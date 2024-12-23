@@ -1,0 +1,26 @@
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+processors:
+extensions:
+  health_check: {}
+exporters:
+  otlp/custom:
+    endpoint: http://host.docker.internal:8080
+    tls:
+      insecure: true
+service:
+  pipelines:
+    traces:
+      receivers: [otlp]
+      exporters: [otlp/custom]
+    metrics:
+      receivers: [otlp]
+      exporters: [otlp/custom]
+    logs:
+      receivers: [otlp]
+      exporters: [otlp/custom]

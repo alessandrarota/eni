@@ -1,0 +1,97 @@
+version: '3.8'
+
+services:
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2019-latest
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=${SA_PASSWORD}
+    ports:
+      - "${SQLSERVER_PORT}:${SQLSERVER_PORT}"
+    volumes:
+      - sql-data:/var/opt/mssql
+    
+
+  sql-init:
+    image: mcr.microsoft.com/mssql-tools
+    depends_on:
+      - sqlserver
+    volumes:
+      - ./sql-server:/sql-server
+    entrypoint: >
+      /bin/bash -c "
+      sleep 15 &&
+      until /opt/mssql-tools/bin/sqlcmd -S sqlserver -U sa -P ${SA_PASSWORD} -Q 'SELECT 1'; do
+        echo 'Waiting for SQL Server to be ready...'
+        sleep 5
+      done &&
+      /opt/mssql-tools/bin/sqlcmd -S sqlserver -U sa -P ${SA_PASSWORD} -i /sql-server/init.sql"
+    
+
+  custom-receiver:
+    build:
+      context: ./custom-receiver
+    environment:
+      - DB_URL=${DB_URL}
+    ports:
+      - "${CUSTOM_RECEIVER_PORT}:${CUSTOM_RECEIVER_PORT}"
+    depends_on:
+      - sqlserver
+      - sql-init
+    entrypoint: >
+      /bin/bash -c "
+      sleep 15 &&
+      until nc -zv sqlserver 1433; do
+        echo 'Waiting for SQL Server to be ready...'
+        sleep 5
+      done &&
+      java -jar /app/custom-receiver.jar"
+    
+
+  collector:
+    image: otel/opentelemetry-collector-contrib:latest
+    command: ["--config=/etc/otel-collector-config.yaml"]
+    volumes:
+      - ./collector/otel-collector-config.yaml:/etc/otel-collector-config.yaml
+    ports:
+      - "${OTEL_GRPC_PORT}:${OTEL_GRPC_PORT}" # OTLP gRPC receiver
+      - "${OTEL_HTTP_PORT}:${OTEL_HTTP_PORT}"
+    depends_on:
+      - custom-receiver
+      - sqlserver
+      - sql-init
+
+  quality-sidecar:
+    build:
+      context: ./quality-sidecar
+    environment:
+      - OTEL_EXPORTER_OTLP_ENDPOINT=${OTEL_EXPORTER_ENDPOINT}
+      - OTEL_METRIC_EXPORT_INTERVAL=60000
+      - OTEL_SERVICE_NAME=consuntiviDiProduzione-quality_sidecar
+    depends_on:
+      - collector
+
+
+  # forwarder:
+  #   build:
+  #     context: ./forwarder
+  #   environment:
+  #     - ENV=testing
+  #   ports:
+  #     - "5000:5000"
+  #   depends_on:
+  #     - sqlserver
+  #     - sql-init
+  #   entrypoint: >
+  #     /bin/bash -c "sleep 10 && 
+  #     until nc -zv sqlserver 1433; do 
+  #       echo 'Waiting for SQL Server to be ready...' && 
+  #       sleep 5; 
+  #     done && 
+  #     echo 'SQL Server is ready, starting the service...' && 
+  #     python3 /app/build/app.py"
+
+volumes:
+  sql-data:
+    driver: local
+
