@@ -6,7 +6,6 @@ import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
-import java.time.ZonedDateTime;
 import java.util.Objects;
 
 @AllArgsConstructor
@@ -15,8 +14,9 @@ import java.util.Objects;
 public class MetricID implements Serializable {
     private String dataProductName;
     private String appName;
+    private String expectationName;
     private String metricName;
-    private String timestamp;
+    private LocalDateTime timestamp;
 
     @Override
     public boolean equals(Object o) {
@@ -25,6 +25,7 @@ public class MetricID implements Serializable {
 
         return this.dataProductName.equals(that.getDataProductName()) &&
                 this.appName.equals(that.getAppName()) &&
+                this.expectationName.equals(that.getExpectationName()) &&
                 this.metricName.equals(that.getMetricName()) &&
                 this.timestamp.equals(that.getTimestamp());
     }
@@ -34,6 +35,7 @@ public class MetricID implements Serializable {
         return Objects.hash(
                 this.dataProductName,
                 this.appName,
+                this.expectationName,
                 this.metricName,
                 this.timestamp
         );

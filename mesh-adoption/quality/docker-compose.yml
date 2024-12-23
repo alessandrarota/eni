@@ -1,8 +1,9 @@
 version: '3.8'
 
 services:
-  sqlserver:
+  platform-local-metastore:
     image: mcr.microsoft.com/mssql/server:2019-latest
+    container_name: platform-local-metastore
     environment:
       - ACCEPT_EULA=Y
       - SA_PASSWORD=${SA_PASSWORD}
@@ -15,61 +16,64 @@ services:
   sql-init:
     image: mcr.microsoft.com/mssql-tools
     depends_on:
-      - sqlserver
+      - platform-local-metastore
     volumes:
-      - ./sql-server:/sql-server
+      - ./platform-local-metastore:/platform-local-metastore
     entrypoint: >
       /bin/bash -c "
       sleep 15 &&
-      until /opt/mssql-tools/bin/sqlcmd -S sqlserver -U sa -P ${SA_PASSWORD} -Q 'SELECT 1'; do
+      until /opt/mssql-tools/bin/sqlcmd -S platform-local-metastore -U sa -P ${SA_PASSWORD} -Q 'SELECT 1'; do
         echo 'Waiting for SQL Server to be ready...'
         sleep 5
       done &&
-      /opt/mssql-tools/bin/sqlcmd -S sqlserver -U sa -P ${SA_PASSWORD} -i /sql-server/init.sql"
+      /opt/mssql-tools/bin/sqlcmd -S platform-local-metastore -U sa -P ${SA_PASSWORD} -i /platform-local-metastore/init.sql"
     
 
-  custom-receiver:
+  platform-custom-receiver:
     build:
-      context: ./custom-receiver
+      context: ./platform-custom-receiver
+    container_name: platform-custom-receiver
     environment:
       - DB_URL=${DB_URL}
     ports:
       - "${CUSTOM_RECEIVER_PORT}:${CUSTOM_RECEIVER_PORT}"
     depends_on:
-      - sqlserver
+      - platform-local-metastore
       - sql-init
     entrypoint: >
       /bin/bash -c "
       sleep 15 &&
-      until nc -zv sqlserver 1433; do
+      until nc -zv platform-local-metastore 1433; do
         echo 'Waiting for SQL Server to be ready...'
         sleep 5
       done &&
-      java -jar /app/custom-receiver.jar"
+      java -jar /app/platform-custom-receiver.jar"
     
 
-  collector:
+  platform-collector:
     image: otel/opentelemetry-collector-contrib:latest
-    command: ["--config=/etc/otel-collector-config.yaml"]
+    container_name: platform-collector
+    command: ["--config=/etc/platform-collector/config.yaml"]
     volumes:
-      - ./collector/otel-collector-config.yaml:/etc/otel-collector-config.yaml
+      - ./platform-collector/config.yaml:/etc/platform-collector/config.yaml
     ports:
-      - "${OTEL_GRPC_PORT}:${OTEL_GRPC_PORT}" # OTLP gRPC receiver
+      - "${OTEL_GRPC_PORT}:${OTEL_GRPC_PORT}"
       - "${OTEL_HTTP_PORT}:${OTEL_HTTP_PORT}"
     depends_on:
-      - custom-receiver
-      - sqlserver
+      - platform-custom-receiver
+      - platform-local-metastore
       - sql-init
 
-  quality-sidecar:
+  cdp-quality-sidecar:
     build:
-      context: ./quality-sidecar
+      context: ./cdp-quality-sidecar
+    container_name: cdp-quality-sidecar
     environment:
       - OTEL_EXPORTER_OTLP_ENDPOINT=${OTEL_EXPORTER_ENDPOINT}
-      - OTEL_METRIC_EXPORT_INTERVAL=60000
+      - OTEL_METRIC_EXPORT_INTERVAL=10000
       - OTEL_SERVICE_NAME=consuntiviDiProduzione-quality_sidecar
     depends_on:
-      - collector
+      - platform-collector
 
 
   # forwarder:

@@ -1,32 +1,28 @@
 package it.quantyca.OTELCustomCollector.service;
 
-import io.grpc.stub.StreamObserver;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 
-import io.opentelemetry.proto.collector.logs.v1.ExportLogsServiceRequest;
-import io.opentelemetry.proto.collector.logs.v1.ExportLogsServiceResponse;
-import io.opentelemetry.proto.collector.logs.v1.LogsServiceGrpc;
-import io.opentelemetry.proto.common.v1.KeyValue;
-import io.opentelemetry.proto.logs.v1.ResourceLogs;
-
-import it.quantyca.OTELCustomCollector.model.Log;
-import it.quantyca.OTELCustomCollector.repository.LogRepository;
-import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-
+import io.grpc.stub.StreamObserver;
+import io.opentelemetry.proto.collector.logs.v1.ExportLogsServiceRequest;
+import io.opentelemetry.proto.collector.logs.v1.ExportLogsServiceResponse;
+import io.opentelemetry.proto.collector.logs.v1.LogsServiceGrpc;
+import io.opentelemetry.proto.common.v1.KeyValue;
+import io.opentelemetry.proto.logs.v1.ResourceLogs;
+import it.quantyca.OTELCustomCollector.model.Log;
+import it.quantyca.OTELCustomCollector.repository.LogRepository;
 import static it.quantyca.OTELCustomCollector.utility.Utils.getValueDataFromAnyValue;
+import jakarta.transaction.Transactional;
 
 @Service
 public class OTELLogsService extends LogsServiceGrpc.LogsServiceImplBase {
-    //@PersistenceContext
-    //private EntityManager entityManager;
     @Autowired
     private LogRepository logRepository;
 

@@ -11,11 +11,11 @@ WORKDIR /app
 RUN apt-get update && apt-get install -y netcat
 
 # Copia il jar generato
-COPY --from=builder /app/target/*.jar custom-receiver.jar
+COPY --from=builder /app/target/*.jar platform-custom-receiver.jar
 
 # Aggiungi lo script di attesa per la connessione al database
 COPY wait-for-it.sh /wait-for-it.sh
 RUN chmod +x /wait-for-it.sh
 
 # Comando di avvio dell'applicazione Spring Boot
-ENTRYPOINT ["/wait-for-it.sh", "host.docker.internal:1433", "--", "java", "-jar", "custom-receiver.jar"]
+ENTRYPOINT ["/wait-for-it.sh", "host.docker.internal:1433", "--", "java", "-jar", "platform-custom-receiver.jar"]

@@ -1,5 +1,7 @@
 package it.quantyca.OTELCustomCollector.model;
 
+import java.time.LocalDateTime;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.IdClass;
@@ -7,9 +9,6 @@ import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-
-import java.time.LocalDateTime;
-import java.time.ZonedDateTime;
 
 @Entity(name = "Metric")
 @Table(name = "metric_current")
@@ -23,12 +22,16 @@ public class Metric {
     @Id
     private String appName;
     @Id
+    private String expectationName;
+    @Id
     private String metricName;
     private String metricDescription;
     private Double value;
     private String unitOfMeasure;
+    private Integer elementCount;
+    private Integer unexpectedCount;
     @Id
-    private String timestamp;
+    private LocalDateTime timestamp;
 
     @Override
     public String toString() {

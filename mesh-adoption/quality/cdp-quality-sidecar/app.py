@@ -46,13 +46,13 @@ def setup_gx(data_product_suites):
         observable_gauge = meter.create_observable_gauge(
             name=suite_name,
             description=f"Validation results for suite: {suite_name}",
-            unit="string",
-            callbacks=[run_validation_callback(validation_def, suite_name, physical_informations["data_source_name"], physical_informations["data_asset_name"], pd.read_csv(physical_informations["dataframe"]))]
+            unit="%",
+            callbacks=[run_validation_callback(validation_def, data_product_name, suite_name, physical_informations["data_source_name"], physical_informations["data_asset_name"], pd.read_csv(physical_informations["dataframe"]))]
         )
 
     return validation_defs
 
-def run_validation_callback(validation_def, suite_name, data_source_name, data_asset_name, df):
+def run_validation_callback(validation_def, data_product_name, suite_name, data_source_name, data_asset_name, df):
     def callback(options):
         validation_results = validation_run(df=df, validation_definition=validation_def)
         
@@ -62,14 +62,16 @@ def run_validation_callback(validation_def, suite_name, data_source_name, data_a
             result = validation_result["result"]
             expectation_config = validation_result["expectation_config"]
             meta = expectation_config["meta"]
+            print(validation_result)
 
             #print(f"Validation result: {validation_result}")
             observation = Observation(
-                value=validation_result["success"],
+                value=100-result["unexpected_percent"],
                 attributes={
                     "element_count": result["element_count"],
                     "unexpected_count": result["unexpected_count"],
                     "expectation_name": meta["expectation_name"],
+                    "data_product_name": data_product_name,
                     "suite_name": suite_name,
                     "data_source_name": data_source_name,
                     "data_asset_name": data_asset_name#,

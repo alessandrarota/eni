@@ -1,0 +1,11 @@
+version: '3'
+services:
+  jupyter:
+    image: jupyter/base-notebook
+    container_name: jupyter_notebook
+    ports:
+      - "8888:8888"  # Porta per accedere al Jupyter Notebook
+    volumes:
+      - ./notebooks:/home/jovyan/work  # Monta la directory dei notebook
+    environment:
+      - PASSWORD=password
