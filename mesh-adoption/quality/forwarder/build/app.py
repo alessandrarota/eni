@@ -6,6 +6,7 @@ from src import create_processor
 from src.data.entities.MetricCurrent import MetricCurrent
 from src.data.entities.MetricHistory import MetricHistory
 from datetime import datetime, timezone
+from src.blindata.blindata import *
 import sys
 import logging
 import schedule
@@ -14,28 +15,36 @@ import requests
 
 def metric_processor_job(config, current_metrics):
     try:
-        history_metrics = [
-            MetricHistory(
-                data_product_name=metric.data_product_name,
-                app_name=metric.app_name,
-                metric_name=metric.metric_name,
-                expectation_name=metric.expectation_name,
-                metric_description=metric.metric_description,
-                value=metric.value,
-                unit_of_measure=metric.unit_of_measure,
-                element_count=metric.element_count,
-                unexpected_count=metric.unexpected_count,
-                timestamp=metric.timestamp,
-                flow_name=config.FLOW_NAME,
-                insert_datetime=datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
+        if config.BLINDATA_ACTIVATE:
+            blindata_response = post_quality_results(config, current_metrics)
+
+        if not config.BLINDATA_ACTIVATE or (blindata_response and blindata_response.status_code == 200 and blindata_response.json()['errors'] == []):
+            history_metrics = [
+                MetricHistory(
+                    data_product_name=metric.data_product_name,
+                    app_name=metric.app_name,
+                    metric_name=metric.metric_name,
+                    expectation_name=metric.expectation_name,
+                    metric_description=metric.metric_description,
+                    value=metric.value,
+                    unit_of_measure=metric.unit_of_measure,
+                    element_count=metric.element_count,
+                    unexpected_count=metric.unexpected_count,
+                    timestamp=metric.timestamp,
+                    flow_name=config.FLOW_NAME,
+                    insert_datetime=datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
+                )
+                for metric in current_metrics
+            ]
+            
+            MetricHistory.save_history_metrics(config, history_metrics)
+            MetricCurrent.delete_current_metrics(config, current_metrics)
+
+            logging.info(
+                f"Successfully processed and transferred {len(current_metrics)} metrics from {MetricCurrent.__tablename__} to {MetricHistory.__tablename__}."
             )
-            for metric in current_metrics
-        ]
-        MetricHistory.save_history_metrics(config, history_metrics)
-
-        MetricCurrent.delete_current_metrics(config, current_metrics)  
-
-        logging.info(f"Successfully processed and transferred {len(current_metrics)} metrics from {MetricCurrent.__tablename__} to {MetricHistory.__tablename__}.")
+        else:
+            logging.error(f"Blindata response failed with status: {blindata_response.status_code if blindata_response else 'No response'}")
     except SQLAlchemyError as e:
         logging.error(f"Error during job: {e}")
 
@@ -52,13 +61,13 @@ def elaborate_request(config):
     # logging.debug(f"What time is it? {datetime.now().strftime('%Y-%m-%d %H:%M:%S')} \t"
     #              f"Should I start? {processing_should_start}")
 
+
     if processing_should_start:
         logging.info(f"{len(current_metrics)} metrics to send to {MetricHistory.__tablename__} - I'm starting")
         metric_processor_job(config, current_metrics)
     else:
         logging.debug(f"No metrics from {MetricCurrent.__tablename__} available, I'm done")
 
-    return current_metrics
 
 def main():
     while 1:

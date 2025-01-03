@@ -7,6 +7,7 @@ from src.data.entities.MetricCurrent import MetricCurrent
 from src.data.entities.MetricHistory import MetricHistory
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine
+from src.blindata.blindata import get_blindata_token, post_quality_results
 import logging
 import re
 
@@ -336,3 +337,55 @@ def test_migration_with_duplicates_in_metric_current_and_existing_records_in_met
 
     destroy_database(configurations)
 
+def test_login_blindata():
+    configurations = init_configurations("development")
+    bearer_token = get_blindata_token(configurations)
+
+    assert bearer_token != None
+
+def test_migration_with_error_blindata():
+    configurations = init_configurations("development")
+    configurations.BLINDATA_ACTIVATE = True
+
+    init_database(configurations)
+
+    session = configurations.SESSION_MAKER()
+
+    current_metrics = [
+        {
+            "data_product_name": "consuntiviDiProduzione",
+            "app_name": "consuntiviDiProduzione-quality_sidecar",
+            "expectation_name": "expectPassengerCountValuesToBeBetween",
+            "metric_name": "metric-that-does-not-exist-on-blindata", #error
+            "metric_description": "Validation results for suite: consuntiviDiProduzione-cdpDataSourceSample2-cdpDataAssetSample2",
+            "value": 93.33,
+            "unit_of_measure": "%",
+            "element_count": 10000,
+            "unexpected_count": 667,
+            "timestamp": "2025-01-03T10:46:47.191770889Z"
+        }
+    ]
+    populate_metric_current(session, current_metrics)
+
+    assert len(MetricCurrent.get_all_current_metrics(configurations)) == 1
+    assert len(MetricHistory.get_all_history_metrics(configurations)) == 0
+
+    elaborate_request(configurations)
+
+    assert len(MetricCurrent.get_all_current_metrics(configurations)) == 1
+    assert len(MetricHistory.get_all_history_metrics(configurations)) == 0
+
+    current_metrics = MetricCurrent.get_all_current_metrics(configurations)
+
+    assert current_metrics[0].data_product_name == "consuntiviDiProduzione"
+    assert current_metrics[0].app_name == "consuntiviDiProduzione-quality_sidecar"
+    assert current_metrics[0].expectation_name == "expectPassengerCountValuesToBeBetween"
+    assert current_metrics[0].metric_name == "metric-that-does-not-exist-on-blindata"
+    assert current_metrics[0].metric_description == "Validation results for suite: consuntiviDiProduzione-cdpDataSourceSample2-cdpDataAssetSample2"
+    assert current_metrics[0].value == 93.33
+    assert current_metrics[0].unit_of_measure == "%"
+    assert current_metrics[0].element_count == 10000
+    assert current_metrics[0].unexpected_count == 667
+    assert current_metrics[0].timestamp == "2025-01-03T10:46:47.191770889Z"
+
+    destroy_database(configurations)

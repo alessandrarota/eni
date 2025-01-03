@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, DateTime, Float, Integer
+from sqlalchemy import Column, String, DateTime, Float, Integer, Boolean
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.exc import SQLAlchemyError
 import sqlalchemy
@@ -19,6 +19,7 @@ class MetricHistory(Base):
     element_count = Column(Integer)
     unexpected_count = Column(Integer)
     timestamp = Column(String, primary_key=True)
+    posted_on_blindata = Column(Boolean)
     insert_datetime = Column(String)
     flow_name = Column(String)
 

@@ -5,7 +5,7 @@ import traceback
 
 logging.basicConfig(level=logging.INFO)
 
-def setup_csv():
+def fill_csv_file(current_metrics):
     file_name = "quality_results.csv"
     csv_header = [
         "qualityResult.qualityCheckCode",
@@ -14,18 +14,19 @@ def setup_csv():
         "qualityResult.startedAt"
     ]
 
-    csv_row = [
-        "test",
-        "667",
-        "10000",
-        "2024-12-19T10:00:00Z"
-    ]
-
     try:
         with open(file_name, mode="w", newline="", encoding="utf-8") as file:
             writer = csv.writer(file)
             writer.writerow(csv_header)
-            writer.writerow(csv_row)
+
+            for current_metric in current_metrics:
+                csv_row = [
+                    current_metric.metric_name + "-" + current_metric.expectation_name,
+                    current_metric.unexpected_count,
+                    current_metric.element_count,
+                    current_metric.timestamp
+                ]           
+                writer.writerow(csv_row)
         logging.info(f"CSV file created successfully!")
         return file_name
     except Exception as e:
@@ -57,9 +58,9 @@ def get_blindata_token(config):
 
     return bearer_token
 
-def post_quality_results(config):
+def post_quality_results(config, current_metrics):
     bearer_token = get_blindata_token(config)
-    file_name = setup_csv()
+    file_name = fill_csv_file(current_metrics)
 
     with open(file_name, mode="r", encoding="utf-8") as file:
         reader = csv.reader(file)
@@ -82,7 +83,7 @@ def post_quality_results(config):
             )
         
         
-        if response.status_code == 200:
+        if response.status_code == 200 and response.json()['errors'] == []:
             logging.info("File uploaded successfully!")
             logging.info(f"API Response: {response.json()}")
             return response
