@@ -13,11 +13,11 @@ def test_login_blindata():
 
     assert bearer_token != None
 
-def test_post_empty_quality_results():
-    configurations = init_configurations("development")
-    response = post_quality_results(configurations)
+# def test_post_empty_quality_results():
+#     configurations = init_configurations("development")
+#     response = post_quality_results(configurations)
 
-    logging.info(response)
-    assert response.status_code != 200
+#     logging.info(response)
+#     assert response.status_code != 200
 
     

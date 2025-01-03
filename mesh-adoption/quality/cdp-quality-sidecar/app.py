@@ -1,10 +1,5 @@
-import random
 import time
-from datetime import datetime
-from opentelemetry.sdk.metrics import MeterProvider
-from opentelemetry.sdk.metrics.export import ConsoleMetricExporter, PeriodicExportingMetricReader
 from opentelemetry.metrics import get_meter, Observation
-from opentelemetry.sdk.resources import Resource
 import logging
 import pandas as pd
 import great_expectations as gx
@@ -16,14 +11,6 @@ from opentelemetry import metrics
 logging.basicConfig(level=logging.INFO)
 context = gx.get_context()
 
-#sidecar_name = data_product_name + "-quality_sidecar"
-# resource = Resource.create({"service.name": sidecar_name})
-# exporter = ConsoleMetricExporter()
-# metric_reader = PeriodicExportingMetricReader(exporter)
-# provider = MeterProvider(resource=resource, metric_readers=[metric_reader])
-# get_meter.__globals__["_METER_PROVIDER"] = provider 
-# meter = get_meter(sidecar_name, "1.0.0")
-
 meter = metrics.get_meter(__name__)
 
 def setup_gx(data_product_suites): 
@@ -34,12 +21,12 @@ def setup_gx(data_product_suites):
         physical_informations = data_product_suite["physical_informations"]
         suite_name = data_product_name + "-" + physical_informations["data_source_name"] + "-" + physical_informations["data_asset_name"]
 
-        data_source = data_source_definition(context, physical_informations["data_source_name"])
-        data_asset = data_asset_definition(data_source, physical_informations["data_asset_name"])
-        batch_definition = whole_batch_definition(data_asset, suite_name)
+        data_source = add_data_source(context, physical_informations["data_source_name"])
+        data_asset = add_data_asset(data_source, physical_informations["data_asset_name"])
+        batch_definition = add_whole_batch_definition(data_asset, suite_name)
 
-        suite = suite_definition(context, data_product_name, suite_name, data_product_suite["expectations"])
-        validation_def = validation_definition(context, batch_definition, suite)
+        suite = add_suite(context, data_product_name, suite_name, data_product_suite["expectations"])
+        validation_def = add_validation_definition(context, batch_definition, suite)
         validation_defs.append(validation_def)
 
         # Create an ObservableGauge

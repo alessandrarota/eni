@@ -31,13 +31,13 @@ public class Metric {
     private Integer elementCount;
     private Integer unexpectedCount;
     @Id
-    private LocalDateTime timestamp;
+    private String timestamp;
 
     @Override
     public String toString() {
         return String.format(
                 "Metric[DP='%s', App='%s', Metric='%s', Value='%f %s', Timestamp='%s']",
-                dataProductName, appName, metricName, value, unitOfMeasure, timestamp.toString()
+                dataProductName, appName, metricName, value, unitOfMeasure, timestamp
         );
     }
 }

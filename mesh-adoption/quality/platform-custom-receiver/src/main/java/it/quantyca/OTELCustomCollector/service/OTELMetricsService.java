@@ -3,6 +3,7 @@ package it.quantyca.OTELCustomCollector.service;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 
 import org.slf4j.Logger;
@@ -113,12 +114,14 @@ public class OTELMetricsService extends MetricsServiceGrpc.MetricsServiceImplBas
                                             .map(Ints::tryParse)
                                             .orElse(0),
                                     LocalDateTime.ofInstant(
-                                            Instant.ofEpochSecond(
-                                                    dataPoint.getTimeUnixNano() / 1_000_000_000,
-                                                    (int) (dataPoint.getTimeUnixNano() % 1_000_000_000)
-                                            ),
-                                            ZoneId.systemDefault()
-                                    )
+                                                    Instant.ofEpochSecond(
+                                                            dataPoint.getTimeUnixNano() / 1_000_000_000,
+                                                            (int) (dataPoint.getTimeUnixNano() % 1_000_000_000)
+                                                    ),
+                                                    ZoneId.systemDefault()
+                                            )
+                                            .atZone(ZoneId.of("UTC"))
+                                            .format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSSSSS'Z'"))
                             ));
 
                         });
@@ -169,12 +172,14 @@ public class OTELMetricsService extends MetricsServiceGrpc.MetricsServiceImplBas
                                             .map(Ints::tryParse)
                                             .orElse(0),
                                     LocalDateTime.ofInstant(
-                                            Instant.ofEpochSecond(
-                                                    dataPoint.getTimeUnixNano() / 1_000_000_000,
-                                                    (int) (dataPoint.getTimeUnixNano() % 1_000_000_000)
-                                            ),
-                                            ZoneId.systemDefault()
-                                    )
+                                                    Instant.ofEpochSecond(
+                                                            dataPoint.getTimeUnixNano() / 1_000_000_000,
+                                                            (int) (dataPoint.getTimeUnixNano() % 1_000_000_000)
+                                                    ),
+                                                    ZoneId.systemDefault()
+                                            )
+                                            .atZone(ZoneId.of("UTC"))
+                                            .format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSSSSS'Z'"))
                             ));
 
                         });

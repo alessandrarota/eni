@@ -70,30 +70,31 @@ services:
     container_name: cdp-quality-sidecar
     environment:
       - OTEL_EXPORTER_OTLP_ENDPOINT=${OTEL_EXPORTER_ENDPOINT}
-      - OTEL_METRIC_EXPORT_INTERVAL=10000
+      - OTEL_METRIC_EXPORT_INTERVAL=30000
       - OTEL_SERVICE_NAME=consuntiviDiProduzione-quality_sidecar
     depends_on:
       - platform-collector
 
 
-  # forwarder:
-  #   build:
-  #     context: ./forwarder
-  #   environment:
-  #     - ENV=testing
-  #   ports:
-  #     - "5000:5000"
-  #   depends_on:
-  #     - sqlserver
-  #     - sql-init
-  #   entrypoint: >
-  #     /bin/bash -c "sleep 10 && 
-  #     until nc -zv sqlserver 1433; do 
-  #       echo 'Waiting for SQL Server to be ready...' && 
-  #       sleep 5; 
-  #     done && 
-  #     echo 'SQL Server is ready, starting the service...' && 
-  #     python3 /app/build/app.py"
+  forwarder:
+    build:
+      context: ./forwarder
+    container_name: forwarder
+    environment:
+      - ENV=testing
+    ports:
+      - "5000:5000"
+    depends_on:
+      - platform-local-metastore
+      - sql-init
+    entrypoint: >
+      /bin/bash -c "sleep 10 && 
+      until nc -zv platform-local-metastore 1433; do 
+        echo 'Waiting for SQL Server to be ready...' && 
+        sleep 5; 
+      done && 
+      echo 'SQL Server is ready, starting the service...' && 
+      python3 /app/build/app.py"
 
 volumes:
   sql-data:

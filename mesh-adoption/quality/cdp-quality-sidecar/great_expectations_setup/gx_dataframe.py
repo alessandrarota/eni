@@ -4,16 +4,16 @@ import great_expectations as gx
 
 logging.basicConfig(level=logging.INFO)
 
-def data_source_definition(context, data_source_name):
+def add_data_source(context, data_source_name):
     return context.data_sources.add_pandas(data_source_name)
 
-def data_asset_definition(data_source, data_asset_name):
+def add_data_asset(data_source, data_asset_name):
     return data_source.add_dataframe_asset(name=data_asset_name)
 
-def whole_batch_definition(data_asset, batch_definition_name):
+def add_whole_batch_definition(data_asset, batch_definition_name):
     return data_asset.add_batch_definition_whole_dataframe(batch_definition_name)
 
-def suite_definition(context, data_product_name, suite_name, suite_expectations):
+def add_suite(context, data_product_name, suite_name, suite_expectations):
     suite = gx.ExpectationSuite(name=suite_name)
     suite = context.suites.add(suite)
     for exp in suite_expectations:
@@ -30,7 +30,7 @@ def suite_definition(context, data_product_name, suite_name, suite_expectations)
 
     return suite
 
-def validation_definition(context, batch_definition, suite):
+def add_validation_definition(context, batch_definition, suite):
     print()
     validation = gx.ValidationDefinition(data=batch_definition, suite=suite, name=suite.name)
     return context.validation_definitions.add(validation)

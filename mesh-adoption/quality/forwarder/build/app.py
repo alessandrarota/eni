@@ -19,9 +19,12 @@ def metric_processor_job(config, current_metrics):
                 data_product_name=metric.data_product_name,
                 app_name=metric.app_name,
                 metric_name=metric.metric_name,
+                expectation_name=metric.expectation_name,
                 metric_description=metric.metric_description,
                 value=metric.value,
                 unit_of_measure=metric.unit_of_measure,
+                element_count=metric.element_count,
+                unexpected_count=metric.unexpected_count,
                 timestamp=metric.timestamp,
                 flow_name=config.FLOW_NAME,
                 insert_datetime=datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")

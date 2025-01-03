@@ -44,7 +44,7 @@ WORKDIR /app
 RUN apt-get update && apt-get install -y netcat-openbsd
 
 # Export the proxy as env variable
-ENV ENV=testing
+ENV ENV=development
 
 # Create the environment:
 COPY ./environment.yml .

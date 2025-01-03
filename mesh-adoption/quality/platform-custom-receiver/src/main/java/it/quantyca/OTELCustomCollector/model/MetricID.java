@@ -16,7 +16,7 @@ public class MetricID implements Serializable {
     private String appName;
     private String expectationName;
     private String metricName;
-    private LocalDateTime timestamp;
+    private String timestamp;
 
     @Override
     public boolean equals(Object o) {
