@@ -115,6 +115,8 @@ L'integrazione di OpenTelemetry avviene tramite i seguenti passaggi:
 2. **Definizione delle Metriche con ***ObservableGauge*****: Le metriche di validazione dei dati vengono raccolte in tempo reale tramite una metrica chiamata ***ObservableGauge***. Questa metrica viene creata per ogni suite di validazione e misura il valore percentuale di successo delle aspettative sui dati.
 3. **Raccolta delle Metriche**: Viene definita una callback che viene eseguita periodicamente (in base al valore della variabile di ambiente specificata) per raccogliere le metriche di validazione, e creare delle osservazioni (valori di metrica) per ogni aspettativa. I risultati della validazione vengono mappati su valori percentuali che vengono esportati come metriche tramite OTLP.
 
+#### Esempio di metrica in formato OTLP
+
 Di seguito un esempio di risultato di validazione con Great Expectations esportato come metrica tramite OTLP:
 ``` json
 {
@@ -191,8 +193,6 @@ Di seguito un esempio di risultato di validazione con Great Expectations esporta
   ]
 }
 ```
-
-#### Esempio di metrica in formato OTLP
 
 ## Configurazione
 
