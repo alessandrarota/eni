@@ -59,8 +59,6 @@ Il file deve essere strutturato come segue:
         - Consultare la gallery di Expectations ufficiale: https://greatexpectations.io/expectations/.
     - **kwargs**: I parametri necessari per eseguire l'aspettativa (ad esempio, il nome della colonna da verificare o i valori di limite per un intervallo).
 
-<br><br>
-
 Di seguito un esempio di file di configurazione:
         
 ```json
@@ -110,51 +108,92 @@ Il risultato finale della validazione tramite Great Expectations conterrà i ris
 
 ### OpenTelemetry
 
+Opentelemetry viene utilizzato per raccogliere e inviare metriche, relative alla validazione dei dati con Great Expectations, tramite il protocollo OTLP a un sistema di monitoraggio esterno (es: Collector di piattaforma).
+
+L'integrazione di OpenTelemetry avviene tramite i seguenti passaggi:
+1. **Creazione di un ***Meter*****: Un oggetto ***Meter*** è creato tramite la libreria opentelemetry.metrics. Questo oggetto viene utilizzato per raccogliere metriche relative all'applicazione, in questo caso, alla validazione dei dati.
+2. **Definizione delle Metriche con ***ObservableGauge*****: Le metriche di validazione dei dati vengono raccolte in tempo reale tramite una metrica chiamata ***ObservableGauge***. Questa metrica viene creata per ogni suite di validazione e misura il valore percentuale di successo delle aspettative sui dati.
+3. **Raccolta delle Metriche**: Viene definita una callback che viene eseguita periodicamente (in base al valore della variabile di ambiente specificata) per raccogliere le metriche di validazione, e creare delle osservazioni (valori di metrica) per ogni aspettativa. I risultati della validazione vengono mappati su valori percentuali che vengono esportati come metriche tramite OTLP.
+
+Di seguito un esempio di risultato di validazione con Great Expectations esportato come metrica tramite OTLP:
+``` json
+{
+  "resource_metrics":[
+    {
+      "resource":{
+        "attributes":{
+          "telemetry.sdk.language":"python",
+          "telemetry.sdk.name":"opentelemetry",
+          "telemetry.sdk.version":"1.28.2",
+          "service.name":"consuntiviDiProduzione-quality_sidecar",
+          "telemetry.auto.version":"0.49b2"
+        },
+        "schema_url":""
+      },
+      "scope_metrics":[
+        {
+          "scope":{
+            "name":"__main__",
+            "version":"",
+            "schema_url":"",
+            "attributes":null
+          },
+          "metrics":[
+            {
+              "name":"consuntividiproduzione-cdpdatasourcesample-cdpdataassetsample",
+              "description":"Validation results for suite: consuntiviDiProduzione-cdpDataSourceSample-cdpDataAssetSample",
+              "unit":"%",
+              "data":{
+                "data_points":[
+                  {
+                    "attributes":{
+                      "element_count":10000,
+                      "unexpected_count":667,
+                      "expectation_name":"expectPassengerCountValuesToBeBetween",
+                      "data_product_name":"consuntiviDiProduzione",
+                      "suite_name":"consuntiviDiProduzione-cdpDataSourceSample-cdpDataAssetSample",
+                      "data_source_name":"cdpDataSourceSample",
+                      "data_asset_name":"cdpDataAssetSample"
+                    },
+                    "start_time_unix_nano":null,
+                    "time_unix_nano":1736263323852875020,
+                    "value":93.33,
+                    "exemplars":[
+                      
+                    ]
+                  },
+                  {
+                    "attributes":{
+                      "element_count":10000,
+                      "unexpected_count":0,
+                      "expectation_name":"expectPickupDatetimeValuesToMatchRegex",
+                      "data_product_name":"consuntiviDiProduzione",
+                      "suite_name":"consuntiviDiProduzione-cdpDataSourceSample-cdpDataAssetSample",
+                      "data_source_name":"cdpDataSourceSample",
+                      "data_asset_name":"cdpDataAssetSample"
+                    },
+                    "start_time_unix_nano":null,
+                    "time_unix_nano":1736263323852875020,
+                    "value":100.0,
+                    "exemplars":[
+                      
+                    ]
+                  }
+                ]
+              }
+            }
+          ],
+          "schema_url":""
+        }
+      ],
+      "schema_url":""
+    }
+  ]
+}
+```
+
+#### Esempio di metrica in formato OTLP
+
 ## Configurazione
 
 ### Variabili d'Ambiente
-
-L'applicazione utilizza la variabile d'ambiente `EXPECTATIONS_JSON_FILE_PATH` per definire il percorso del file JSON delle aspettative. Assicurati che questa variabile punti al file di configurazione corretto (`resources/gx_v0.1.json`).
-
-Esempio:
-
-```bash
-export EXPECTATIONS_JSON_FILE_PATH='build/resources/gx_v0.1.json'
-```
-
-### OpenTelemetry
-
-L'applicazione è configurata per inviare metriche e log tramite OpenTelemetry. Le seguenti variabili d'ambiente sono utilizzate per configurare il livello di log e le opzioni di esportazione:
-
-- **OTEL_LOG_LEVEL**: Imposta il livello di log (default: DEBUG).
-- **OTEL_PYTHON_LOGGING_AUTO_INSTRUMENTATION_ENABLED**: Abilita la strumentazione automatica del logging Python.
-- **OTEL_PYTHON_DISABLED_INSTRUMENTATIONS**: Disabilita specifici strumenti di strumentazione (ad esempio, HTTP, requests).
-
-## Esecuzione con Docker
-
-1. **Costruisci l'immagine Docker**:
-    ```bash
-    docker build -t gx-opentelemetry-app .
-    ```
-
-2. **Esegui il container**:
-    ```bash
-    docker run -e EXPECTATIONS_JSON_FILE_PATH='/path/to/gx_v0.1.json' gx-opentelemetry-app
-    ```
-
-    Assicurati di sostituire il percorso con quello corretto del file JSON delle aspettative.
-
-## Test
-
-L'immagine Docker esegue automaticamente i test utilizzando `pytest` prima di avviare l'applicazione. Puoi eseguire i test manualmente anche senza Docker, se preferisci.
-
-```bash
-pip install -r requirements.txt
-pytest -v /app/tests --maxfail=1 --disable-warnings -s
-```
-
-## Funzionalità
-
-- **Lettura del file di configurazione JSON**: Il file JSON definisce le aspettative di validazione dei dati, che vengono eseguite sui dati caricati da un file CSV remoto.
-- **Esecuzione delle validazioni**: Le validazioni vengono eseguite utilizzando Great Expectations, e i risultati vengono monitorati con OpenTelemetry.
-- **Monitoraggio con OpenTelemetry**: Le metriche delle validazioni vengono raccolte e inviate tramite OpenTelemetry (esportazione a OTLP e console).
