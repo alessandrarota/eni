@@ -70,7 +70,7 @@ services:
     container_name: cdp-quality-sidecar
     environment:
       - OTEL_EXPORTER_OTLP_ENDPOINT=${OTEL_EXPORTER_ENDPOINT}
-      - OTEL_METRIC_EXPORT_INTERVAL=30000
+      - OTEL_METRIC_EXPORT_INTERVAL=60000
       - OTEL_SERVICE_NAME=consuntiviDiProduzione-quality_sidecar
     depends_on:
       - platform-collector

@@ -1,0 +1,7 @@
+CustomerID,Name,Age,Gender,ProductPurchased,PurchaseAmount,PurchaseDate
+101,John Smith,25,Male,Laptop,999.99,2024-01-15
+102,Anna Johnson,34,Female,Smartphone,799.99,2024-02-05
+103,James Williams,40,Male,Headphones,199.99,2024-03-12
+104,Emily Davis,29,Female,Tablet,329.99,2024-04-19
+105,Michael Brown,55,Male,Smartwatch,249.99,2024-05-03
+106,Lisa Miller,23,Female,Camera,449.99,2024-06-21

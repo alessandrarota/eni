@@ -19,7 +19,6 @@ class MetricHistory(Base):
     element_count = Column(Integer)
     unexpected_count = Column(Integer)
     timestamp = Column(String, primary_key=True)
-    posted_on_blindata = Column(Boolean)
     insert_datetime = Column(String)
     flow_name = Column(String)
 

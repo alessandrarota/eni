@@ -1,0 +1,44 @@
+{
+    "data_product_name": "v1",
+    "data_product_suites": [
+        {
+            "physical_informations": {
+                "data_source_name": "data_source_v1",
+                "data_asset_name": "data_asset_v2",
+                "dataframe": "/app/tests/resources/v1/v1.csv"
+            },
+            "expectations": [
+                {
+                    "expectation_name": "expectCityValuesToBeInSet",
+                    "expectation_type": "expect_column_values_to_be_in_set",
+                    "kwargs": {
+                        "column": "City",
+                        "value_set": ["New York", "San Francisco", "Chicago", "London"]
+                    }
+                },
+                {
+                    "expectation_name": "expectUnitPriceValuesToBeBetween",
+                    "expectation_type": "expect_column_values_to_be_between",
+                    "kwargs": {
+                        "column": "UnitPrice",
+                        "min_value": 0
+                    }
+                },
+                {
+                    "expectation_name": "expectSalespersonValuesToNotBeNull",
+                    "expectation_type": "expect_column_values_to_not_be_null",
+                    "kwargs": {
+                        "column": "Salesperson"
+                    }
+                },
+                {
+                    "expectation_name": "expectSaleIDValuesToBeUnique",
+                    "expectation_type": "expect_column_values_to_be_unique",
+                    "kwargs": {
+                        "column": "SaleID"
+                    }
+                }
+            ]
+        }
+    ]
+}
