@@ -197,4 +197,51 @@ Di seguito un esempio di risultato di validazione con Great Expectations esporta
 
 ## Configurazione
 
-### Variabili d'Ambiente
+Le variabili di ambiente per configurare il sidecar sono gestite tramite il file `docker-compose.yml`, mentre i valori effettivi vengono definiti in un file `.env` per semplificare la gestione e la modifica delle configurazioni.
+
+### Dettaglio delle Variabili
+
+1. **`OTEL_EXPORTER_OTLP_ENDPOINT`**: Specifica l'endpoint di destinazione per l'esportazione dei dati tramite OTLP (al collector di piattaforma).  
+    ```env
+    OTEL_EXPORTER_ENDPOINT=http://platform-collector:4317
+    ```
+    * `collector`: nome del container specificato per il collector di piattaforma nel `docker-compose.yml`.
+    * `4317`: è la porta di defualt per il protocollo OTLP/gRPC.
+    
+
+2. **`OTEL_METRIC_EXPORT_INTERVAL`**: Intervallo in millisecondi per l'esportazione delle metriche OTLP (default: 60 secondi).
+    ```env
+    OTEL_METRIC_EXPORT_INTERVAL=60000
+    ```
+
+3. **`OTEL_SERVICE_NAME`**: Nome custom identificativo del servizio.
+    ```env
+    OTEL_SERVICE_NAME_CDP=consuntiviDiProduzione-quality_sidecar
+    ```
+
+4. **`EXPECTATIONS_JSON_FILE_PATH`**: Percorso del file JSON contenente le configurazioni per Great Expectations ([vai alla sezione specifica](#file-di-configurazione)).  
+   ```env
+    EXPECTATIONS_JSON_FILE_PATH=build/resources/gx_v0.1.json
+    ```
+
+## Esecuzione
+Per eseguire l'applicazione è necessario avere installato [Docker Desktop](https://www.docker.com/).
+
+Una volta clonato il progetto in locale e avviato Docker Desktop, posizionarsi all'interno della cartella sorgente del progetto ed eseguire il comando per creare l'immagine:
+```
+docker build -t sidecar .\
+```
+Successivamente, eseguire il comando per avviare il container sulla base dell'immagine appena creata:
+```
+docker run -d --name sidecar sidecar
+```
+
+**NB**: L'esecuzione stand-alone dell'applicazione è sconsigliata, poiché è progettata per funzionare insieme a un collector che riceva le metriche generate (nei log si potrà notare che l'applicazione tenterà sempre di connettersi al collector di default `localhost:4317`).  L'esecuzione dell'applicazione in modo indipendente può essere utile per testare i singoli test o per verificare il formato delle metriche generate, ma senza un collector attivo, la generazione delle metriche non ha alcun effetto pratico.
+
+### Test
+L'applicazione viene testata prima di ogni esecuzione grazie al comando all'interno del `Dockerfile`:
+```
+RUN pytest -v /app/tests --maxfail=1 --disable-warnings -s
+```
+
+I test sono stati creati mediante la libreria `pytest` al fine di testare le sole funzionalità di Great Expectations.

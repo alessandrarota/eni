@@ -11,6 +11,8 @@ COPY . .
 
 ENV PYTHONPATH=/app/build
 
+ENV EXPECTATIONS_JSON_FILE_PATH=build/resources/gx_v0.1.json
+
 # Esegui i test prima di eseguire il container
 RUN pytest -v /app/tests --maxfail=1 --disable-warnings -s
 
