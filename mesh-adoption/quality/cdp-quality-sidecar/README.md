@@ -40,7 +40,7 @@ gx_v<i>MAJOR.MINOR</i>.json
 
 **NB:** 
 
-- È **obbligatorio** fornire almeno un file di configurazione e specificarne il percorso come variabile di ambiente del container (***vedi la sezione di configurazione del container***).
+- È **obbligatorio** fornire almeno un file di configurazione e specificarne il percorso come variabile di ambiente del container ([vai alla sezione specifica](#dettaglio-delle-variabili)).
 - I file di configurazione possono essere versionati per mantenere lo storico delle configurazioni o sovrascritti di volta in volta, a seconda delle esigenze del progetto (l'applicazione punterà al file indicato nella variabile di ambiente).
 
 ##### Struttura del file JSON
