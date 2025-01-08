@@ -1,0 +1,18 @@
+{
+    "name": "GGP016_valorizzazione_di_input_port",
+    "displayName": "Valorizzazione di Input Port",
+    "description": "La lista delle input port del Data Product specificata nel Data Product Descriptor, al momento della registrazione di una nuova versione di un Data Product, deve contenere almeno una input port.",
+    "blockingFlag": "true",
+    "rawContent": "package GGP016_valorizzazione_di_input_port\n\ndefault allow := false\n\nallow { count(input.afterState.dataProductVersion.interfaceComponents.inputPorts) > 0}",
+    "evaluationEvents": [
+    {
+      "event": "DATA_PRODUCT_VERSION_CREATION"
+    }
+  ],
+    "filteringExpression": "true",
+    "suite": "data_contract",
+    "policyEngine":{
+        "id": 1,
+        "name": "opa_policy_engine"
+    }
+} 

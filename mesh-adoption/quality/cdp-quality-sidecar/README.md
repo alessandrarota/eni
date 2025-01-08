@@ -7,8 +7,6 @@ Questo sidecar integra **Great Expectations** con **OpenTelemetry** per eseguire
 Il progetto è strutturato come segue:
 
 ```
-├── Dockerfile
-├── requirements.txt
 ├── builds/
 │   └── app.py
 └── gx_setup/
@@ -16,13 +14,15 @@ Il progetto è strutturato come segue:
 └── resources/
     └── gx_v0.1.json
     └── ...
+├── Dockerfile
+├── requirements.txt
 ```
 
 ### Descrizione di file e cartelle
 
 - **Dockerfile**: Definisce l'immagine del container e le fasi di installazione delle dipendenze, esecuzione dei test, e configurazione dell'ambiente per l'esecuzione dell'applicazione.
-- **requirements.txt**: Contiene tutte le dipendenze Python necessarie per il progetto, inclusi `great_expectations`, `opentelemetry`, `pandas` e `pytest`.
-- **/builds/app.py**: Contiene l'intera logica del sidecar: legge il file JSON di configurazione, imposta e valida le aspettative di Great Expectations, e utilizza OpenTelemetry per monitorare le metriche.
+- **requirements.txt**: Contiene tutte le dipendenze Python necessarie per il progetto, inclusi `great_expectations`, `opentelemetry` e `pandas`.
+- **/builds/app.py**: Contiene la logica principale del sidecar: legge il file JSON di configurazione, imposta e valida le aspettative di Great Expectations, e utilizza OpenTelemetry per monitorare le metriche.
 - **/gx_setup/gx_dataframe.py**: Contiene funzioni per configurare Great Expectations per il suo utilizzo sui DataFrame nello specifico, inclusa l'aggiunta di sorgenti dati, asset, suite di aspettative e definizioni di validazioni.
 - **/resources**: La cartella contiene i file JSON di configurazione per definire i dati da validare e le aspettative di Great Expectations.
 
@@ -32,32 +32,33 @@ Il progetto è strutturato come segue:
 
 #### File di configurazione
 
-I file all'interno della cartella **/resources** contengono le configurazioni necessarie per la corretta esecuzione di **Great Expectations** all'interno del sidecar, come ad esempio le aspettative di validazione sui dati. Ogni file di configurazione definisce i controlli sui dataset di interesse per un prodotto di dati specifico.
+I file all'interno della cartella **/resources** contengono le configurazioni necessarie per la corretta esecuzione di **Great Expectations** all'interno del sidecar, come ad esempio le aspettative di validazione sui dati. Ogni file di configurazione definisce tutti i controlli sui dataset di interesse per l'intero data product.
 
 Per convenzione, i file di configurazione vengono nominati includendo la versione, ad esempio:
 gx_v<i>MAJOR.MINOR</i>.json
 
 **NB:** 
 * È **obbligatorio** fornire almeno un file di configurazione e specificarne il percorso come variabile di ambiente del container (***vedi la sezione di configurazione del container***).
-* I file di configurazione possono essere versionati per mantenere lo storico delle configurazioni o sovrascritti di volta in volta, a seconda delle esigenze del progetto (l'applicazione punterà al file indicato nella variabile di ambiente)
+* I file di configurazione possono essere versionati per mantenere lo storico delle configurazioni o sovrascritti di volta in volta, a seconda delle esigenze del progetto (l'applicazione punterà al file indicato nella variabile di ambiente).
 
 ##### Struttura del file JSON
 Il file deve essere strutturato come segue:
 
-- **data_product_name**: Il nome del data_product per cui vengono definite le aspettative
-    - il data_product_name definito è uno solo perchè da specifica il sidecar è unico per data_product.
+- **data_product_name**: Il nome del data product per cui vengono definite le aspettative
+    - il data_product_name definito è uno solo perchè da specifica il sidecar è unico per data product.
   
-- **data_product_suites**: Una lista di ***ExpectationSuite***, in cui ogni suite rappresenta un insieme di aspettative da applicare a un determinato set di dati. Ogni suite deve presentare:
+- **data_product_suites**: Una lista di **suite**, in cui ogni suite rappresenta un insieme di aspettative da applicare a un determinato set di dati. Ogni suite deve presentare:
   - **physical_informations**: Contiene le informazioni fisiche del set di dati, che includono:
     - **data_source_name**: Il nome della sorgente dati.
     - **data_asset_name**: Il nome dell'asset dati.
     - **dataframe**: Un URL che punta a un file CSV che contiene i dati da validare.
         - NB: un'estensione del progetto protrebbe prevedere la creazione di estrattori standard di DataFrame; in seguito questo campo potrà contenere il riferimento diretto al DataFrame interessato.
   - **expectations**: Una lista di aspettative da applicare sui dati. Ogni aspettativa contiene:
-    - **expectation_name**: Il nome custom dell'aspettativa.
+    - **expectation_name**: Il nome identificativo custom dell'aspettativa.
     - **expectation_type**: Il tipo di aspettativa da applicare (ad esempio, verifica che un valore non sia nullo, che un valore sia compreso tra due estremi, o che un valore corrisponda a una regex).
         - Consultare la gallery di Expectations ufficiale: https://greatexpectations.io/expectations/.
     - **kwargs**: I parametri necessari per eseguire l'aspettativa (ad esempio, il nome della colonna da verificare o i valori di limite per un intervallo).
+      - Consultare la gallery di Expectations ufficiale: https://greatexpectations.io/expectations/.
 
 Di seguito un esempio di file di configurazione:
         
@@ -103,7 +104,7 @@ Di seguito un esempio di file di configurazione:
 ```
 
 #### Validazione dei dati
-Il risultato finale della validazione tramite Great Expectations conterrà i risultati di tutte le suite definite nel file. Per ogni suite definita nel file di configurazione, il sistema eseguirà un controllo sui dati e fornirà un esito che indica se le aspettative sono state rispettate o meno. Se una suite contiene più di una aspettativa, ognuna di esse verrà validata individualmente, e il risultato finale conterrà un riepilogo di tutte le aspettative eseguite.
+Il risultato finale della validazione tramite Great Expectations conterrà i risultati di tutte le suite definite nel file. Per ogni suite definita nel file di configurazione, il sistema eseguirà un controllo sui dati e fornirà un esito che indica se le aspettative sono state rispettate o meno. Se una suite contiene più di una aspettativa, ognuna di esse verrà validata individualmente, e il risultato finale conterrà un riepilogo di tutte le aspettative eseguite sull'intero data product.
 
 
 ### OpenTelemetry
@@ -111,9 +112,9 @@ Il risultato finale della validazione tramite Great Expectations conterrà i ris
 Opentelemetry viene utilizzato per raccogliere e inviare metriche, relative alla validazione dei dati con Great Expectations, tramite il protocollo OTLP a un sistema di monitoraggio esterno (es: Collector di piattaforma).
 
 L'integrazione di OpenTelemetry avviene tramite i seguenti passaggi:
-1. **Creazione di un ***Meter*****: Un oggetto ***Meter*** è creato tramite la libreria opentelemetry.metrics. Questo oggetto viene utilizzato per raccogliere metriche relative all'applicazione, in questo caso, alla validazione dei dati.
-2. **Definizione delle Metriche con ***ObservableGauge*****: Le metriche di validazione dei dati vengono raccolte in tempo reale tramite una metrica chiamata ***ObservableGauge***. Questa metrica viene creata per ogni suite di validazione e misura il valore percentuale di successo delle aspettative sui dati.
-3. **Raccolta delle Metriche**: Viene definita una callback che viene eseguita periodicamente (in base al valore della variabile di ambiente specificata) per raccogliere le metriche di validazione, e creare delle osservazioni (valori di metrica) per ogni aspettativa. I risultati della validazione vengono mappati su valori percentuali che vengono esportati come metriche tramite OTLP.
+1. **Creazione di un ***Meter*****: Un oggetto ***Meter*** è creato, tramite la libreria opentelemetry.metrics, per raccogliere metriche.
+2. **Definizione delle Metriche con ***ObservableGauge*****: Le metriche di validazione dei dati verranno raccolte tramite una metrica particolare chiamata ***ObservableGauge***. Questa metrica misurerà il valore percentuale di successo delle aspettative sui dati, e raccoglierà inoltre una serie di attributi custom (es: data_product_name, suite_name, ...).
+3. **Raccolta delle Metriche**: Una funzione di callback che viene eseguita periodicamente (il tempo viene stabilito dal valore della variabile di ambiente specificata) per raccogliere le metriche di validazione. I risultati della validazione vengono mappati su valori percentuali che vengono esportati come metriche tramite OTLP.
 
 #### Esempio di metrica in formato OTLP
 

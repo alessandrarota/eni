@@ -1,0 +1,24 @@
+{
+    "name": "GGP004_valorizzazione_di_description",
+    "displayName": "Valorizzazione di Description",
+    "description": "La descrizione del Data Product specificata nel Data Product Descriptor, al momento della registrazione di una nuova versione di un Data Product, deve essere dichiarata, non deve essere nulla, non deve essere vuota e deve essere lunga almeno duecento caratteri (esclusi gli spazi).",
+    "blockingFlag": "true",
+    "rawContent": "package GGP004_valorizzazione_di_description\n\ndefault allow := false\n\nallow { count(trim(input.afterState.dataProductVersion.info.description, \" \")) >= 200 }",
+    "evaluationEvents": [
+    {
+      "event": "DATA_PRODUCT_VERSION_CREATION"
+    },
+    {
+      "event": "DATA_PRODUCT_CREATION"
+    },
+    {
+      "event": "DATA_PRODUCT_UPDATE"
+    }
+  ],
+    "filteringExpression": "true",
+    "suite": "data_product_general_discoverability_metadata",
+    "policyEngine":{
+        "id": 1,
+        "name": "opa_policy_engine"
+    }
+}

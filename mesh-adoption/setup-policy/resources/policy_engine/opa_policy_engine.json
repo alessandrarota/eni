@@ -1,0 +1,5 @@
+{
+    "name": "opa_policy_engine",
+    "displayName": "OPA Policy Engine",
+    "adapterUrl": "http://xops-policy-executor.pr-xops.svc.cluster.local:9009"
+}

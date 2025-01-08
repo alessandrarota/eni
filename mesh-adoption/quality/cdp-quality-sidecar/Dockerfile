@@ -7,9 +7,6 @@ WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-ENV EXPECTATIONS_JSON_FILE_PATH='build/resources/gx_v0.1.json'
-ENV OTEL_METRIC_EXPORT_INTERVAL=60000
-
 COPY . .
 
 ENV PYTHONPATH=/app/build

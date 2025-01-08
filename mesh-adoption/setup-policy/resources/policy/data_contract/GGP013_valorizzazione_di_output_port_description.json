@@ -1,0 +1,18 @@
+{
+    "name": "GGP013_valorizzazione_di_output_port_description",
+    "displayName": "Valorizzazione di Output Port Description",
+    "description": "La descrizione di tutte le output port del Data Product specificata nel Data Product Descriptor, al momento della registrazione di una nuova versione di un Data Product, deve essere dichiarata, non deve essere nulla, non deve essere vuota e deve essere lunga almeno trenta caratteri (esclusi gli spazi).",
+    "blockingFlag": "true",
+    "rawContent": "package GGP013_valorizzazione_di_output_port_description\n\ndefault allow := false\n\nallow { count({i | count(trim(input.afterState.dataProductVersion.interfaceComponents.outputPorts[i].description, \" \")) >= 30}) == count(input.afterState.dataProductVersion.interfaceComponents.outputPorts)}",
+    "evaluationEvents": [
+    {
+      "event": "DATA_PRODUCT_VERSION_CREATION"
+    }
+  ],
+    "filteringExpression": "true",
+    "suite": "data_contract",
+    "policyEngine":{
+        "id": 1,
+        "name": "opa_policy_engine"
+    }
+} 

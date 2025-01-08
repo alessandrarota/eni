@@ -1,0 +1,18 @@
+{
+    "name": "GGP011_valori_ammessi_per_output_port_specification",
+    "displayName": "Valori ammessi per Output Port Specification",
+    "description": "La specifica di tutte le output port specificata nel Data Product Descriptor, al momento della registrazione di una nuova versione di un Data Product, deve essere una e una solo dei valori autorizzati: openapi o datastoreapi.",
+    "blockingFlag": "true",
+    "rawContent": "package GGP011_valori_ammessi_per_output_port_specification\n\ndefault allow := false\n\nvalid_specification := {\"datastoreapi\", \"openapi\"}\n\nallow { count({i | valid_specification[input.afterState.dataProductVersion.interfaceComponents.outputPorts[i].promises.api.specification]}) == count(input.afterState.dataProductVersion.interfaceComponents.outputPorts)}",
+    "evaluationEvents": [
+    {
+      "event": "DATA_PRODUCT_VERSION_CREATION"
+    }
+  ],
+    "filteringExpression": "true",
+    "suite": "data_contract",
+    "policyEngine":{
+        "id": 1,
+        "name": "opa_policy_engine"
+    }
+} 

@@ -1,0 +1,18 @@
+{
+    "name": "GGP015_valorizzazione_di_output_port_datastoreapi_table_description",
+    "displayName": "Valorizzazione di Output Port Version",
+    "description": "Per tutte le output port specificate nel Data Product Descriptor, al momento della registrazione di una nuova versione di un Data Product, che presentano la specifica valorizzata come 'datastoreapi', deve valere il seguente vincolo: la descrizione di tutte le tabelle, definite all'interno della specifica, deve essere dichiarata, non deve essere nulla, non deve essere vuota e deve essere lunga almeno trenta caratteri (esclusi gli spazi).",
+    "blockingFlag": "false",
+    "rawContent": "package GGP015_valorizzazione_di_output_port_datastoreapi_table_description\n\ndefault allow := false\n\ndatastore_ports := {port |\n    port := input.afterState.dataProductVersion.interfaceComponents.outputPorts[_]\n    port.promises.api.specification == \"datastoreapi\"\n}\n\ntables_with_valid_description(port) = valid {\n    data := json.unmarshal(port.promises.api.definition.rawContent) \n    valid = count({\n        table |\n        table := data.schema.tables[_] \n        count(trim(table.description, \" \")) >= 30\n    }) == count(data.schema.tables)\n}\n\nports_with_table_validation := [\n    {\"port\": port, \"valid\": tables_with_valid_description(port)} |\n    port := datastore_ports[_]\n]\n\nall_ports_valid := count({\n    port |\n    port := datastore_ports[_]\n    tables_with_valid_description(port)\n}) == count(datastore_ports)\n\nallow {\n    all_ports_valid\n}\n"  ,
+    "evaluationEvents": [
+    {
+      "event": "DATA_PRODUCT_VERSION_CREATION"
+    }
+  ],
+    "filteringExpression": "true",
+    "suite": "data_contract",
+    "policyEngine":{
+        "id": 1,
+        "name": "opa_policy_engine"
+    }
+} 
