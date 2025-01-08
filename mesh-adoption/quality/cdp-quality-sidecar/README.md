@@ -1,5 +1,6 @@
 # Quality Sidecar
 
+
 Questo sidecar integra **Great Expectations** con **OpenTelemetry** per eseguire validazioni su DataFrame e monitorare le metriche, utilizzando una configurazione personalizzata, e generare dei risultati in formato OTLP.
 
 ## Struttura del progetto
@@ -38,8 +39,9 @@ Per convenzione, i file di configurazione vengono nominati includendo la version
 gx_v<i>MAJOR.MINOR</i>.json
 
 **NB:** 
-* È **obbligatorio** fornire almeno un file di configurazione e specificarne il percorso come variabile di ambiente del container (***vedi la sezione di configurazione del container***).
-* I file di configurazione possono essere versionati per mantenere lo storico delle configurazioni o sovrascritti di volta in volta, a seconda delle esigenze del progetto (l'applicazione punterà al file indicato nella variabile di ambiente).
+
+- È **obbligatorio** fornire almeno un file di configurazione e specificarne il percorso come variabile di ambiente del container (***vedi la sezione di configurazione del container***).
+- I file di configurazione possono essere versionati per mantenere lo storico delle configurazioni o sovrascritti di volta in volta, a seconda delle esigenze del progetto (l'applicazione punterà al file indicato nella variabile di ambiente).
 
 ##### Struttura del file JSON
 Il file deve essere strutturato come segue:
@@ -112,6 +114,7 @@ Il risultato finale della validazione tramite Great Expectations conterrà i ris
 Opentelemetry viene utilizzato per raccogliere e inviare metriche, relative alla validazione dei dati con Great Expectations, tramite il protocollo OTLP a un sistema di monitoraggio esterno (es: Collector di piattaforma).
 
 L'integrazione di OpenTelemetry avviene tramite i seguenti passaggi:
+
 1. **Creazione di un ***Meter*****: Un oggetto ***Meter*** è creato, tramite la libreria opentelemetry.metrics, per raccogliere metriche.
 2. **Definizione delle Metriche con ***ObservableGauge*****: Le metriche di validazione dei dati verranno raccolte tramite una metrica particolare chiamata ***ObservableGauge***. Questa metrica misurerà il valore percentuale di successo delle aspettative sui dati, e raccoglierà inoltre una serie di attributi custom (es: data_product_name, suite_name, ...).
 3. **Raccolta delle Metriche**: Una funzione di callback che viene eseguita periodicamente (il tempo viene stabilito dal valore della variabile di ambiente specificata) per raccogliere le metriche di validazione. I risultati della validazione vengono mappati su valori percentuali che vengono esportati come metriche tramite OTLP.
