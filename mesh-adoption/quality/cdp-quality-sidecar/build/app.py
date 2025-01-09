@@ -8,20 +8,23 @@ import logging
 from opentelemetry import metrics
 import os
 import json
+import sys
 
 logging.basicConfig(level=logging.INFO)
 context = gx.get_context(mode="file")
 meter = metrics.get_meter(__name__)
 
 
-def read_json_file(expectations_json_file_path=os.getenv("EXPECTATIONS_JSON_FILE_PATH")):
-    if not expectations_json_file_path:
-        raise ValueError("EXPECTATIONS_JSON_FILE_PATH variable not found. It must be provided.")
-    
-    with open(expectations_json_file_path, "r") as f:
-        config_data = json.load(f)
-
-        return config_data
+def read_json_file(json_file_path):
+    try:
+        with open(json_file_path, "r") as f:
+            return json.load(f)
+    except FileNotFoundError:
+        logging.error(f"File not found: {json_file_path}")
+        sys.exit(1)
+    except json.JSONDecodeError:
+        logging.error(f"Error decoding JSON file: {json_file_path}")
+        sys.exit(1)
 
 def setup_gx(gx_json_data): 
     validation_defs = []
@@ -63,7 +66,6 @@ def run_validation_callback(validation_def, data_product_name, suite_name, data_
             meta = expectation_config["meta"]
             print(validation_result)
 
-            #print(f"Validation result: {validation_result}")
             observation = Observation(
                 value=100-result["unexpected_percent"],
                 attributes={
@@ -73,8 +75,7 @@ def run_validation_callback(validation_def, data_product_name, suite_name, data_
                     "data_product_name": data_product_name,
                     "suite_name": suite_name,
                     "data_source_name": data_source_name,
-                    "data_asset_name": data_asset_name#,
-                    #"timestamp": datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                    "data_asset_name": data_asset_name
                 }
             )
 
@@ -84,17 +85,31 @@ def run_validation_callback(validation_def, data_product_name, suite_name, data_
 
     return callback 
 
-if __name__ == "__main__":
-    logging.info("Starting the application...")
-
-    logging.info("Reading GreatExpectations json file...")
-    gx_json_data = read_json_file()
-
-    logging.info("Setting up GreatExpectations...")
-    validation_defs = setup_gx(gx_json_data)
-    
+def main(json_file_path):
     try:
-        while True:
-            time.sleep(5)  
-    except:
-        logging.info("Shutting down the application...")
+        logging.info("Starting the application...")
+
+        logging.info("Reading GreatExpectations json file...")
+        gx_json_data = read_json_file(json_file_path)
+
+        logging.info("Setting up GreatExpectations...")
+        validation_defs = setup_gx(gx_json_data)
+        
+        try:
+            while True:
+                time.sleep(5)  
+        except:
+            logging.info("Shutting down the application...")
+
+    except Exception as e:
+        logging.error(f"An error occurred during application execution: {e}")
+        sys.exit(1)
+
+if __name__ == "__main__":
+    if len(sys.argv) < 2:
+        logging.error("No file path provided as parameter!")
+        sys.exit(1)
+
+    main(sys.argv[1])
+
+    

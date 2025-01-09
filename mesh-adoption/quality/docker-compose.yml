@@ -76,6 +76,16 @@ services:
     depends_on:
       - platform-collector
 
+  # jupyter:
+  #   image: jupyter/base-notebook
+  #   container_name: quality-sidecar-jupyter-notebook
+  #   ports:
+  #     - "8888:8888"  
+  #   volumes:
+  #     - ./notebook:/home/jovyan  
+  #   environment:
+  #     - JUPYTER_TOKEN=password
+  #     - EXPECTATIONS_JSON_FILE_PATH=${EXPECTATIONS_JSON_FILE_PATH}
 
   forwarder:
     build:

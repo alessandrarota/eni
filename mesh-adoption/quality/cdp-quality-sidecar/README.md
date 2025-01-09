@@ -9,9 +9,9 @@ Il progetto è strutturato come segue:
 
 ```
 ├── builds/
-│   └── app.py
-└── gx_setup/
-    └── gx_dataframe.py
+    └── app.py
+    └── gx_setup/
+        └── gx_dataframe.py
 └── resources/
     └── gx_v0.1.json
     └── ...
@@ -200,7 +200,7 @@ Di seguito un esempio di risultato di validazione con Great Expectations esporta
 
 ## Configurazione
 
-Le variabili di ambiente per configurare il sidecar sono gestite tramite il file `docker-compose.yml`, mentre i valori effettivi vengono definiti in un file `.env` per semplificare la gestione e la modifica delle configurazioni.
+Le variabili di ambiente per configurare il sidecar sono gestite tramite il file `docker-compose.yml`, mentre i valori effettivi vengono definiti in un file `.env` per semplificare la gestione e la modifica delle configurazioni. Entrambi i file sono definiti a livello di root del progetto ```quality```.
 
 ### Dettaglio delle Variabili
 
@@ -227,6 +227,14 @@ Le variabili di ambiente per configurare il sidecar sono gestite tramite il file
     EXPECTATIONS_JSON_FILE_PATH=build/resources/gx_v0.1.json
     ```
 
+### Dettaglio delle Dockerfile
+
+Alla fine del Dockerfile è presente il comando che lancia l'applicazione:
+```
+CMD ["sh", "-c", "opentelemetry-instrument --metrics_exporter otlp,console --logs_exporter otlp,console python build/app.py $EXPECTATIONS_JSON_FILE_PATH"]
+```
+L'applicazione riceve quindi in input il percorso del file json contenente le configurazioni per GreatExpectations.
+
 ## Esecuzione
 Per eseguire l'applicazione è necessario avere installato [Docker Desktop](https://www.docker.com/).
 
@@ -239,7 +247,7 @@ Successivamente, eseguire il comando per avviare il container sulla base dell'im
 docker run -d --name sidecar sidecar
 ```
 
-**NB**: L'esecuzione stand-alone dell'applicazione è sconsigliata, poiché è progettata per funzionare insieme a un collector che riceva le metriche generate (nei log si potrà notare che l'applicazione tenterà sempre di connettersi al collector di default `localhost:4317`).  L'esecuzione dell'applicazione in modo indipendente può essere utile per testare i singoli test o per verificare il formato delle metriche generate, ma senza un collector attivo, la generazione delle metriche non ha alcun effetto pratico.
+**NB**: L'esecuzione stand-alone dell'applicazione è sconsigliata, poiché è progettata per funzionare insieme a un collector che riceva le metriche generate (nei log si potrà notare che l'applicazione tenterà sempre di connettersi al collector di default `localhost:4317`).  L'esecuzione dell'applicazione in modo indipendente può essere utile per testare i singoli test o per verificare il formato delle metriche generate, ma senza un collector attivo (lanciato con il docker-compose.yml di progetto), la generazione delle metriche non ha alcun effetto pratico.
 
 ### Test
 L'applicazione viene testata prima di ogni esecuzione grazie al comando all'interno del `Dockerfile`:

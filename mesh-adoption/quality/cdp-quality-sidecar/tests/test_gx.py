@@ -1,7 +1,7 @@
 import pytest
 from datetime import datetime
 import logging
-from app import *
+from app import read_json_file, setup_gx
 import os
 import pandas as pd
 from gx_setup.gx_dataframe import *
