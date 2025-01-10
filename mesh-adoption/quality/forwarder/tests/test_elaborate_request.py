@@ -2,12 +2,12 @@ import pytest
 from datetime import datetime
 from sqlalchemy.exc import SQLAlchemyError
 from src import create_processor, init_configurations
-from app import elaborate_request
+from app import elaborate_request, checking_for_new_metrics, handle_metrics
 from src.data.entities.MetricCurrent import MetricCurrent
 from src.data.entities.MetricHistory import MetricHistory
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine
-from src.blindata.blindata import get_blindata_token, post_quality_results
+from src.blindata.blindata import get_blindata_token
 import logging
 import re
 
@@ -65,6 +65,12 @@ def populate_metric_history(session, data):
         session.add(metric)
     session.commit()
 
+def job_without_blindata(configurations):
+    metrics = checking_for_new_metrics(configurations)
+
+    if metrics is not None and len(metrics) != 0:
+        handle_metrics(configurations, metrics)
+
 def test_migration_with_empty_database():
     configurations = init_configurations("development")
     init_database(configurations)
@@ -72,7 +78,7 @@ def test_migration_with_empty_database():
     assert len(MetricCurrent.get_all_current_metrics(configurations)) == 0
     assert len(MetricHistory.get_all_history_metrics(configurations)) == 0
 
-    elaborate_request(configurations)
+    job_without_blindata(configurations)
 
     assert len(MetricCurrent.get_all_current_metrics(configurations)) == 0
     assert len(MetricHistory.get_all_history_metrics(configurations)) == 0
@@ -105,7 +111,7 @@ def test_migration_with_no_metric_current_and_existing_metric_history():
     assert len(MetricCurrent.get_all_current_metrics(configurations)) == 0
     assert len(MetricHistory.get_all_history_metrics(configurations)) == 1
 
-    elaborate_request(configurations)
+    job_without_blindata(configurations)
 
     assert len(MetricCurrent.get_all_current_metrics(configurations)) == 0
     assert len(MetricHistory.get_all_history_metrics(configurations)) == 1
@@ -163,7 +169,7 @@ def test_migration_with_existing_metric_current_and_no_existing_metric_history()
     assert len(MetricCurrent.get_all_current_metrics(configurations)) == 2
     assert len(MetricHistory.get_all_history_metrics(configurations)) == 0
 
-    elaborate_request(configurations)
+    job_without_blindata(configurations)
 
     assert len(MetricCurrent.get_all_current_metrics(configurations)) == 0
     assert len(MetricHistory.get_all_history_metrics(configurations)) == 2
@@ -239,7 +245,7 @@ def test_migration_with_existng_metric_current_and_existing_metric_history():
     assert len(MetricCurrent.get_all_current_metrics(configurations)) == 1
     assert len(MetricHistory.get_all_history_metrics(configurations)) == 1
 
-    elaborate_request(configurations)
+    job_without_blindata(configurations)
 
     assert len(MetricCurrent.get_all_current_metrics(configurations)) == 0
     assert len(MetricHistory.get_all_history_metrics(configurations)) == 2
@@ -316,7 +322,7 @@ def test_migration_with_duplicates_in_metric_current_and_existing_records_in_met
     assert len(MetricCurrent.get_all_current_metrics(configurations)) == 1
     assert len(MetricHistory.get_all_history_metrics(configurations)) == 1
 
-    elaborate_request(configurations)
+    job_without_blindata(configurations)
 
     assert len(MetricCurrent.get_all_current_metrics(configurations)) == 0
     assert len(MetricHistory.get_all_history_metrics(configurations)) == 1

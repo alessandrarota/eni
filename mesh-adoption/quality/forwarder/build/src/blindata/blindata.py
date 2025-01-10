@@ -58,7 +58,7 @@ def get_blindata_token(config):
 
     return bearer_token
 
-def post_quality_results(config, current_metrics):
+def post_quality_results_on_blindata(config, current_metrics):
     bearer_token = get_blindata_token(config)
     file_name = fill_csv_file(current_metrics)
 
