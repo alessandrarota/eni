@@ -64,29 +64,29 @@ services:
       - platform-local-metastore
       - sql-init
 
-  cdp-quality-sidecar:
-    build:
-      context: ./cdp-quality-sidecar
-    container_name: cdp-quality-sidecar
-    environment:
-      - OTEL_EXPORTER_OTLP_ENDPOINT=${OTEL_EXPORTER_ENDPOINT}
-      - OTEL_METRIC_EXPORT_INTERVAL=${OTEL_METRIC_EXPORT_INTERVAL}
-      - OTEL_SERVICE_NAME=${CDP_OTEL_SERVICE_NAME}
-      - DATA_PRODUCT_NAME=${CDP_DATA_PRODUCT_NAME}
-      - EXPECTATIONS_JSON_FILE_PATH=${EXPECTATIONS_JSON_FILE_PATH}
-    depends_on:
-      - platform-collector
-
-  # jupyter:
-  #   image: jupyter/base-notebook
-  #   container_name: quality-sidecar-jupyter-notebook
-  #   ports:
-  #     - "8888:8888"  
-  #   volumes:
-  #     - ./notebook:/home/jovyan  
+  # cdp-quality-sidecar:
+  #   build:
+  #     context: ./cdp-quality-sidecar
+  #   container_name: cdp-quality-sidecar
   #   environment:
-  #     - JUPYTER_TOKEN=password
+  #     - OTEL_EXPORTER_OTLP_ENDPOINT=${OTEL_EXPORTER_ENDPOINT}
+  #     - OTEL_METRIC_EXPORT_INTERVAL=${OTEL_METRIC_EXPORT_INTERVAL}
+  #     - OTEL_SERVICE_NAME=${CDP_OTEL_SERVICE_NAME}
+  #     - DATA_PRODUCT_NAME=${CDP_DATA_PRODUCT_NAME}
   #     - EXPECTATIONS_JSON_FILE_PATH=${EXPECTATIONS_JSON_FILE_PATH}
+  #   depends_on:
+  #     - platform-collector
+
+  jupyter:
+    image: jupyter/base-notebook
+    container_name: quality-sidecar-jupyter-notebook
+    ports:
+      - "8888:8888"  
+    volumes:
+      - ./notebook:/home/jovyan  
+    environment:
+      - JUPYTER_TOKEN=password
+      #- EXPECTATIONS_JSON_FILE_PATH=${EXPECTATIONS_JSON_FILE_PATH}
 
   forwarder:
     build:

@@ -23,7 +23,7 @@ Il progetto è strutturato come segue:
 
 - **Dockerfile**: Definisce l'immagine del container e le fasi di installazione delle dipendenze, esecuzione dei test, e configurazione dell'ambiente per l'esecuzione dell'applicazione.
 - **requirements.txt**: Contiene tutte le dipendenze Python necessarie per il progetto (ad esempio `great_expectations`, `opentelemetry` e `pandas`).
-- **/builds/app.py**: Contiene la logica principale del sidecar: legge il file JSON di configurazione, imposta e valida le aspettative di Great Expectations, e utilizza OpenTelemetry per monitorare le metriche.
+- **/builds/app.py**: Contiene la logica principale del sidecar: legge il file JSON di configurazione, imposta e valida le aspettative di Great Expectations, e utilizza OpenTelemetry per formattare ed inviare le metriche.
 - **/gx_setup/gx_dataframe.py**: Contiene funzioni per configurare Great Expectations per il suo utilizzo sui DataFrame nello specifico, inclusa l'aggiunta di sorgenti dati, asset, suite di aspettative e definizioni di validazioni.
 - **/resources**: La cartella contiene i file JSON di configurazione per definire i dati da validare e le aspettative di Great Expectations.
 
@@ -449,7 +449,7 @@ Alla fine del Dockerfile è presente il comando che lancia l'applicazione:
 ```
 CMD ["sh", "-c", "opentelemetry-instrument --metrics_exporter otlp,console --logs_exporter otlp,console python build/app.py $EXPECTATIONS_JSON_FILE_PATH"]
 ```
-L'applicazione riceve quindi in input il percorso del file json contenente le configurazioni per GreatExpectations.
+L'applicazione riceve quindi in input il percorso del file json contenente le configurazioni per Great Expectations.
 
 ## Esecuzione
 Per eseguire l'applicazione è necessario avere installato [Docker Desktop](https://www.docker.com/).

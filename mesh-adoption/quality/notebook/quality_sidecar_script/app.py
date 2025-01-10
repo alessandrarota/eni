@@ -8,24 +8,32 @@ import logging
 from opentelemetry import metrics
 import os
 import json
+import sys
+from opentelemetry.sdk.resources import Resource
+from opentelemetry.sdk.metrics import MeterProvider
+from opentelemetry.sdk.resources import SERVICE_NAME
 
 logging.basicConfig(level=logging.INFO)
+logging.getLogger("great_expectations").setLevel(logging.WARNING)
+#context = gx.get_context(mode="file")
 context = gx.get_context()
 meter = metrics.get_meter(__name__)
 
 
-def read_json_file(expectations_json_file_path=os.getenv("EXPECTATIONS_JSON_FILE_PATH")):
-    if not expectations_json_file_path:
-        raise ValueError("EXPECTATIONS_JSON_FILE_PATH variable not found. It must be provided.")
-    
-    with open(expectations_json_file_path, "r") as f:
-        config_data = json.load(f)
+def read_json_file(json_file_path):
+    try:
+        with open(json_file_path, "r") as f:
+            return json.load(f)
+    except FileNotFoundError:
+        logging.error(f"File not found: {json_file_path}")
+        sys.exit(1)
+    except json.JSONDecodeError:
+        logging.error(f"Error decoding JSON file: {json_file_path}")
+        sys.exit(1)
 
-        return config_data
-
-def setup_gx(gx_json_data): 
+def setup_gx(gx_json_data, data_product_name): 
     validation_defs = []
-    data_product_name = gx_json_data["data_product_name"]
+    #data_product_name = gx_json_data["data_product_name"]
     data_product_suites = gx_json_data["data_product_suites"]
 
     for data_product_suite in data_product_suites:
@@ -53,7 +61,9 @@ def setup_gx(gx_json_data):
 
 def run_validation_callback(validation_def, data_product_name, suite_name, data_source_name, data_asset_name, df):
     def callback(options):
+        logging.info("Creating ValidationResults...")
         validation_results = validation_run(df=df, validation_definition=validation_def)
+        #print(validation_results)
         
         observations = []
         
@@ -61,9 +71,7 @@ def run_validation_callback(validation_def, data_product_name, suite_name, data_
             result = validation_result["result"]
             expectation_config = validation_result["expectation_config"]
             meta = expectation_config["meta"]
-            print(validation_result)
 
-            #print(f"Validation result: {validation_result}")
             observation = Observation(
                 value=100-result["unexpected_percent"],
                 attributes={
@@ -73,22 +81,46 @@ def run_validation_callback(validation_def, data_product_name, suite_name, data_
                     "data_product_name": data_product_name,
                     "suite_name": suite_name,
                     "data_source_name": data_source_name,
-                    "data_asset_name": data_asset_name#,
-                    #"timestamp": datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                    "data_asset_name": data_asset_name
                 }
             )
 
             observations.append(observation)
 
+        logging.info("ValidationResults created!")
         return observations
 
     return callback 
 
+def main(json_file_path, data_product_name):
+    try:
+        logging.info("Starting the application...")
+
+        logging.info("Reading GreatExpectations json file...")
+        gx_json_data = read_json_file(json_file_path)
+
+        logging.info("Setting up GreatExpectations...")
+        validation_defs = setup_gx(gx_json_data, data_product_name)
+        
+        # try:
+        #     while True:
+        #         time.sleep(5)  
+        # except:
+        #     logging.info("Shutting down the application...")
+
+    except Exception as e:
+        logging.error(f"An error occurred during application execution: {e}")
+        sys.exit(1)
+
 if __name__ == "__main__":
-    logging.info("Starting the application...")
+    if len(sys.argv) < 2:
+        logging.error("No file path provided as parameter!")
+        sys.exit(1)
 
-    logging.info("Reading GreatExpectations json file...")
-    gx_json_data = read_json_file()
+    if not os.getenv("DATA_PRODUCT_NAME"):
+        logging.error("The environment variable DATA_PRODUCT_NAME is not set or is empty!")
+        sys.exit(1)
 
-    logging.info("Setting up GreatExpectations...")
-    validation_defs = setup_gx(gx_json_data)
+    main(sys.argv[1], os.getenv("DATA_PRODUCT_NAME"))
+
+    

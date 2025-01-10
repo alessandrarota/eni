@@ -14,7 +14,9 @@ from opentelemetry.sdk.metrics import MeterProvider
 from opentelemetry.sdk.resources import SERVICE_NAME
 
 logging.basicConfig(level=logging.INFO)
-context = gx.get_context(mode="file")
+logging.getLogger("great_expectations").setLevel(logging.WARNING)
+#context = gx.get_context(mode="file")
+context = gx.get_context()
 meter = metrics.get_meter(__name__)
 
 
@@ -59,6 +61,7 @@ def setup_gx(gx_json_data, data_product_name):
 
 def run_validation_callback(validation_def, data_product_name, suite_name, data_source_name, data_asset_name, df):
     def callback(options):
+        logging.info("Creating ValidationResults...")
         validation_results = validation_run(df=df, validation_definition=validation_def)
         #print(validation_results)
         
@@ -84,6 +87,7 @@ def run_validation_callback(validation_def, data_product_name, suite_name, data_
 
             observations.append(observation)
 
+        logging.info("ValidationResults created!")
         return observations
 
     return callback 
