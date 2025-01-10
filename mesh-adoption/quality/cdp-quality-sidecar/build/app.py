@@ -9,6 +9,9 @@ from opentelemetry import metrics
 import os
 import json
 import sys
+from opentelemetry.sdk.resources import Resource
+from opentelemetry.sdk.metrics import MeterProvider
+from opentelemetry.sdk.resources import SERVICE_NAME
 
 logging.basicConfig(level=logging.INFO)
 context = gx.get_context(mode="file")
@@ -26,9 +29,9 @@ def read_json_file(json_file_path):
         logging.error(f"Error decoding JSON file: {json_file_path}")
         sys.exit(1)
 
-def setup_gx(gx_json_data): 
+def setup_gx(gx_json_data, data_product_name): 
     validation_defs = []
-    data_product_name = gx_json_data["data_product_name"]
+    #data_product_name = gx_json_data["data_product_name"]
     data_product_suites = gx_json_data["data_product_suites"]
 
     for data_product_suite in data_product_suites:
@@ -57,6 +60,7 @@ def setup_gx(gx_json_data):
 def run_validation_callback(validation_def, data_product_name, suite_name, data_source_name, data_asset_name, df):
     def callback(options):
         validation_results = validation_run(df=df, validation_definition=validation_def)
+        #print(validation_results)
         
         observations = []
         
@@ -64,7 +68,6 @@ def run_validation_callback(validation_def, data_product_name, suite_name, data_
             result = validation_result["result"]
             expectation_config = validation_result["expectation_config"]
             meta = expectation_config["meta"]
-            print(validation_result)
 
             observation = Observation(
                 value=100-result["unexpected_percent"],
@@ -85,7 +88,7 @@ def run_validation_callback(validation_def, data_product_name, suite_name, data_
 
     return callback 
 
-def main(json_file_path):
+def main(json_file_path, data_product_name):
     try:
         logging.info("Starting the application...")
 
@@ -93,7 +96,7 @@ def main(json_file_path):
         gx_json_data = read_json_file(json_file_path)
 
         logging.info("Setting up GreatExpectations...")
-        validation_defs = setup_gx(gx_json_data)
+        validation_defs = setup_gx(gx_json_data, data_product_name)
         
         try:
             while True:
@@ -110,6 +113,10 @@ if __name__ == "__main__":
         logging.error("No file path provided as parameter!")
         sys.exit(1)
 
-    main(sys.argv[1])
+    if not os.getenv("DATA_PRODUCT_NAME"):
+        logging.error("The environment variable DATA_PRODUCT_NAME is not set or is empty!")
+        sys.exit(1)
+
+    main(sys.argv[1], os.getenv("DATA_PRODUCT_NAME"))
 
     

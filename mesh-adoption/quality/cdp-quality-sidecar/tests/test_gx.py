@@ -8,10 +8,9 @@ from gx_setup.gx_dataframe import *
 
 def test_gx_v1():
     gx_json_data = read_json_file('/app/tests/resources/v1/gx_v1.json')
-    data_product_name = gx_json_data["data_product_name"]
-    assert data_product_name == 'v1'
+    data_product_name = 'v1'
 
-    validation_defs = setup_gx(gx_json_data)
+    validation_defs = setup_gx(gx_json_data, data_product_name)
 
     data_product_suite = gx_json_data["data_product_suites"][0]
     physical_informations = data_product_suite["physical_informations"]
@@ -56,10 +55,9 @@ def test_gx_v1():
 
 def test_gx_v2():
     gx_json_data = read_json_file('/app/tests/resources/v2/gx_v2.json')
-    data_product_name = gx_json_data["data_product_name"]
-    assert data_product_name == 'v2'
+    data_product_name = 'v2'
 
-    validation_defs = setup_gx(gx_json_data)
+    validation_defs = setup_gx(gx_json_data, data_product_name)
 
     data_product_suite = gx_json_data["data_product_suites"][0]
     physical_informations = data_product_suite["physical_informations"]

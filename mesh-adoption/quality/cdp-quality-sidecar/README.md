@@ -22,7 +22,7 @@ Il progetto è strutturato come segue:
 ### Descrizione di file e cartelle
 
 - **Dockerfile**: Definisce l'immagine del container e le fasi di installazione delle dipendenze, esecuzione dei test, e configurazione dell'ambiente per l'esecuzione dell'applicazione.
-- **requirements.txt**: Contiene tutte le dipendenze Python necessarie per il progetto, inclusi `great_expectations`, `opentelemetry` e `pandas`.
+- **requirements.txt**: Contiene tutte le dipendenze Python necessarie per il progetto (ad esempio `great_expectations`, `opentelemetry` e `pandas`).
 - **/builds/app.py**: Contiene la logica principale del sidecar: legge il file JSON di configurazione, imposta e valida le aspettative di Great Expectations, e utilizza OpenTelemetry per monitorare le metriche.
 - **/gx_setup/gx_dataframe.py**: Contiene funzioni per configurare Great Expectations per il suo utilizzo sui DataFrame nello specifico, inclusa l'aggiunta di sorgenti dati, asset, suite di aspettative e definizioni di validazioni.
 - **/resources**: La cartella contiene i file JSON di configurazione per definire i dati da validare e le aspettative di Great Expectations.
@@ -45,9 +45,6 @@ gx_v<i>MAJOR.MINOR</i>.json
 
 ##### Struttura del file JSON
 Il file deve essere strutturato come segue:
-
-- **data_product_name**: Il nome del data product per cui vengono definite le aspettative
-    - il data_product_name definito è uno solo perchè da specifica il sidecar è unico per data product.
   
 - **data_product_suites**: Una lista di **suite**, in cui ogni suite rappresenta un insieme di aspettative da applicare a un determinato set di dati. Ogni suite deve presentare:
   - **physical_informations**: Contiene le informazioni fisiche del set di dati, che includono:
@@ -66,7 +63,6 @@ Di seguito un esempio di file di configurazione:
         
 ```json
 {
-    "data_product_name": "consuntiviDiProduzione",
     "data_product_suites": [
         {
             "physical_informations": {
@@ -108,6 +104,211 @@ Di seguito un esempio di file di configurazione:
 #### Validazione dei dati
 Il risultato finale della validazione tramite Great Expectations conterrà i risultati di tutte le suite definite nel file. Per ogni suite definita nel file di configurazione, il sistema eseguirà un controllo sui dati e fornirà un esito che indica se le aspettative sono state rispettate o meno. Se una suite contiene più di una aspettativa, ognuna di esse verrà validata individualmente, e il risultato finale conterrà un riepilogo di tutte le aspettative eseguite sull'intero data product.
 
+Di seguito un esempio di ```Validation Result```, con result_format="SUMMARY" (verbosità di default):
+```json
+{
+  "success":false,
+  "results":[
+    {
+      "success":true,
+      "expectation_config":{
+        "type":"expect_column_values_to_not_be_null",
+        "kwargs":{
+          "batch_id":"cdpDataSourceSample-cdpDataAssetSample",
+          "column":"vendor_id"
+        },
+        "meta":{
+          "expectation_name":"expectVendorIdValuesToNotBeNull",
+          "data_product_name":"consuntiviDiProduzione"
+        },
+        "id":"839e339f-07ae-4fc3-9a81-5b628ceeee3e"
+      },
+      "result":{
+        "element_count":10000,
+        "unexpected_count":0,
+        "unexpected_percent":0.0,
+        "partial_unexpected_list":[
+          
+        ],
+        "partial_unexpected_counts":[
+          
+        ],
+        "partial_unexpected_index_list":[
+          
+        ]
+      },
+      "meta":{
+        
+      },
+      "exception_info":{
+        "raised_exception":false,
+        "exception_traceback":null,
+        "exception_message":null
+      }
+    },
+    {
+      "success":false,
+      "expectation_config":{
+        "type":"expect_column_values_to_be_between",
+        "kwargs":{
+          "batch_id":"cdpDataSourceSample-cdpDataAssetSample",
+          "column":"passenger_count",
+          "min_value":0.0,
+          "max_value":4.0
+        },
+        "meta":{
+          "expectation_name":"expectPassengerCountValuesToBeBetween",
+          "data_product_name":"consuntiviDiProduzione"
+        },
+        "id":"7ef1c360-f79c-400d-8085-ebb9b31a83b9"
+      },
+      "result":{
+        "element_count":10000,
+        "unexpected_count":667,
+        "unexpected_percent":6.67,
+        "partial_unexpected_list":[
+          5,
+          5,
+          5,
+          5,
+          5,
+          5,
+          5,
+          5,
+          5,
+          5,
+          5,
+          5,
+          5,
+          5,
+          5,
+          5,
+          5,
+          5,
+          5,
+          5
+        ],
+        "missing_count":0,
+        "missing_percent":0.0,
+        "unexpected_percent_total":6.67,
+        "unexpected_percent_nonmissing":6.67,
+        "partial_unexpected_counts":[
+          {
+            "value":5,
+            "count":20
+          }
+        ],
+        "partial_unexpected_index_list":[
+          9333,
+          9334,
+          9335,
+          9336,
+          9337,
+          9338,
+          9339,
+          9340,
+          9341,
+          9342,
+          9343,
+          9344,
+          9345,
+          9346,
+          9347,
+          9348,
+          9349,
+          9350,
+          9351,
+          9352
+        ]
+      },
+      "meta":{
+        
+      },
+      "exception_info":{
+        "raised_exception":false,
+        "exception_traceback":null,
+        "exception_message":null
+      }
+    },
+    {
+      "success":true,
+      "expectation_config":{
+        "type":"expect_column_values_to_match_regex",
+        "kwargs":{
+          "batch_id":"cdpDataSourceSample-cdpDataAssetSample",
+          "column":"pickup_datetime",
+          "regex":"^\\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])\\s([01]\\d|2[0-3]):([0-5]\\d):([0-5]\\d)$"
+        },
+        "meta":{
+          "expectation_name":"expectPickupDatetimeValuesToMatchRegex",
+          "data_product_name":"consuntiviDiProduzione"
+        },
+        "id":"e76de3a6-488b-4170-bd14-0e17dd7a34e1"
+      },
+      "result":{
+        "element_count":10000,
+        "unexpected_count":0,
+        "unexpected_percent":0.0,
+        "partial_unexpected_list":[
+          
+        ],
+        "missing_count":0,
+        "missing_percent":0.0,
+        "unexpected_percent_total":0.0,
+        "unexpected_percent_nonmissing":0.0,
+        "partial_unexpected_counts":[
+          
+        ],
+        "partial_unexpected_index_list":[
+          
+        ]
+      },
+      "meta":{
+        
+      },
+      "exception_info":{
+        "raised_exception":false,
+        "exception_traceback":null,
+        "exception_message":null
+      }
+    }
+  ],
+  "suite_name":"consuntiviDiProduzione-cdpDataSourceSample-cdpDataAssetSample",
+  "suite_parameters":{
+    
+  },
+  "statistics":{
+    "evaluated_expectations":3,
+    "successful_expectations":2,
+    "unsuccessful_expectations":1,
+    "success_percent":66.66666666666666
+  },
+  "meta":{
+    "great_expectations_version":"1.3.0",
+    "batch_spec":{
+      "batch_data":"PandasDataFrame"
+    },
+    "batch_markers":{
+      "ge_load_time":"20250110T094539.230404Z",
+      "pandas_data_fingerprint":"c4f929e6d4fab001fedc9e075bf4b612"
+    },
+    "active_batch_definition":{
+      "datasource_name":"cdpDataSourceSample",
+      "data_connector_name":"fluent",
+      "data_asset_name":"cdpDataAssetSample",
+      "batch_identifiers":{
+        "dataframe":"<DATAFRAME>"
+      }
+    },
+    "validation_id":"579e0276-50ee-49e3-996e-e7eae780ae30",
+    "checkpoint_id":null,
+    "batch_parameters":{
+      "dataframe":"<DATAFRAME>"
+    }
+  },
+  "id":null
+}
+```
 
 ### OpenTelemetry
 
@@ -154,6 +355,23 @@ Di seguito un esempio di risultato di validazione con Great Expectations esporta
                   {
                     "attributes":{
                       "element_count":10000,
+                      "unexpected_count":0,
+                      "expectation_name":"expectVendorIdValuesToNotBeNull",
+                      "data_product_name":"consuntiviDiProduzione",
+                      "suite_name":"consuntiviDiProduzione-cdpDataSourceSample-cdpDataAssetSample",
+                      "data_source_name":"cdpDataSourceSample",
+                      "data_asset_name":"cdpDataAssetSample"
+                    },
+                    "start_time_unix_nano":null,
+                    "time_unix_nano":1736505237278387565,
+                    "value":100.0,
+                    "exemplars":[
+                      
+                    ]
+                  },
+                  {
+                    "attributes":{
+                      "element_count":10000,
                       "unexpected_count":667,
                       "expectation_name":"expectPassengerCountValuesToBeBetween",
                       "data_product_name":"consuntiviDiProduzione",
@@ -162,7 +380,7 @@ Di seguito un esempio di risultato di validazione con Great Expectations esporta
                       "data_asset_name":"cdpDataAssetSample"
                     },
                     "start_time_unix_nano":null,
-                    "time_unix_nano":1736263323852875020,
+                    "time_unix_nano":1736505237278387565,
                     "value":93.33,
                     "exemplars":[
                       
@@ -179,7 +397,7 @@ Di seguito un esempio di risultato di validazione con Great Expectations esporta
                       "data_asset_name":"cdpDataAssetSample"
                     },
                     "start_time_unix_nano":null,
-                    "time_unix_nano":1736263323852875020,
+                    "time_unix_nano":1736505237278387565,
                     "value":100.0,
                     "exemplars":[
                       
@@ -199,32 +417,30 @@ Di seguito un esempio di risultato di validazione con Great Expectations esporta
 ```
 
 ## Configurazione
+Di seguito vengono descritte le variabili di ambiente necessarie per il corretto funzionamento dell'applicazione e definite nel ``Dockerfile``.
 
-Le variabili di ambiente per configurare il sidecar sono gestite tramite il file `docker-compose.yml`, mentre i valori effettivi vengono definiti in un file `.env` per semplificare la gestione e la modifica delle configurazioni. Entrambi i file sono definiti a livello di root del progetto ```quality```.
+**NB**: le variabili descritte di seguito vengono sovrascritte da quelle usate per configurare il sidecar all'interno del `docker-compose.yml`, e definite nel file `.env` per semplificare la gestione e la modifica delle configurazioni. Entrambi i file sono definiti a livello di root del progetto ```quality```.
 
-### Dettaglio delle Variabili
+### Dettaglio delle Variabili    
 
-1. **`OTEL_EXPORTER_OTLP_ENDPOINT`**: Specifica l'endpoint di destinazione per l'esportazione dei dati tramite OTLP (al collector di piattaforma).  
+1. **`OTEL_METRIC_EXPORT_INTERVAL`**: Intervallo in millisecondi per l'esportazione delle metriche OTLP (default: 60 secondi).
     ```env
-    OTEL_EXPORTER_ENDPOINT=http://platform-collector:4317
-    ```
-    * `collector`: nome del container specificato per il collector di piattaforma nel `docker-compose.yml`.
-    * `4317`: è la porta di defualt per il protocollo OTLP/gRPC.
-    
-
-2. **`OTEL_METRIC_EXPORT_INTERVAL`**: Intervallo in millisecondi per l'esportazione delle metriche OTLP (default: 60 secondi).
-    ```env
-    OTEL_METRIC_EXPORT_INTERVAL=60000
+    ENV OTEL_METRIC_EXPORT_INTERVAL=10000
     ```
 
-3. **`OTEL_SERVICE_NAME`**: Nome custom identificativo del servizio.
+2. **`DATA_PRODUCT_NAME`**: Nome del data product.
     ```env
-    OTEL_SERVICE_NAME_CDP=consuntiviDiProduzione-quality_sidecar
+    ENV DATA_PRODUCT_NAME=dataProductNameSample
+    ```
+
+3. **`OTEL_SERVICE_NAME`**: Nome identificativo del servizio OTLP.
+    ```env
+    ENV OTEL_SERVICE_NAME=${DATA_PRODUCT_NAME}-quality_sidecar
     ```
 
 4. **`EXPECTATIONS_JSON_FILE_PATH`**: Percorso del file JSON contenente le configurazioni per Great Expectations ([vai alla sezione specifica](#file-di-configurazione)).  
    ```env
-    EXPECTATIONS_JSON_FILE_PATH=build/resources/gx_v0.1.json
+    ENV EXPECTATIONS_JSON_FILE_PATH=resources/gx_v0.1.json
     ```
 
 ### Dettaglio delle Dockerfile
@@ -246,6 +462,7 @@ Successivamente, eseguire il comando per avviare il container sulla base dell'im
 ```
 docker run -d --name sidecar sidecar
 ```
+L'applicazione genererà quindi metriche in formato OTLP.
 
 **NB**: L'esecuzione stand-alone dell'applicazione è sconsigliata, poiché è progettata per funzionare insieme a un collector che riceva le metriche generate (nei log si potrà notare che l'applicazione tenterà sempre di connettersi al collector di default `localhost:4317`).  L'esecuzione dell'applicazione in modo indipendente può essere utile per testare i singoli test o per verificare il formato delle metriche generate, ma senza un collector attivo (lanciato con il docker-compose.yml di progetto), la generazione delle metriche non ha alcun effetto pratico.
 
