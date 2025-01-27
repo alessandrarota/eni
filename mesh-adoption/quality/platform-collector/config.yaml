@@ -1,26 +1,54 @@
+# receivers:
+#   otlp:
+#     protocols:
+#       grpc:
+#         endpoint: 0.0.0.0:4317
+#       http:
+#         endpoint: 0.0.0.0:4318
+# processors:
+# extensions:
+#   health_check: {}
+# exporters:
+#   otlp/custom:
+#     endpoint: http://host.docker.internal:8080
+#     tls:
+#       insecure: true
+# service:
+#   pipelines:
+#     traces:
+#       receivers: [otlp]
+#       exporters: [otlp/custom]
+#     metrics:
+#       receivers: [otlp]
+#       exporters: [otlp/custom]
+#     logs:
+#       receivers: [otlp]
+#       exporters: [otlp/custom]
+
+
+extensions:
+  health_check:
+    endpoint: "0.0.0.0:13133"
 receivers:
   otlp:
     protocols:
-      grpc:
-        endpoint: 0.0.0.0:4317
+      # grpc:
+      #   endpoint: 0.0.0.0:4317
       http:
         endpoint: 0.0.0.0:4318
-processors:
-extensions:
-  health_check: {}
 exporters:
+  debug:
+    verbosity: basic
+    sampling_initial: 2
+    sampling_thereafter: 100
   otlp/custom:
     endpoint: http://host.docker.internal:8080
     tls:
       insecure: true
 service:
+  extensions: [health_check]
   pipelines:
-    traces:
-      receivers: [otlp]
-      exporters: [otlp/custom]
     metrics:
       receivers: [otlp]
-      exporters: [otlp/custom]
-    logs:
-      receivers: [otlp]
-      exporters: [otlp/custom]
+      processors: []
+      exporters: [debug, otlp/custom]

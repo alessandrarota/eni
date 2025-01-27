@@ -1,7 +1,6 @@
 package it.quantyca.OTELCustomCollector.model;
 
-import java.time.LocalDateTime;
-
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.IdClass;
@@ -18,19 +17,38 @@ import lombok.NoArgsConstructor;
 @Getter
 public class Metric {
     @Id
+    @Column(name = "data_product_name")
     private String dataProductName;
+
     @Id
+    @Column(name = "app_name")
     private String appName;
+
     @Id
+    @Column(name = "expectation_name")
     private String expectationName;
+
     @Id
+    @Column(name = "metric_name")
     private String metricName;
+
+    @Column(name = "metric_description")
     private String metricDescription;
+
+    @Column(name = "value")
     private Double value;
+
+    @Column(name = "unit_of_measure")
     private String unitOfMeasure;
+
+    @Column(name = "element_count")
     private Integer elementCount;
+
+    @Column(name = "unexpected_count")
     private Integer unexpectedCount;
+
     @Id
+    @Column(name = "timestamp")
     private String timestamp;
 
     @Override

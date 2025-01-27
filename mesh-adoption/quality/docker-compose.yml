@@ -51,13 +51,14 @@ services:
     
 
   platform-collector:
-    image: otel/opentelemetry-collector-contrib:latest
+    #image: otel/opentelemetry-collector-contrib:latest
+    image: otel/opentelemetry-collector-contrib:0.117.0
     container_name: platform-collector
     command: ["--config=/etc/platform-collector/config.yaml"]
     volumes:
       - ./platform-collector/config.yaml:/etc/platform-collector/config.yaml
     ports:
-      - "${OTEL_GRPC_PORT}:${OTEL_GRPC_PORT}"
+      #- "${OTEL_GRPC_PORT}:${OTEL_GRPC_PORT}"
       - "${OTEL_HTTP_PORT}:${OTEL_HTTP_PORT}"
     depends_on:
       - platform-custom-receiver
@@ -69,7 +70,10 @@ services:
   #     context: ./cdp-quality-sidecar
   #   container_name: cdp-quality-sidecar
   #   environment:
-  #     - OTEL_EXPORTER_OTLP_ENDPOINT=${OTEL_EXPORTER_ENDPOINT}
+  #     #- OTEL_EXPORTER_OTLP_ENDPOINT=${OTEL_EXPORTER_ENDPOINT}
+  #     #- OTEL_EXPORTER_OTLP_ENDPOINT=https://api-app.eni.com/sd-xops/otel-collector
+  #     - OTEL_EXPORTER_OTLP_ENDPOINT=http://platform-collector:4318
+  #     - OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf
   #     - OTEL_METRIC_EXPORT_INTERVAL=${OTEL_METRIC_EXPORT_INTERVAL}
   #     - OTEL_SERVICE_NAME=${CDP_OTEL_SERVICE_NAME}
   #     - DATA_PRODUCT_NAME=${CDP_DATA_PRODUCT_NAME}
@@ -86,7 +90,6 @@ services:
       - ./notebook:/home/jovyan  
     environment:
       - JUPYTER_TOKEN=password
-      #- EXPECTATIONS_JSON_FILE_PATH=${EXPECTATIONS_JSON_FILE_PATH}
 
   forwarder:
     build:

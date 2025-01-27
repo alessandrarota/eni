@@ -7,7 +7,6 @@ from src.configurations.ConfigurationProperties import *
 from datetime import datetime
 import logging
 import os
-import socket
 
 
 def create_processor(env='ENV'):

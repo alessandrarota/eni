@@ -1,5 +1,5 @@
 # Usa una base di immagine (Python o Ubuntu, a seconda di cosa usi)
-FROM python:3.9-slim
+FROM python:3.11-slim
 
 WORKDIR /app
 

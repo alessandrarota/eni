@@ -11,7 +11,6 @@ import sys
 import logging
 import schedule
 import time
-import requests
 
 def handle_metrics(config, current_metrics):
     try:
@@ -79,6 +78,6 @@ if __name__ == '__main__':
     config = create_processor()
     logging.info("forwarder setup completed")
     threads = []
-    schedule.every(20).seconds.do(elaborate_request, config)
+    schedule.every(60).seconds.do(elaborate_request, config)
 
     main()

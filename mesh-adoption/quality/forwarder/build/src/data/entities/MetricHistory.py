@@ -18,7 +18,10 @@ class MetricHistory(Base):
     unit_of_measure = Column(String)
     element_count = Column(Integer)
     unexpected_count = Column(Integer)
-    timestamp = Column(String, primary_key=True)
+    timestamp = Column(String, primary_key=True),
+    data_source_name = Column(String),
+    data_asset_name = Column(String),
+    column_name = Column(String),
     insert_datetime = Column(String)
     flow_name = Column(String)
 

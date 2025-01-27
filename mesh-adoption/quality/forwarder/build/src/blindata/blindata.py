@@ -21,7 +21,7 @@ def fill_csv_file(current_metrics):
 
             for current_metric in current_metrics:
                 csv_row = [
-                    current_metric.metric_name + "-" + current_metric.expectation_name,
+                    current_metric.expectation_name + "_" + current_metric.data_source_name + "-" + current_metric.data_asset_name + "-" + current_metric.column_name,
                     current_metric.unexpected_count,
                     current_metric.element_count,
                     current_metric.timestamp
