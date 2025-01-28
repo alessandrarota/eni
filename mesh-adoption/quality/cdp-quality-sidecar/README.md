@@ -44,7 +44,7 @@ gx_v<i>MAJOR.MINOR</i>.json
 - I file di configurazione possono essere versionati per mantenere lo storico delle configurazioni o sovrascritti di volta in volta, a seconda delle esigenze del progetto (l'applicazione punterà al file indicato nella variabile di ambiente).
 
 ##### Struttura del file JSON
-Il file di configurazione permette di definire tutti i controlli di data quality per l'intero data product. Contiene una lista di **suite**: ogni suite rappresenta un insieme di aspettative da applicare a un determinato asset di dati, all'interno di una sorgente. Ogni suite deve presentare el seguenti informazioni:"
+Il file di configurazione permette di definire tutti i controlli di data quality per l'intero data product. Contiene una lista di **suite**: ogni suite rappresenta un insieme di aspettative da applicare a un determinato asset di dati, all'interno di una sorgente. Ogni suite deve presentare el seguenti informazioni:
 
 - **physical_informations**: Contiene le informazioni fisiche del set di dati, che includono:
     - **data_source_name**: Il nome della sorgente dati.
@@ -61,108 +61,101 @@ Il file di configurazione permette di definire tutti i controlli di data quality
 Di seguito un esempio di file di configurazione:
         
 ```json
-{
-    "data_product_suites": [
-        {
-            "physical_informations": {
-                "data_source_name": "cdpDataSourceSample",
-                "data_asset_name": "cdpDataAssetSample",
-                "dataframe": "https://raw.githubusercontent.com/great-expectations/gx_tutorials/main/data/yellow_tripdata_sample_2019-01.csv"
-            },
-            "expectations": [
-                {
-                    "expectation_name": "expectVendorIdValuesToNotBeNull",
-                    "expectation_type": "expect_column_values_to_not_be_null",
-                    "kwargs": {
-                        "column": "vendor_id"
-                    }
-                },
-                {
-                    "expectation_name": "expectPassengerCountValuesToBeBetween",
-                    "expectation_type": "expect_column_values_to_be_between",
-                    "kwargs": {
-                        "column": "passenger_count",
-                        "min_value": 0,
-                        "max_value": 4
-                    }
-                },
-                {
-                    "expectation_name": "expectPickupDatetimeValuesToMatchRegex",
-                    "expectation_type": "expect_column_values_to_match_regex",
-                    "kwargs": {
-                        "column": "pickup_datetime",
-                        "regex": "^\\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])\\s([01]\\d|2[0-3]):([0-5]\\d):([0-5]\\d)$"
-                    }
+[
+    {
+        "physical_informations": {
+            "data_source_name": "dataSourceSample",
+            "data_asset_name": "dataAssetSample",
+            "dataframe": "https://raw.githubusercontent.com/great-expectations/gx_tutorials/main/data/yellow_tripdata_sample_2019-01.csv"
+        },
+        "expectations": [
+            {
+                "expectation_name": "checkNotNull",
+                "expectation_type": "expect_column_values_to_not_be_null",
+                "kwargs": {
+                    "column": "vendor_id"
                 }
-            ]
-        }
-    ]
-}
+            },
+            {
+                "expectation_name": "checkAcceptedValues",
+                "expectation_type": "expect_column_values_to_be_between",
+                "kwargs": {
+                    "column": "passenger_count",
+                    "min_value": 0,
+                    "max_value": 4
+                }
+            },
+            {
+                "expectation_name": "checkAcceptedValues",
+                "expectation_type": "expect_column_values_to_match_regex",
+                "kwargs": {
+                    "column": "pickup_datetime",
+                    "regex": "^\\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])\\s([01]\\d|2[0-3]):([0-5]\\d):([0-5]\\d)$"
+                }
+            }
+        ]
+    }
+]
 ```
+
+#### Validazione dei dati
+Il risultato finale della validazione tramite Great Expectations conterrà i risultati di tutte le suite definite nel file. Per ogni suite definita nel file di configurazione, il sistema eseguirà un controllo sui dati e fornirà un esito che indica se le aspettative sono state rispettate o meno. Se una suite contiene più di una aspettativa, ognuna di esse verrà validata individualmente, e il risultato finale conterrà un riepilogo di tutte le aspettative eseguite sull'intero data product.
 
 Di seguito un esempio di ```Validation Result```, con result_format="SUMMARY" (verbosità di default):
 ```json
 {
-  "success":false,
-  "results":[
+  "success": false,
+  "results": [
     {
-      "success":true,
-      "expectation_config":{
-        "type":"expect_column_values_to_not_be_null",
-        "kwargs":{
-          "batch_id":"cdpDataSourceSample-cdpDataAssetSample",
-          "column":"vendor_id"
+      "success": true,
+      "expectation_config": {
+        "type": "expect_column_values_to_not_be_null",
+        "kwargs": {
+          "batch_id": "dataSourceSample-dataAssetSample",
+          "column": "vendor_id"
         },
-        "meta":{
-          "expectation_name":"expectVendorIdValuesToNotBeNull",
-          "data_product_name":"consuntiviDiProduzione"
+        "meta": {
+          "expectation_name": "checkNotNull",
+          "data_product_name": "consuntiviDiProduzione"
         },
-        "id":"839e339f-07ae-4fc3-9a81-5b628ceeee3e"
+        "id": "d3243727-a938-4b5a-b24a-ac8a6a993440"
       },
-      "result":{
-        "element_count":10000,
-        "unexpected_count":0,
-        "unexpected_percent":0.0,
-        "partial_unexpected_list":[
-          
-        ],
-        "partial_unexpected_counts":[
-          
-        ],
-        "partial_unexpected_index_list":[
-          
-        ]
+      "result": {
+        "element_count": 10000,
+        "unexpected_count": 0,
+        "unexpected_percent": 0.0,
+        "partial_unexpected_list": [],
+        "partial_unexpected_counts": [],
+        "partial_unexpected_index_list": []
       },
-      "meta":{
-        
-      },
-      "exception_info":{
-        "raised_exception":false,
-        "exception_traceback":null,
-        "exception_message":null
+      "meta": {},
+      "exception_info": {
+        "raised_exception": false,
+        "exception_traceback": null,
+        "exception_message": null
       }
     },
     {
-      "success":false,
-      "expectation_config":{
-        "type":"expect_column_values_to_be_between",
-        "kwargs":{
-          "batch_id":"cdpDataSourceSample-cdpDataAssetSample",
-          "column":"passenger_count",
-          "min_value":0.0,
-          "max_value":4.0
+      "success": false,
+      "expectation_config": {
+        "type": "expect_column_values_to_be_between",
+        "kwargs": {
+          "batch_id": "dataSourceSample-dataAssetSample",
+          "column": "passenger_count",
+          "min_value": 0.0,
+          "max_value": 4.0
         },
-        "meta":{
-          "expectation_name":"expectPassengerCountValuesToBeBetween",
-          "data_product_name":"consuntiviDiProduzione"
+        "meta": {
+          "expectation_name": "checkAcceptedValues",
+          "data_product_name": "consuntiviDiProduzione"
         },
-        "id":"7ef1c360-f79c-400d-8085-ebb9b31a83b9"
+        "id": "66382b9d-3214-41d7-a182-30becda19fc1"
       },
-      "result":{
-        "element_count":10000,
-        "unexpected_count":667,
-        "unexpected_percent":6.67,
-        "partial_unexpected_list":[
+      "result": {
+        "element_count": 10000,
+        "unexpected_count": 667,
+        "unexpected_percent": 6.67,
+        "partial_unexpected_list": [
           5,
           5,
           5,
@@ -184,17 +177,17 @@ Di seguito un esempio di ```Validation Result```, con result_format="SUMMARY" (v
           5,
           5
         ],
-        "missing_count":0,
-        "missing_percent":0.0,
-        "unexpected_percent_total":6.67,
-        "unexpected_percent_nonmissing":6.67,
-        "partial_unexpected_counts":[
+        "missing_count": 0,
+        "missing_percent": 0.0,
+        "unexpected_percent_total": 6.67,
+        "unexpected_percent_nonmissing": 6.67,
+        "partial_unexpected_counts": [
           {
-            "value":5,
-            "count":20
+            "value": 5,
+            "count": 20
           }
         ],
-        "partial_unexpected_index_list":[
+        "partial_unexpected_index_list": [
           9333,
           9334,
           9335,
@@ -217,92 +210,262 @@ Di seguito un esempio di ```Validation Result```, con result_format="SUMMARY" (v
           9352
         ]
       },
-      "meta":{
-        
-      },
-      "exception_info":{
-        "raised_exception":false,
-        "exception_traceback":null,
-        "exception_message":null
+      "meta": {},
+      "exception_info": {
+        "raised_exception": false,
+        "exception_traceback": null,
+        "exception_message": null
       }
     },
     {
-      "success":true,
-      "expectation_config":{
-        "type":"expect_column_values_to_match_regex",
-        "kwargs":{
-          "batch_id":"cdpDataSourceSample-cdpDataAssetSample",
-          "column":"pickup_datetime",
-          "regex":"^\\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])\\s([01]\\d|2[0-3]):([0-5]\\d):([0-5]\\d)$"
+      "success": true,
+      "expectation_config": {
+        "type": "expect_column_values_to_match_regex",
+        "kwargs": {
+          "batch_id": "dataSourceSample-dataAssetSample",
+          "column": "pickup_datetime",
+          "regex": "^\\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])\\s([01]\\d|2[0-3]):([0-5]\\d):([0-5]\\d)$"
         },
-        "meta":{
-          "expectation_name":"expectPickupDatetimeValuesToMatchRegex",
-          "data_product_name":"consuntiviDiProduzione"
+        "meta": {
+          "expectation_name": "checkAcceptedValues",
+          "data_product_name": "consuntiviDiProduzione"
         },
-        "id":"e76de3a6-488b-4170-bd14-0e17dd7a34e1"
+        "id": "cae5c5d5-c019-4508-a6b4-ab80fc0d62c3"
       },
-      "result":{
-        "element_count":10000,
-        "unexpected_count":0,
-        "unexpected_percent":0.0,
-        "partial_unexpected_list":[
-          
-        ],
-        "missing_count":0,
-        "missing_percent":0.0,
-        "unexpected_percent_total":0.0,
-        "unexpected_percent_nonmissing":0.0,
-        "partial_unexpected_counts":[
-          
-        ],
-        "partial_unexpected_index_list":[
-          
-        ]
+      "result": {
+        "element_count": 10000,
+        "unexpected_count": 0,
+        "unexpected_percent": 0.0,
+        "partial_unexpected_list": [],
+        "missing_count": 0,
+        "missing_percent": 0.0,
+        "unexpected_percent_total": 0.0,
+        "unexpected_percent_nonmissing": 0.0,
+        "partial_unexpected_counts": [],
+        "partial_unexpected_index_list": []
       },
-      "meta":{
-        
-      },
-      "exception_info":{
-        "raised_exception":false,
-        "exception_traceback":null,
-        "exception_message":null
+      "meta": {},
+      "exception_info": {
+        "raised_exception": false,
+        "exception_traceback": null,
+        "exception_message": null
       }
     }
   ],
-  "suite_name":"consuntiviDiProduzione-cdpDataSourceSample-cdpDataAssetSample",
-  "suite_parameters":{
-    
+  "suite_name": "dataSourceSample-dataAssetSample",
+  "suite_parameters": {},
+  "statistics": {
+    "evaluated_expectations": 3,
+    "successful_expectations": 2,
+    "unsuccessful_expectations": 1,
+    "success_percent": 66.66666666666666
   },
-  "statistics":{
-    "evaluated_expectations":3,
-    "successful_expectations":2,
-    "unsuccessful_expectations":1,
-    "success_percent":66.66666666666666
-  },
-  "meta":{
-    "great_expectations_version":"1.3.0",
-    "batch_spec":{
-      "batch_data":"PandasDataFrame"
+  "meta": {
+    "great_expectations_version": "1.3.0",
+    "batch_spec": {
+      "batch_data": "PandasDataFrame"
     },
-    "batch_markers":{
-      "ge_load_time":"20250110T094539.230404Z",
-      "pandas_data_fingerprint":"c4f929e6d4fab001fedc9e075bf4b612"
+    "batch_markers": {
+      "ge_load_time": "20250128T095853.440943Z",
+      "pandas_data_fingerprint": "c4f929e6d4fab001fedc9e075bf4b612"
     },
-    "active_batch_definition":{
-      "datasource_name":"cdpDataSourceSample",
-      "data_connector_name":"fluent",
-      "data_asset_name":"cdpDataAssetSample",
-      "batch_identifiers":{
-        "dataframe":"<DATAFRAME>"
+    "active_batch_definition": {
+      "datasource_name": "dataSourceSample",
+      "data_connector_name": "fluent",
+      "data_asset_name": "dataAssetSample",
+      "batch_identifiers": {
+        "dataframe": "<DATAFRAME>"
       }
     },
-    "validation_id":"579e0276-50ee-49e3-996e-e7eae780ae30",
-    "checkpoint_id":null,
-    "batch_parameters":{
-      "dataframe":"<DATAFRAME>"
+    "validation_id": "35b060ac-db19-4531-a6e1-b402b0f60f24",
+    "checkpoint_id": null,
+    "batch_parameters": {
+      "dataframe": "<DATAFRAME>"
     }
   },
-  "id":null
+  "id": null
+}
+{
+  "success": false,
+  "results": [
+    {
+      "success": true,
+      "expectation_config": {
+        "type": "expect_column_values_to_not_be_null",
+        "kwargs": {
+          "batch_id": "dataSourceSample-dataAssetSample",
+          "column": "vendor_id"
+        },
+        "meta": {
+          "expectation_name": "checkNotNull",
+          "data_product_name": "consuntiviDiProduzione"
+        },
+        "id": "d3243727-a938-4b5a-b24a-ac8a6a993440"
+      },
+      "result": {
+        "element_count": 10000,
+        "unexpected_count": 0,
+        "unexpected_percent": 0.0,
+        "partial_unexpected_list": [],
+        "partial_unexpected_counts": [],
+        "partial_unexpected_index_list": []
+      },
+      "meta": {},
+      "exception_info": {
+        "raised_exception": false,
+        "exception_traceback": null,
+        "exception_message": null
+      }
+    },
+    {
+      "success": false,
+      "expectation_config": {
+        "type": "expect_column_values_to_be_between",
+        "kwargs": {
+          "batch_id": "dataSourceSample-dataAssetSample",
+          "column": "passenger_count",
+          "min_value": 0.0,
+          "max_value": 4.0
+        },
+        "meta": {
+          "expectation_name": "checkAcceptedValues",
+          "data_product_name": "consuntiviDiProduzione"
+        },
+        "id": "66382b9d-3214-41d7-a182-30becda19fc1"
+      },
+      "result": {
+        "element_count": 10000,
+        "unexpected_count": 667,
+        "unexpected_percent": 6.67,
+        "partial_unexpected_list": [
+          5,
+          5,
+          5,
+          5,
+          5,
+          5,
+          5,
+          5,
+          5,
+          5,
+          5,
+          5,
+          5,
+          5,
+          5,
+          5,
+          5,
+          5,
+          5,
+          5
+        ],
+        "missing_count": 0,
+        "missing_percent": 0.0,
+        "unexpected_percent_total": 6.67,
+        "unexpected_percent_nonmissing": 6.67,
+        "partial_unexpected_counts": [
+          {
+            "value": 5,
+            "count": 20
+          }
+        ],
+        "partial_unexpected_index_list": [
+          9333,
+          9334,
+          9335,
+          9336,
+          9337,
+          9338,
+          9339,
+          9340,
+          9341,
+          9342,
+          9343,
+          9344,
+          9345,
+          9346,
+          9347,
+          9348,
+          9349,
+          9350,
+          9351,
+          9352
+        ]
+      },
+      "meta": {},
+      "exception_info": {
+        "raised_exception": false,
+        "exception_traceback": null,
+        "exception_message": null
+      }
+    },
+    {
+      "success": true,
+      "expectation_config": {
+        "type": "expect_column_values_to_match_regex",
+        "kwargs": {
+          "batch_id": "dataSourceSample-dataAssetSample",
+          "column": "pickup_datetime",
+          "regex": "^\\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])\\s([01]\\d|2[0-3]):([0-5]\\d):([0-5]\\d)$"
+        },
+        "meta": {
+          "expectation_name": "checkAcceptedValues",
+          "data_product_name": "consuntiviDiProduzione"
+        },
+        "id": "cae5c5d5-c019-4508-a6b4-ab80fc0d62c3"
+      },
+      "result": {
+        "element_count": 10000,
+        "unexpected_count": 0,
+        "unexpected_percent": 0.0,
+        "partial_unexpected_list": [],
+        "missing_count": 0,
+        "missing_percent": 0.0,
+        "unexpected_percent_total": 0.0,
+        "unexpected_percent_nonmissing": 0.0,
+        "partial_unexpected_counts": [],
+        "partial_unexpected_index_list": []
+      },
+      "meta": {},
+      "exception_info": {
+        "raised_exception": false,
+        "exception_traceback": null,
+        "exception_message": null
+      }
+    }
+  ],
+  "suite_name": "dataSourceSample-dataAssetSample",
+  "suite_parameters": {},
+  "statistics": {
+    "evaluated_expectations": 3,
+    "successful_expectations": 2,
+    "unsuccessful_expectations": 1,
+    "success_percent": 66.66666666666666
+  },
+  "meta": {
+    "great_expectations_version": "1.3.0",
+    "batch_spec": {
+      "batch_data": "PandasDataFrame"
+    },
+    "batch_markers": {
+      "ge_load_time": "20250128T095853.702507Z",
+      "pandas_data_fingerprint": "c4f929e6d4fab001fedc9e075bf4b612"
+    },
+    "active_batch_definition": {
+      "datasource_name": "dataSourceSample",
+      "data_connector_name": "fluent",
+      "data_asset_name": "dataAssetSample",
+      "batch_identifiers": {
+        "dataframe": "<DATAFRAME>"
+      }
+    },
+    "validation_id": "35b060ac-db19-4531-a6e1-b402b0f60f24",
+    "checkpoint_id": null,
+    "batch_parameters": {
+      "dataframe": "<DATAFRAME>"
+    }
+  },
+  "id": null
 }
 ```
 
@@ -321,94 +484,94 @@ L'integrazione di OpenTelemetry avviene tramite i seguenti passaggi:
 Di seguito un esempio di risultato di validazione con Great Expectations esportato come metrica tramite OTLP:
 ``` json
 {
-  "resource_metrics":[
-    {
-      "resource":{
-        "attributes":{
-          "telemetry.sdk.language":"python",
-          "telemetry.sdk.name":"opentelemetry",
-          "telemetry.sdk.version":"1.28.2",
-          "service.name":"consuntiviDiProduzione-quality_sidecar",
-          "telemetry.auto.version":"0.49b2"
-        },
-        "schema_url":""
-      },
-      "scope_metrics":[
+    "resource_metrics": [
         {
-          "scope":{
-            "name":"__main__",
-            "version":"",
-            "schema_url":"",
-            "attributes":null
-          },
-          "metrics":[
-            {
-              "name":"consuntividiproduzione-cdpdatasourcesample-cdpdataassetsample",
-              "description":"Validation results for suite: consuntiviDiProduzione-cdpDataSourceSample-cdpDataAssetSample",
-              "unit":"%",
-              "data":{
-                "data_points":[
-                  {
-                    "attributes":{
-                      "element_count":10000,
-                      "unexpected_count":0,
-                      "expectation_name":"expectVendorIdValuesToNotBeNull",
-                      "data_product_name":"consuntiviDiProduzione",
-                      "suite_name":"consuntiviDiProduzione-cdpDataSourceSample-cdpDataAssetSample",
-                      "data_source_name":"cdpDataSourceSample",
-                      "data_asset_name":"cdpDataAssetSample"
+            "resource": {
+                "attributes": {
+                    "telemetry.sdk.language": "python",
+                    "telemetry.sdk.name": "opentelemetry",
+                    "telemetry.sdk.version": "1.29.0",
+                    "service.name": "consuntiviDiProduzione-quality_sidecar",
+                    "telemetry.auto.version": "0.50b0"
+                },
+                "schema_url": ""
+            },
+            "scope_metrics": [
+                {
+                    "scope": {
+                        "name": "__main__",
+                        "version": "",
+                        "schema_url": "",
+                        "attributes": null
                     },
-                    "start_time_unix_nano":null,
-                    "time_unix_nano":1736505237278387565,
-                    "value":100.0,
-                    "exemplars":[
-                      
-                    ]
-                  },
-                  {
-                    "attributes":{
-                      "element_count":10000,
-                      "unexpected_count":667,
-                      "expectation_name":"expectPassengerCountValuesToBeBetween",
-                      "data_product_name":"consuntiviDiProduzione",
-                      "suite_name":"consuntiviDiProduzione-cdpDataSourceSample-cdpDataAssetSample",
-                      "data_source_name":"cdpDataSourceSample",
-                      "data_asset_name":"cdpDataAssetSample"
-                    },
-                    "start_time_unix_nano":null,
-                    "time_unix_nano":1736505237278387565,
-                    "value":93.33,
-                    "exemplars":[
-                      
-                    ]
-                  },
-                  {
-                    "attributes":{
-                      "element_count":10000,
-                      "unexpected_count":0,
-                      "expectation_name":"expectPickupDatetimeValuesToMatchRegex",
-                      "data_product_name":"consuntiviDiProduzione",
-                      "suite_name":"consuntiviDiProduzione-cdpDataSourceSample-cdpDataAssetSample",
-                      "data_source_name":"cdpDataSourceSample",
-                      "data_asset_name":"cdpDataAssetSample"
-                    },
-                    "start_time_unix_nano":null,
-                    "time_unix_nano":1736505237278387565,
-                    "value":100.0,
-                    "exemplars":[
-                      
-                    ]
-                  }
-                ]
-              }
-            }
-          ],
-          "schema_url":""
+                    "metrics": [
+                        {
+                            "name": "datasourcesample-dataassetsample",
+                            "description": "Validation results for suite: dataSourceSample-dataAssetSample",
+                            "unit": "%",
+                            "data": {
+                                "data_points": [
+                                    {
+                                        "attributes": {
+                                            "signal_type": "DATA_QUALITY",
+                                            "element_count": 10000,
+                                            "unexpected_count": 0,
+                                            "expectation_name": "checkNotNull",
+                                            "data_product_name": "consuntiviDiProduzione",
+                                            "suite_name": "dataSourceSample-dataAssetSample",
+                                            "data_source_name": "dataSourceSample",
+                                            "data_asset_name": "dataAssetSample",
+                                            "column_name": "vendor_id"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1738058333992842935,
+                                        "value": 100.0,
+                                        "exemplars": []
+                                    },
+                                    {
+                                        "attributes": {
+                                            "signal_type": "DATA_QUALITY",
+                                            "element_count": 10000,
+                                            "unexpected_count": 667,
+                                            "expectation_name": "checkAcceptedValues",
+                                            "data_product_name": "consuntiviDiProduzione",
+                                            "suite_name": "dataSourceSample-dataAssetSample",
+                                            "data_source_name": "dataSourceSample",
+                                            "data_asset_name": "dataAssetSample",
+                                            "column_name": "passenger_count"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1738058333992842935,
+                                        "value": 93.33,
+                                        "exemplars": []
+                                    },
+                                    {
+                                        "attributes": {
+                                            "signal_type": "DATA_QUALITY",
+                                            "element_count": 10000,
+                                            "unexpected_count": 0,
+                                            "expectation_name": "checkAcceptedValues",
+                                            "data_product_name": "consuntiviDiProduzione",
+                                            "suite_name": "dataSourceSample-dataAssetSample",
+                                            "data_source_name": "dataSourceSample",
+                                            "data_asset_name": "dataAssetSample",
+                                            "column_name": "pickup_datetime"
+                                        },
+                                        "start_time_unix_nano": null,
+                                        "time_unix_nano": 1738058333992842935,
+                                        "value": 100.0,
+                                        "exemplars": []
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "schema_url": ""
+                }
+            ],
+            "schema_url": ""
         }
-      ],
-      "schema_url":""
-    }
-  ]
+    ]
 }
 ```
 

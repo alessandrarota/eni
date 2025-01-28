@@ -65,7 +65,7 @@ def run_validation_callback(validation_def, data_product_name, suite_name, data_
     def callback(options):
         logging.info("Creating ValidationResults...")
         validation_results = validation_run(df=df, validation_definition=validation_def)
-        #print(validation_results)
+        print(validation_results)
         
         observations = []
         
