@@ -33,7 +33,7 @@ Il progetto è strutturato come segue:
 
 #### File di configurazione
 
-I file all'interno della cartella **/resources** contengono le configurazioni necessarie per la corretta esecuzione di **Great Expectations** all'interno del sidecar, come ad esempio le aspettative di validazione sui dati. Ogni file di configurazione definisce tutti i controlli sui dataset di interesse per l'intero data product.
+I file all'interno della cartella **/resources** contengono le configurazioni necessarie per la corretta esecuzione di **Great Expectations** all'interno del sidecar, in particolare le aspettative di validazione sui dati. Ogni file di configurazione definisce tutti i controlli sui dataset di interesse per l'intero data product.
 
 Per convenzione, i file di configurazione vengono nominati includendo la versione, ad esempio:
 gx_v<i>MAJOR.MINOR</i>.json
@@ -44,16 +44,15 @@ gx_v<i>MAJOR.MINOR</i>.json
 - I file di configurazione possono essere versionati per mantenere lo storico delle configurazioni o sovrascritti di volta in volta, a seconda delle esigenze del progetto (l'applicazione punterà al file indicato nella variabile di ambiente).
 
 ##### Struttura del file JSON
-Il file deve essere strutturato come segue:
-  
-- **data_product_suites**: Una lista di **suite**, in cui ogni suite rappresenta un insieme di aspettative da applicare a un determinato set di dati. Ogni suite deve presentare:
-  - **physical_informations**: Contiene le informazioni fisiche del set di dati, che includono:
+Il file di configurazione permette di definire tutti i controlli di data quality per l'intero data product. Contiene una lista di **suite**: ogni suite rappresenta un insieme di aspettative da applicare a un determinato asset di dati, all'interno di una sorgente. Ogni suite deve presentare el seguenti informazioni:"
+
+- **physical_informations**: Contiene le informazioni fisiche del set di dati, che includono:
     - **data_source_name**: Il nome della sorgente dati.
     - **data_asset_name**: Il nome dell'asset dati.
     - **dataframe**: Un URL che punta a un file CSV che contiene i dati da validare.
-        - NB: un'estensione del progetto protrebbe prevedere la creazione di estrattori standard di DataFrame; in seguito questo campo potrà contenere il riferimento diretto al DataFrame interessato.
-  - **expectations**: Una lista di aspettative da applicare sui dati. Ogni aspettativa contiene:
-    - **expectation_name**: Il nome identificativo custom dell'aspettativa.
+        - NB: Un'eventuale estensione del progetto potrebbe prevedere la creazione di estrattori standard per i DataFrame. In questo caso, il campo potrebbe non essere più necessario, poiché l'estrattore standard recupererebbe il DataFrame accedendo alla tabella tramite Unity Catalog, utilizzando i campi `data_source_name` e `data_asset_name`.
+- **expectations**: Una lista di aspettative da applicare sui dati. Ogni aspettativa contiene:
+    - **expectation_name**: Il nome del tipo di controllo che viene effettuato.
     - **expectation_type**: Il tipo di aspettativa da applicare (ad esempio, verifica che un valore non sia nullo, che un valore sia compreso tra due estremi, o che un valore corrisponda a una regex).
         - Consultare la gallery di Expectations ufficiale: https://greatexpectations.io/expectations/.
     - **kwargs**: I parametri necessari per eseguire l'aspettativa (ad esempio, il nome della colonna da verificare o i valori di limite per un intervallo).
@@ -100,9 +99,6 @@ Di seguito un esempio di file di configurazione:
     ]
 }
 ```
-
-#### Validazione dei dati
-Il risultato finale della validazione tramite Great Expectations conterrà i risultati di tutte le suite definite nel file. Per ogni suite definita nel file di configurazione, il sistema eseguirà un controllo sui dati e fornirà un esito che indica se le aspettative sono state rispettate o meno. Se una suite contiene più di una aspettativa, ognuna di esse verrà validata individualmente, e il risultato finale conterrà un riepilogo di tutte le aspettative eseguite sull'intero data product.
 
 Di seguito un esempio di ```Validation Result```, con result_format="SUMMARY" (verbosità di default):
 ```json
