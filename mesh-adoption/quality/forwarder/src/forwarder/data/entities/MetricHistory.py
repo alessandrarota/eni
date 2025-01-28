@@ -1,7 +1,8 @@
-from sqlalchemy import Column, String, Float, Integer, TIMESTAMP
+from sqlalchemy import Column, String, Float, Integer, DateTime
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.exc import SQLAlchemyError
 import logging
+from datetime import datetime
 
 logging.basicConfig(level=logging.INFO)
 Base = declarative_base()
@@ -63,6 +64,16 @@ class MetricHistory(Base):
                 session.rollback()
                 logging.error(f"Error while saving metrics into {MetricHistory.__tablename__}: {e}")
                 raise e
+    
+    def __repr__(self):
+        return f"<MetricHistory(data_product_name={self.data_product_name}, app_name={self.app_name}, " \
+               f"expectation_name={self.expectation_name}, metric_name={self.metric_name}, " \
+               f"metric_description={self.metric_description}, metric_value={self.metric_value}, " \
+               f"unit_of_measure={self.unit_of_measure}, element_count={self.element_count}, " \
+               f"unexpected_count={self.unexpected_count}, timestamp={self.timestamp}, " \
+               f"data_source_name={self.data_source_name}, data_asset_name={self.data_asset_name}, " \
+               f"column_name={self.column_name}, insert_datetime={self.insert_datetime}, " \
+               f"flow_name={self.flow_name})>"
 
 
 

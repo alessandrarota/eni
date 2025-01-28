@@ -51,20 +51,22 @@ def setup_gx(gx_json_data, data_product_name):
         validation_def = add_validation_definition(context, batch_definition, suite)
         validation_defs.append(validation_def)
 
+        logging.info("Creating ValidationResults...")
+        validation_results = validation_run(df=pd.read_csv(physical_informations["dataframe"], delimiter=','), validation_definition=validation_def)
+
         # Create an ObservableGauge
         observable_gauge = meter.create_observable_gauge(
             name=suite_name,
             description=f"Validation results for suite: {suite_name}",
             unit="%",
-            callbacks=[run_validation_callback(validation_def, data_product_name, suite_name, physical_informations["data_source_name"], physical_informations["data_asset_name"], pd.read_csv(physical_informations["dataframe"], delimiter=','))]
+            callbacks=[run_validation_callback(validation_results, data_product_name, suite_name, physical_informations["data_source_name"], physical_informations["data_asset_name"])]
         )
 
     return validation_defs
 
-def run_validation_callback(validation_def, data_product_name, suite_name, data_source_name, data_asset_name, df):
+def run_validation_callback(validation_results, data_product_name, suite_name, data_source_name, data_asset_name):
     def callback(options):
-        logging.info("Creating ValidationResults...")
-        validation_results = validation_run(df=df, validation_definition=validation_def)
+        
         #print(validation_results)
         
         observations = []
@@ -107,7 +109,7 @@ def main(json_file_path, data_product_name):
 
         logging.info("Setting up GreatExpectations...")
         validation_defs = setup_gx(gx_json_data, data_product_name)
-        
+
         try:
             while True:
                 time.sleep(5)  
@@ -128,6 +130,3 @@ if __name__ == "__main__":
         sys.exit(1)
 
     main(sys.argv[1], os.getenv("DATA_PRODUCT_NAME"))
-
-
-    

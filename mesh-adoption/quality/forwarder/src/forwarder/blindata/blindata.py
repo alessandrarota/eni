@@ -2,6 +2,7 @@ import requests
 import logging
 import csv
 import traceback
+from datetime import datetime
 
 logging.basicConfig(level=logging.INFO)
 
@@ -20,11 +21,12 @@ def fill_csv_file(current_metrics):
             writer.writerow(csv_header)
 
             for current_metric in current_metrics:
+
                 csv_row = [
                     current_metric.expectation_name + "_" + current_metric.data_source_name + "-" + current_metric.data_asset_name + "-" + current_metric.column_name, 
                     current_metric.unexpected_count,
                     current_metric.element_count,
-                    current_metric.timestamp.strftime("%Y-%m-%dT%H:%M:%S.") + str(current_metric.timestamp.microsecond // 1000).zfill(3) + 'Z'
+                    datetime.strptime(current_metric.timestamp[:current_metric.timestamp.index('.') + 7], "%Y-%m-%d %H:%M:%S.%f").strftime("%Y-%m-%dT%H:%M:%S.") + str(datetime.strptime(current_metric.timestamp[:current_metric.timestamp.index('.') + 7], "%Y-%m-%d %H:%M:%S.%f").microsecond // 1000).zfill(3) + 'Z'
                 ]           
                 writer.writerow(csv_row)
         logging.info(f"CSV file created successfully!")

@@ -12,7 +12,7 @@ def test_gx_v1():
 
     validation_defs = setup_gx(gx_json_data, data_product_name)
 
-    data_product_suite = gx_json_data["data_product_suites"][0]
+    data_product_suite = gx_json_data[0]
     physical_informations = data_product_suite["physical_informations"]
 
     results = validation_run(df=pd.read_csv(physical_informations["dataframe"], delimiter=','), validation_definition=validation_defs[0])
@@ -59,7 +59,7 @@ def test_gx_v2():
 
     validation_defs = setup_gx(gx_json_data, data_product_name)
 
-    data_product_suite = gx_json_data["data_product_suites"][0]
+    data_product_suite = gx_json_data[0]
     physical_informations = data_product_suite["physical_informations"]
 
     results = validation_run(df=pd.read_csv(physical_informations["dataframe"], delimiter=','), validation_definition=validation_defs[0])
