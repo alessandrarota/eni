@@ -1,6 +1,6 @@
 package it.quantyca.OTELCustomCollector.model;
 
-import jakarta.persistence.Column;
+import jakarta.annotation.Nullable;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.IdClass;
@@ -8,6 +8,8 @@ import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+
+import java.time.LocalDateTime;
 
 @Entity(name = "Metric")
 @Table(name = "metric_current")
@@ -17,45 +19,32 @@ import lombok.NoArgsConstructor;
 @Getter
 public class Metric {
     @Id
-    @Column(name = "data_product_name")
     private String dataProductName;
-
     @Id
-    @Column(name = "app_name")
     private String appName;
-
     @Id
-    @Column(name = "expectation_name")
     private String expectationName;
-
     @Id
-    @Column(name = "metric_name")
     private String metricName;
-
-    @Column(name = "metric_description")
     private String metricDescription;
-
-    @Column(name = "value")
-    private Double value;
-
-    @Column(name = "unit_of_measure")
+    private Double metricValue;
     private String unitOfMeasure;
-
-    @Column(name = "element_count")
     private Integer elementCount;
-
-    @Column(name = "unexpected_count")
     private Integer unexpectedCount;
-
     @Id
-    @Column(name = "timestamp")
-    private String timestamp;
+    private LocalDateTime timestamp;
+    @Id
+    private String dataSourceName;
+    @Id
+    private String dataAssetName;
+    @Id
+    private String columnName;
 
     @Override
     public String toString() {
         return String.format(
                 "Metric[DP='%s', App='%s', Metric='%s', Value='%f %s', Timestamp='%s']",
-                dataProductName, appName, metricName, value, unitOfMeasure, timestamp
+                dataProductName, appName, metricName, metricValue, unitOfMeasure, timestamp.toString()
         );
     }
 }

@@ -16,7 +16,10 @@ public class MetricID implements Serializable {
     private String appName;
     private String expectationName;
     private String metricName;
-    private String timestamp;
+    private LocalDateTime timestamp;
+    private String dataSourceName;
+    private String dataAssetName;
+    private String columnName;
 
     @Override
     public boolean equals(Object o) {
@@ -27,7 +30,10 @@ public class MetricID implements Serializable {
                 this.appName.equals(that.getAppName()) &&
                 this.expectationName.equals(that.getExpectationName()) &&
                 this.metricName.equals(that.getMetricName()) &&
-                this.timestamp.equals(that.getTimestamp());
+                this.timestamp.equals(that.getTimestamp()) &&
+                this.dataSourceName.equals(that.getDataSourceName()) &&
+                this.dataAssetName.equals(that.getDataAssetName()) &&
+                this.columnName.equals(that.getColumnName());
     }
 
     @Override
@@ -37,7 +43,10 @@ public class MetricID implements Serializable {
                 this.appName,
                 this.expectationName,
                 this.metricName,
-                this.timestamp
+                this.timestamp,
+                this.dataSourceName,
+                this.dataAssetName,
+                this.columnName
         );
     }
 }

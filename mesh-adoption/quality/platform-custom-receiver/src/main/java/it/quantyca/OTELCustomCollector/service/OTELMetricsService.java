@@ -1,11 +1,17 @@
 package it.quantyca.OTELCustomCollector.service;
 
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
-import java.util.Optional;
+import io.grpc.stub.StreamObserver;
 
+import io.opentelemetry.proto.collector.metrics.v1.ExportMetricsServiceRequest;
+import io.opentelemetry.proto.collector.metrics.v1.ExportMetricsServiceResponse;
+import io.opentelemetry.proto.collector.metrics.v1.MetricsServiceGrpc;
+import io.opentelemetry.proto.common.v1.KeyValue;
+import io.opentelemetry.proto.metrics.v1.NumberDataPoint;
+import io.opentelemetry.proto.metrics.v1.ResourceMetrics;
+
+import it.quantyca.OTELCustomCollector.model.*;
+import it.quantyca.OTELCustomCollector.repository.MetricRepository;
+import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,17 +20,15 @@ import org.springframework.stereotype.Service;
 
 import com.google.common.primitives.Ints;
 
-import io.grpc.stub.StreamObserver;
-import io.opentelemetry.proto.collector.metrics.v1.ExportMetricsServiceRequest;
-import io.opentelemetry.proto.collector.metrics.v1.ExportMetricsServiceResponse;
-import io.opentelemetry.proto.collector.metrics.v1.MetricsServiceGrpc;
-import io.opentelemetry.proto.common.v1.KeyValue;
-import io.opentelemetry.proto.metrics.v1.ResourceMetrics;
-import it.quantyca.OTELCustomCollector.model.Metric;
-import it.quantyca.OTELCustomCollector.repository.MetricRepository;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+
 import static it.quantyca.OTELCustomCollector.utility.Utils.getValueDataFromAnyValue;
 import static it.quantyca.OTELCustomCollector.utility.Utils.getValueDataFromOptionalAnyValue;
-import jakarta.transaction.Transactional;
 
 @Service
 public class OTELMetricsService extends MetricsServiceGrpc.MetricsServiceImplBase {
@@ -33,8 +37,10 @@ public class OTELMetricsService extends MetricsServiceGrpc.MetricsServiceImplBas
 
     private Logger logger = LoggerFactory.getLogger(OTELMetricsService.class);
 
-    @Value("${otlp.signalType:DATA_QUALITY}")
-    private String SIGNAL_TYPE_FILTER;
+    @Value("${otlp.metric.signalType.key:signal_type}")
+    private String SIGNAL_TYPE_KEY;
+    @Value("${otlp.metric.signalType.filterValue:DATA_QUALITY}")
+    private String SIGNAL_TYPE_FILTER_VALUE;
 
     @Value("${otlp.metric.dataProductName.placeholder:N/A}")
     private String DATA_PRODUCT_NAME_PLACEHOLDER;
@@ -57,6 +63,13 @@ public class OTELMetricsService extends MetricsServiceGrpc.MetricsServiceImplBas
     @Value("${otlp.metric.appName.key:app-name}")
     private String APP_NAME_KEY;
 
+    @Value("${otlp.metric.dataSourceName.key:data_source_name}")
+    private String DATA_SOURCE_NAME;
+    @Value("${otlp.metric.dataAssetName.key:data_asset_name}")
+    private String DATA_ASSET_NAME;
+    @Value("${otlp.metric.columnName.key:column_name}")
+    private String COLUMN_NAME;
+
 
     @Override
     @Transactional
@@ -67,96 +80,69 @@ public class OTELMetricsService extends MetricsServiceGrpc.MetricsServiceImplBas
         for (ResourceMetrics resourceMetrics : request.getResourceMetricsList()) {
             resourceMetrics.getScopeMetricsList().forEach(scopeMetric -> {
                 scopeMetric.getMetricsList().forEach(currentMetric -> {
+                    List<NumberDataPoint> dataPoints;
                     if (currentMetric.getDataCase() == io.opentelemetry.proto.metrics.v1.Metric.DataCase.GAUGE) {
-                        currentMetric.getGauge().getDataPointsList().forEach(dataPoint -> {
-
-                            String dataProductName = DATA_PRODUCT_NAME_PLACEHOLDER;
-                            String expectationName = EXPECTATION_NAME_PLACEHOLDER;
-                            String elementCount = ELEMENT_COUNT_PLACEHOLDER;
-                            String unexpectedCount = UNEXPECTED_COUNT_PLACEHOLDER;
-
-                            //String appName = resourceMetrics.getResource().getAttributesList();
-                            String appName = getValueDataFromOptionalAnyValue(
-                                    resourceMetrics.getResource().getAttributesList().stream()
-                                            .filter(kv -> kv.getKey().equals("service.name"))
-                                            .map(KeyValue::getValue)
-                                            .findFirst(),
-                                    logger
-                            );
-
-                            for (KeyValue attribute : dataPoint.getAttributesList()) {
-                                if (attribute.getKey().equalsIgnoreCase(DATA_PRODUCT_NAME_KEY)) {
-                                    dataProductName = getValueDataFromAnyValue(attribute.getValue(), logger).strip();
-                                } else if (attribute.getKey().equalsIgnoreCase(EXPECTATION_NAME_KEY)) {
-                                    expectationName = getValueDataFromAnyValue(attribute.getValue(), logger).strip();
-                                } else if (attribute.getKey().equalsIgnoreCase(ELEMENT_COUNT_KEY)) {
-                                    elementCount = getValueDataFromAnyValue(attribute.getValue(), logger).strip();
-                                } else if (attribute.getKey().equalsIgnoreCase(UNEXPECTED_COUNT_KEY)) {
-                                    unexpectedCount = getValueDataFromAnyValue(attribute.getValue(), logger).strip();
-                                }
-                                //else if (attribute.getKey().equalsIgnoreCase(APP_NAME_KEY)) {
-                                //    appName = getValueDataFromAnyValue(attribute.getValue(), logger).strip();
-                                //}
-                            }
-
-                            metricRepository.save(new Metric(
-                                    dataProductName,
-                                    appName,
-                                    expectationName,
-                                    currentMetric.getName(),
-                                    currentMetric.getDescription(),
-                                    dataPoint.getAsDouble() == 0.0 ? dataPoint.getAsInt() : dataPoint.getAsDouble(),
-                                    currentMetric.getUnit(),
-                                    Optional.ofNullable(elementCount)
-                                            .map(Ints::tryParse)
-                                            .orElse(0),
-                                    Optional.ofNullable(unexpectedCount)
-                                            .map(Ints::tryParse)
-                                            .orElse(0),
-                                    LocalDateTime.ofInstant(
-                                                    Instant.ofEpochSecond(
-                                                            dataPoint.getTimeUnixNano() / 1_000_000_000,
-                                                            (int) (dataPoint.getTimeUnixNano() % 1_000_000_000)
-                                                    ),
-                                                    ZoneId.systemDefault()
-                                            )
-                                            .atZone(ZoneId.of("UTC"))
-                                            .format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSSSSS'Z'"))
-                            ));
-
-                        });
+                        dataPoints = currentMetric.getGauge().getDataPointsList();
                     } else if (currentMetric.getDataCase() == io.opentelemetry.proto.metrics.v1.Metric.DataCase.SUM) {
-                        currentMetric.getSum().getDataPointsList().forEach(dataPoint -> {
+                        dataPoints = currentMetric.getSum().getDataPointsList();
+                    } else {
+                        logger.warn("Wasting metric... Current DataCase (" +
+                                currentMetric.getDataCase() + ") not managed.");
+                        dataPoints = new ArrayList<NumberDataPoint>();
+                    }
 
-                            String dataProductName = DATA_PRODUCT_NAME_PLACEHOLDER;
-                            String expectationName = EXPECTATION_NAME_PLACEHOLDER;
-                            String elementCount = ELEMENT_COUNT_PLACEHOLDER;
-                            String unexpectedCount = UNEXPECTED_COUNT_PLACEHOLDER;
+                    dataPoints.forEach(dataPoint -> {
+                        String signalTypeValue = "";
 
-                            // String appName = resourceMetrics.getResource().getAttributesList();
-                            String appName = getValueDataFromOptionalAnyValue(
-                                    resourceMetrics.getResource().getAttributesList().stream()
+                        String dataProductName = DATA_PRODUCT_NAME_PLACEHOLDER;
+                        String expectationName = EXPECTATION_NAME_PLACEHOLDER;
+                        String elementCount = ELEMENT_COUNT_PLACEHOLDER;
+                        String unexpectedCount = UNEXPECTED_COUNT_PLACEHOLDER;
+
+                        String attr_dataSourceName = null;
+                        String attr_dataAssetName = null;
+                        String attr_columnName = null;
+
+                        String appName = getValueDataFromOptionalAnyValue(
+                                resourceMetrics.getResource().getAttributesList().stream()
                                         .filter(kv -> kv.getKey().equals("service.name"))
                                         .map(KeyValue::getValue)
                                         .findFirst(),
-                                    logger
-                            );
+                                logger
+                        );
 
-                            for (KeyValue attribute : dataPoint.getAttributesList()) {
-                                if (attribute.getKey().equalsIgnoreCase(DATA_PRODUCT_NAME_KEY)) {
-                                    dataProductName = getValueDataFromAnyValue(attribute.getValue(), logger).strip();
-                                } else if (attribute.getKey().equalsIgnoreCase(EXPECTATION_NAME_KEY)) {
-                                    expectationName = getValueDataFromAnyValue(attribute.getValue(), logger).strip();
-                                } else if (attribute.getKey().equalsIgnoreCase(ELEMENT_COUNT_KEY)) {
-                                    elementCount = getValueDataFromAnyValue(attribute.getValue(), logger).strip();
-                                } else if (attribute.getKey().equalsIgnoreCase(UNEXPECTED_COUNT_KEY)) {
-                                    unexpectedCount = getValueDataFromAnyValue(attribute.getValue(), logger).strip();
-                                }
-                                //else if (attribute.getKey().equalsIgnoreCase(APP_NAME_KEY)) {
-                                //    appName = getValueDataFromAnyValue(attribute.getValue(), logger).strip();
-                                //}
+                        for (KeyValue attribute : dataPoint.getAttributesList()) {
+                            if (attribute.getKey().equalsIgnoreCase(SIGNAL_TYPE_KEY)) {
+                                signalTypeValue = getValueDataFromAnyValue(attribute.getValue(), logger).strip();
+                            } else if (attribute.getKey().equalsIgnoreCase(DATA_PRODUCT_NAME_KEY)) {
+                                dataProductName = getValueDataFromAnyValue(attribute.getValue(), logger).strip();
+                            } else if (attribute.getKey().equalsIgnoreCase(EXPECTATION_NAME_KEY)) {
+                                expectationName = getValueDataFromAnyValue(attribute.getValue(), logger).strip();
+                            } else if (attribute.getKey().equalsIgnoreCase(ELEMENT_COUNT_KEY)) {
+                                elementCount = getValueDataFromAnyValue(attribute.getValue(), logger).strip();
+                            } else if (attribute.getKey().equalsIgnoreCase(UNEXPECTED_COUNT_KEY)) {
+                                unexpectedCount = getValueDataFromAnyValue(attribute.getValue(), logger).strip();
+                            } else if (attribute.getKey().equalsIgnoreCase(DATA_SOURCE_NAME)) {
+                                attr_dataSourceName = getValueDataFromAnyValue(attribute.getValue(), logger).strip();
+                            } else if (attribute.getKey().equalsIgnoreCase(DATA_ASSET_NAME)) {
+                                attr_dataAssetName = getValueDataFromAnyValue(attribute.getValue(), logger).strip();
+                            } else if (attribute.getKey().equalsIgnoreCase(COLUMN_NAME)) {
+                                attr_columnName = getValueDataFromAnyValue(attribute.getValue(), logger).strip();
                             }
+                        }
 
+                        if (! signalTypeValue.equalsIgnoreCase(SIGNAL_TYPE_FILTER_VALUE)) {
+                            logger.warn("Wasting metric... " +
+                                    "Signal type expected: [" + SIGNAL_TYPE_FILTER_VALUE + "] " +
+                                    "Signal type received: [" + signalTypeValue + "]");
+                        } else if (attr_dataSourceName == null || attr_dataSourceName.isEmpty()) {
+                            logger.warn("Wasting metric... " + DATA_SOURCE_NAME + " attribute must be valued.");
+                        } else if (attr_dataAssetName == null || attr_dataAssetName.isEmpty()) {
+                            logger.warn("Wasting metric... " + DATA_ASSET_NAME + " attribute must be valued.");
+                        } else if (attr_columnName == null || attr_columnName.isEmpty()) {
+                            logger.warn("Wasting metric... " + COLUMN_NAME + " attribute must be valued.");
+                        } else {
+                            logger.warn("Storing new metric data point.");
                             metricRepository.save(new Metric(
                                     dataProductName,
                                     appName,
@@ -165,25 +151,21 @@ public class OTELMetricsService extends MetricsServiceGrpc.MetricsServiceImplBas
                                     currentMetric.getDescription(),
                                     dataPoint.getAsDouble() == 0.0 ? dataPoint.getAsInt() : dataPoint.getAsDouble(),
                                     currentMetric.getUnit(),
-                                    Optional.ofNullable(elementCount)
-                                            .map(Ints::tryParse)
-                                            .orElse(0),
-                                    Optional.ofNullable(unexpectedCount)
-                                            .map(Ints::tryParse)
-                                            .orElse(0),
+                                    Optional.ofNullable(elementCount).map(Ints::tryParse).orElse(0),
+                                    Optional.ofNullable(unexpectedCount).map(Ints::tryParse).orElse(0),
                                     LocalDateTime.ofInstant(
-                                                    Instant.ofEpochSecond(
-                                                            dataPoint.getTimeUnixNano() / 1_000_000_000,
-                                                            (int) (dataPoint.getTimeUnixNano() % 1_000_000_000)
-                                                    ),
-                                                    ZoneId.systemDefault()
-                                            )
-                                            .atZone(ZoneId.of("UTC"))
-                                            .format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSSSSS'Z'"))
+                                            Instant.ofEpochSecond(
+                                                    dataPoint.getTimeUnixNano() / 1_000_000_000,
+                                                    (int) (dataPoint.getTimeUnixNano() % 1_000_000_000)
+                                            ),
+                                            ZoneId.systemDefault()
+                                    ),
+                                    attr_dataSourceName,
+                                    attr_dataAssetName,
+                                    attr_columnName
                             ));
-
-                        });
-                    }
+                        }
+                    });
                 });
             });
         }

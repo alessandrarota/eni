@@ -1,9 +1,9 @@
-from sqlalchemy import Column, String, DateTime, Float, Integer
+from sqlalchemy import Column, String, Float, Integer, TIMESTAMP
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.exc import SQLAlchemyError
-import sqlalchemy
 import logging
 
+logging.basicConfig(level=logging.INFO)
 Base = declarative_base()
 
 class MetricCurrent(Base):
@@ -14,14 +14,14 @@ class MetricCurrent(Base):
     expectation_name = Column(String, primary_key=True)
     metric_name = Column(String, primary_key=True)
     metric_description = Column(String)
-    value = Column(Float)
+    metric_value = Column(Float)
     unit_of_measure = Column(String)
     element_count = Column(Integer)
     unexpected_count = Column(Integer)
-    timestamp = Column(String, primary_key=True),
-    data_source_name = Column(String),
-    data_asset_name = Column(String),
-    column_name = Column(String)
+    timestamp = Column(String, primary_key=True)
+    data_source_name = Column(String, primary_key=True)
+    data_asset_name = Column(String, primary_key=True)
+    column_name = Column(String, primary_key=True)
 
     @staticmethod
     def get_all_current_metrics(configurations):
@@ -43,7 +43,10 @@ class MetricCurrent(Base):
                         app_name=metric.app_name,
                         expectation_name=metric.expectation_name,
                         metric_name=metric.metric_name,
-                        timestamp=metric.timestamp
+                        timestamp=metric.timestamp, 
+                        data_source_name=metric.data_source_name,
+                        data_asset_name=metric.data_asset_name,
+                        column_name=metric.column_name
                     ).first()
                     
                     if metric_to_delete:

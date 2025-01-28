@@ -1,10 +1,9 @@
 package it.quantyca.OTELCustomCollector.utility;
 
-import java.util.Optional;
-
+import io.opentelemetry.proto.common.v1.AnyValue;
 import org.slf4j.Logger;
 
-import io.opentelemetry.proto.common.v1.AnyValue;
+import java.util.Optional;
 
 public class Utils {
     public static String getValueDataFromAnyValue(AnyValue value, Logger logger) {

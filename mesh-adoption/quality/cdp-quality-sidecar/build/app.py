@@ -10,15 +10,17 @@ import os
 import json
 import sys
 from opentelemetry.sdk.resources import Resource
-from opentelemetry.sdk.metrics import MeterProvider
 from opentelemetry.sdk.resources import SERVICE_NAME
+from opentelemetry.metrics import (
+    CallbackOptions,
+    Observation
+)
 
 logging.basicConfig(level=logging.INFO)
 logging.getLogger("great_expectations").setLevel(logging.WARNING)
 #context = gx.get_context(mode="file")
 context = gx.get_context()
 meter = metrics.get_meter(__name__)
-
 
 def read_json_file(json_file_path):
     try:
@@ -34,12 +36,12 @@ def read_json_file(json_file_path):
 def setup_gx(gx_json_data, data_product_name): 
     validation_defs = []
     #data_product_name = gx_json_data["data_product_name"]
-    data_product_suites = gx_json_data["data_product_suites"]
+    #data_product_suites = gx_json_data
 
-    for data_product_suite in data_product_suites:
+    for data_product_suite in gx_json_data:
         
         physical_informations = data_product_suite["physical_informations"]
-        suite_name = data_product_name + "-" + physical_informations["data_source_name"] + "-" + physical_informations["data_asset_name"]
+        suite_name = physical_informations["data_source_name"] + "-" + physical_informations["data_asset_name"]
 
         data_source = add_data_source(context, physical_informations["data_source_name"])
         data_asset = add_data_asset(data_source, physical_informations["data_asset_name"])
@@ -71,17 +73,21 @@ def run_validation_callback(validation_def, data_product_name, suite_name, data_
             result = validation_result["result"]
             expectation_config = validation_result["expectation_config"]
             meta = expectation_config["meta"]
+            expectation_config = validation_result["expectation_config"]
+            kwargs = expectation_config["kwargs"]
 
             observation = Observation(
                 value=100-result["unexpected_percent"],
                 attributes={
+                    "signal_type": "DATA_QUALITY",
                     "element_count": result["element_count"],
                     "unexpected_count": result["unexpected_count"],
                     "expectation_name": meta["expectation_name"],
                     "data_product_name": data_product_name,
                     "suite_name": suite_name,
                     "data_source_name": data_source_name,
-                    "data_asset_name": data_asset_name
+                    "data_asset_name": data_asset_name,
+                    "column_name": kwargs["column"]
                 }
             )
 
@@ -122,5 +128,6 @@ if __name__ == "__main__":
         sys.exit(1)
 
     main(sys.argv[1], os.getenv("DATA_PRODUCT_NAME"))
+
 
     

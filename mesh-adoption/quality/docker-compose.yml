@@ -96,7 +96,12 @@ services:
       context: ./forwarder
     container_name: forwarder
     environment:
-      - ENV=testing
+      - ENV=development
+      - DATABASE_URL=${DATABASE_URL}
+      - BLINDATA_FORWARDER_USERNAME=${BLINDATA_FORWARDER_USERNAME}
+      - BLINDATA_FORWARDER_PASSWORD=${BLINDATA_FORWARDER_PASSWORD}
+      - BLINDATA_TENANT_ID=${BLINDATA_TENANT_ID}
+      - SCHEDULE_INTERVAL=${SCHEDULE_INTERVAL}
     ports:
       - "5000:5000"
     depends_on:
@@ -109,7 +114,7 @@ services:
         sleep 5; 
       done && 
       echo 'SQL Server is ready, starting the service...' && 
-      python3 /app/build/app.py"
+      python3 /app/src/main.py"
 
 volumes:
   sql-data:

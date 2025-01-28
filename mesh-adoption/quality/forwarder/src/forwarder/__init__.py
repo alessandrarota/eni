@@ -3,14 +3,14 @@ from sqlalchemy_utils import database_exists, create_database
 from sqlalchemy.orm import sessionmaker
 from logging.handlers import TimedRotatingFileHandler
 from logging import StreamHandler
-from src.configurations.ConfigurationProperties import *
+from forwarder.configurations.ConfigurationProperties import *
 from datetime import datetime
 import logging
 import os
 
 
 def create_processor(env='ENV'):
-    config_name = os.getenv(env, "development")
+    config_name = os.getenv(env, "base")
     configurations = init_configurations(config_name)
     init_logging(configurations)
     logging.info(f"Environment: {config_name}")
@@ -26,11 +26,13 @@ def init_configurations(env):
         return TestingConfig
     if env.__eq__('production'):
         return ProductionConfig
+    if env.__eq__('base'):
+        return BaseConfig
 
 
 def init_database(configurations):
-    logging.info(f"Setting up the database: {configurations.SQLALCHEMY_DATABASE_URI}")
-    engine = create_engine(configurations.SQLALCHEMY_DATABASE_URI, isolation_level=configurations.ENGINE_ISOLATION_LEVEL)
+    logging.info(f"Setting up the database: {configurations.DATABASE_URL}")
+    engine = create_engine(configurations.DATABASE_URL, isolation_level=configurations.ENGINE_ISOLATION_LEVEL)
     logging.info(f"Setting up the session maker: started")
     configurations.SESSION_MAKER = sessionmaker(engine)
     logging.info(f"Setting up the session maker: done")
@@ -62,6 +64,5 @@ def init_logging(configurations):
     console_handler = StreamHandler()
     console_handler.setLevel(configurations.CONSOLE_LOG_LEVEL)
     console_handler.setFormatter(formatter)
-    console_handler.suffix = '%Y%m%d'
     root_logger.addHandler(console_handler)
     logging.debug("Logger setup completed")
