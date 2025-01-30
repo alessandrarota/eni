@@ -25,21 +25,23 @@ def handle_metrics(config, current_metrics):
             now_utc = datetime.now(timezone.utc)
             history_metrics.append(
                 MetricHistory(
-                    data_product_name=metric.data_product_name,
-                    app_name=metric.app_name,
-                    metric_name=metric.metric_name,
-                    expectation_name=metric.expectation_name,
-                    metric_description=metric.metric_description,
-                    metric_value=metric.metric_value,
-                    unit_of_measure=metric.unit_of_measure,
-                    element_count=metric.element_count,
-                    unexpected_count=metric.unexpected_count,
-                    timestamp=metric.timestamp,
-                    data_source_name=metric.data_source_name,
-                    data_asset_name=metric.data_asset_name,
-                    column_name=metric.column_name,
-                    flow_name=config.FLOW_NAME,
-                    insert_datetime=now_utc
+                    business_domain_name = metric.business_domain_name,
+                    data_product_name = metric.data_product_name,
+                    expectation_name = metric.expectation_name,
+                    data_source_name = metric.data_source_name,
+                    data_asset_name = metric.data_asset_name,
+                    column_name = metric.column_name,
+                    blindata_suite_name = metric.blindata_suite_name,
+                    gx_suite_name = metric.gx_suite_name,
+                    metric_value = metric.metric_value,
+                    unit_of_measure = metric.unit_of_measure,
+                    checked_elements_nbr = metric.checked_elements_nbr,
+                    errors_nbr = metric.errors_nbr,
+                    app_name = metric.app_name,
+                    otlp_sending_datetime = metric.otlp_sending_datetime,
+                    status_code = metric.status_code,
+                    insert_datetime = now_utc,
+                    source_service_code = config.FLOW_NAME
                 )
             )
         

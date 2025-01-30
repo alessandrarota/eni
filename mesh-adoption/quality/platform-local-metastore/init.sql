@@ -54,20 +54,26 @@ GO
 IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'metric_current')
 BEGIN
     CREATE TABLE metric_current (
-        data_product_name VARCHAR(128) NOT NULL,
-            app_name VARCHAR(128) NOT NULL,
+            business_domain_name VARCHAR(255) NULL,
+            data_product_name VARCHAR(128) NOT NULL,
             expectation_name VARCHAR(128) NOT NULL,
-            metric_name VARCHAR(128) NOT NULL,
-            metric_description VARCHAR(255) NULL,
-            metric_value FLOAT NULL,
-            unit_of_measure VARCHAR(8) NULL,
-            element_count INT NULL,
-            unexpected_count INT NULL,
-            timestamp VARCHAR(30) NOT NULL,
             data_source_name VARCHAR(128) NOT NULL,
             data_asset_name VARCHAR(128) NOT NULL,
             column_name VARCHAR(128) NOT NULL,
-            CONSTRAINT PK_metric_current PRIMARY KEY (data_product_name, app_name, expectation_name, metric_name, timestamp, data_source_name, data_asset_name, column_name)
+            blindata_suite_name VARCHAR(128) NULL,
+            gx_suite_name VARCHAR(128) NOT NULL,
+            metric_value FLOAT NULL,
+            unit_of_measure VARCHAR(8) NULL,
+            checked_elements_nbr INT NULL,
+            errors_nbr INT NULL,
+            app_name VARCHAR(128) NOT NULL,
+            otlp_sending_datetime VARCHAR(30)  NOT NULL,
+            status_code VARCHAR(64) NOT NULL,
+            locking_service_code VARCHAR(128) NULL,
+            insert_datetime VARCHAR(30) NOT NULL,
+            update_datetime VARCHAR(30) NOT NULL,
+            CONSTRAINT PK_metric_current PRIMARY KEY (data_product_name, app_name, expectation_name, data_source_name, data_asset_name, column_name, otlp_sending_datetime)
+        
         );
 END
 GO
@@ -76,22 +82,25 @@ GO
 IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'metric_history')
 BEGIN
     CREATE TABLE metric_history (
-        data_product_name VARCHAR(128) NOT NULL,
-            app_name VARCHAR(128) NOT NULL,
+            business_domain_name VARCHAR(255) NULL,
+            data_product_name VARCHAR(128) NOT NULL,
             expectation_name VARCHAR(128) NOT NULL,
-            metric_name VARCHAR(128) NOT NULL,
-            metric_description VARCHAR(255) NULL,
-            metric_value FLOAT NULL,
-            unit_of_measure VARCHAR(8) NULL,
-            element_count INT NULL,
-            unexpected_count INT NULL,
-            timestamp VARCHAR(30) NOT NULL,
-            insert_datetime VARCHAR(30) NOT NULL,
-            flow_name VARCHAR(21) NULL,
             data_source_name VARCHAR(128) NOT NULL,
             data_asset_name VARCHAR(128) NOT NULL,
             column_name VARCHAR(128) NOT NULL,
-            CONSTRAINT PK_metric_history PRIMARY KEY (data_product_name, app_name, expectation_name, metric_name, timestamp, data_source_name, data_asset_name, column_name)
+            blindata_suite_name VARCHAR(128) NULL,
+            gx_suite_name VARCHAR(128) NOT NULL,
+            metric_value FLOAT NULL,
+            unit_of_measure VARCHAR(8) NULL,
+            checked_elements_nbr INT NULL,
+            errors_nbr INT NULL,
+            app_name VARCHAR(128) NOT NULL,
+            otlp_sending_datetime VARCHAR(30)  NOT NULL,
+            status_code VARCHAR(64) NOT NULL,
+            source_service_code VARCHAR(128) NULL,
+            insert_datetime VARCHAR(30) NOT NULL,
+            CONSTRAINT PK_metric_history PRIMARY KEY (data_product_name, app_name, expectation_name, data_source_name, data_asset_name, column_name, otlp_sending_datetime)
+        
         );
 END
 GO

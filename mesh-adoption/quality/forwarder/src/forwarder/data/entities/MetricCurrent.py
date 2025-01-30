@@ -10,19 +10,24 @@ Base = declarative_base()
 class MetricCurrent(Base):
     __tablename__ = 'metric_current'
     
+    business_domain_name = Column(String)
     data_product_name = Column(String, primary_key=True)
-    app_name = Column(String, primary_key=True)
     expectation_name = Column(String, primary_key=True)
-    metric_name = Column(String, primary_key=True)
-    metric_description = Column(String)
-    metric_value = Column(Float)
-    unit_of_measure = Column(String)
-    element_count = Column(Integer)
-    unexpected_count = Column(Integer)
-    timestamp = Column(String, primary_key=True)
     data_source_name = Column(String, primary_key=True)
     data_asset_name = Column(String, primary_key=True)
     column_name = Column(String, primary_key=True)
+    blindata_suite_name = Column(String)
+    gx_suite_name = Column(String)
+    metric_value = Column(Float)
+    unit_of_measure = Column(String)
+    checked_elements_nbr = Column(Integer)
+    errors_nbr = Column(Integer)
+    app_name = Column(String, primary_key=True)
+    otlp_sending_datetime = Column(String, primary_key=True)
+    status_code = Column(String)
+    locking_service_code = Column(String)
+    insert_datetime = Column(String)
+    update_datetime = Column(String)
 
     @staticmethod
     def get_all_current_metrics(configurations):
@@ -45,11 +50,10 @@ class MetricCurrent(Base):
                         data_product_name=metric.data_product_name,
                         app_name=metric.app_name,
                         expectation_name=metric.expectation_name,
-                        metric_name=metric.metric_name,
-                        timestamp=metric.timestamp,
                         data_source_name=metric.data_source_name,
                         data_asset_name=metric.data_asset_name,
-                        column_name=metric.column_name
+                        column_name=metric.column_name,
+                        otlp_sending_datetime=metric.otlp_sending_datetime
                     ).first()
 
                     
@@ -65,12 +69,3 @@ class MetricCurrent(Base):
                     raise e
                 
         logging.info(f"{len(current_metrics)} metrics deleted from {MetricCurrent.__tablename__} successfully.")
-
-    def __repr__(self):
-        return f"<MetricCurrent(data_product_name={self.data_product_name}, app_name={self.app_name}, " \
-               f"expectation_name={self.expectation_name}, metric_name={self.metric_name}, " \
-               f"metric_description={self.metric_description}, metric_value={self.metric_value}, " \
-               f"unit_of_measure={self.unit_of_measure}, element_count={self.element_count}, " \
-               f"unexpected_count={self.unexpected_count}, timestamp={self.timestamp}, " \
-               f"data_source_name={self.data_source_name}, data_asset_name={self.data_asset_name}, " \
-               f"column_name={self.column_name})>"

@@ -13,13 +13,12 @@ import java.util.Objects;
 @Getter
 public class MetricID implements Serializable {
     private String dataProductName;
-    private String appName;
     private String expectationName;
-    private String metricName;
-    private LocalDateTime timestamp;
     private String dataSourceName;
     private String dataAssetName;
     private String columnName;
+    private String appName;
+    private LocalDateTime otlpSendingDatetime;
 
     @Override
     public boolean equals(Object o) {
@@ -27,26 +26,24 @@ public class MetricID implements Serializable {
         if (!(o instanceof MetricID that)) return false;
 
         return this.dataProductName.equals(that.getDataProductName()) &&
-                this.appName.equals(that.getAppName()) &&
                 this.expectationName.equals(that.getExpectationName()) &&
-                this.metricName.equals(that.getMetricName()) &&
-                this.timestamp.equals(that.getTimestamp()) &&
                 this.dataSourceName.equals(that.getDataSourceName()) &&
                 this.dataAssetName.equals(that.getDataAssetName()) &&
-                this.columnName.equals(that.getColumnName());
+                this.columnName.equals(that.getColumnName()) &&
+                this.appName.equals(that.getAppName()) &&
+                this.otlpSendingDatetime.equals(that.getOtlpSendingDatetime());
     }
 
     @Override
     public final int hashCode() {
         return Objects.hash(
                 this.dataProductName,
-                this.appName,
                 this.expectationName,
-                this.metricName,
-                this.timestamp,
                 this.dataSourceName,
                 this.dataAssetName,
-                this.columnName
+                this.columnName,
+                this.appName,
+                this.otlpSendingDatetime
         );
     }
 }

@@ -9,18 +9,16 @@ from opentelemetry import metrics
 import os
 import json
 import sys
-from opentelemetry.sdk.resources import Resource
 from opentelemetry.sdk.resources import SERVICE_NAME
 from opentelemetry.metrics import (
-    CallbackOptions,
     Observation
 )
 
 logging.basicConfig(level=logging.INFO)
 logging.getLogger("great_expectations").setLevel(logging.WARNING)
-#context = gx.get_context(mode="file")
 context = gx.get_context()
 meter = metrics.get_meter(__name__)
+
 
 def read_json_file(json_file_path):
     try:
@@ -33,42 +31,54 @@ def read_json_file(json_file_path):
         logging.error(f"Error decoding JSON file: {json_file_path}")
         sys.exit(1)
 
-def setup_gx(gx_json_data, data_product_name): 
-    validation_defs = []
-    #data_product_name = gx_json_data["data_product_name"]
-    #data_product_suites = gx_json_data
+def setup_gx_resources(gx_json_data, data_product_name):
+    gx_resources = []
 
     for data_product_suite in gx_json_data:
-        
         physical_informations = data_product_suite["physical_informations"]
         suite_name = physical_informations["data_source_name"] + "-" + physical_informations["data_asset_name"]
 
         data_source = add_data_source(context, physical_informations["data_source_name"])
         data_asset = add_data_asset(data_source, physical_informations["data_asset_name"])
         batch_definition = add_whole_batch_definition(data_asset, suite_name)
-
         suite = add_suite(context, data_product_name, suite_name, data_product_suite["expectations"])
+        
+        gx_resources.append({
+            "batch_definition": batch_definition,
+            "suite_name": suite_name,
+            "physical_informations": physical_informations,
+            "expectations": data_product_suite["expectations"],
+            "suite": suite
+        })
+
+    return gx_resources
+
+def setup_validation_definitions(data_resources):
+    validation_defs = []
+
+    for data_resource in data_resources:
+        batch_definition = data_resource["batch_definition"]
+        suite = data_resource["suite"]
         validation_def = add_validation_definition(context, batch_definition, suite)
         validation_defs.append(validation_def)
 
-        logging.info("Creating ValidationResults...")
-        validation_results = validation_run(df=pd.read_csv(physical_informations["dataframe"], delimiter=','), validation_definition=validation_def)
-
-        # Create an ObservableGauge
-        observable_gauge = meter.create_observable_gauge(
-            name=suite_name,
-            description=f"Validation results for suite: {suite_name}",
-            unit="%",
-            callbacks=[run_validation_callback(validation_results, data_product_name, suite_name, physical_informations["data_source_name"], physical_informations["data_asset_name"])]
-        )
-
     return validation_defs
 
-def run_validation_callback(validation_results, data_product_name, suite_name, data_source_name, data_asset_name):
+def run_validations_and_create_metric(validation_defs, gx_json_data, data_product_name):
+    for index, data_product_suite in enumerate(gx_json_data):
+        physical_informations = data_product_suite["physical_informations"]
+        suite_name = physical_informations["data_source_name"] + "-" + physical_informations["data_asset_name"]
+
+        validation_results = validation_run(df=pd.read_csv(physical_informations["dataframe"], delimiter=','), validation_definition=validation_defs[index])
+
+        meter.create_observable_gauge(
+            name=suite_name,
+            unit="%",
+            callbacks=[create_observations_callback(validation_results, data_product_name, suite_name, physical_informations["data_source_name"], physical_informations["data_asset_name"])]
+        )
+
+def create_observations_callback(validation_results, data_product_name, suite_name, data_source_name, data_asset_name):
     def callback(options):
-        
-        #print(validation_results)
-        
         observations = []
         
         for validation_result in validation_results["results"]:
@@ -107,8 +117,14 @@ def main(json_file_path, data_product_name):
         logging.info("Reading GreatExpectations json file...")
         gx_json_data = read_json_file(json_file_path)
 
-        logging.info("Setting up GreatExpectations...")
-        validation_defs = setup_gx(gx_json_data, data_product_name)
+        logging.info("Setting up GreatExpectations Resources...")
+        gx_resources = setup_gx_resources(gx_json_data, data_product_name)
+
+        logging.info("Setting up ValidationDefinitions...")
+        validation_defs = setup_validation_definitions(gx_resources)
+
+        logging.info("Running ValidationDefinitions and creating Metric...")
+        results = run_validations_and_create_metric(validation_defs, gx_json_data, data_product_name)
 
         try:
             while True:

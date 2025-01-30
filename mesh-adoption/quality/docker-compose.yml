@@ -29,14 +29,18 @@ services:
       /opt/mssql-tools/bin/sqlcmd -S platform-local-metastore -U sa -P ${SA_PASSWORD} -i /platform-local-metastore/init.sql"
     
 
-  platform-custom-receiver:
+  platform-quality-receiver:
     build:
-      context: ./platform-custom-receiver
-    container_name: platform-custom-receiver
+      context: ./platform-quality-receiver
+    container_name: platform-quality-receiver
     environment:
       - DB_URL=${DB_URL}
+      - BD_REFRESH_RATE_MS=${BD_REFRESH_RATE_MS}
+      - BD_CREDENTIALS_USERNAME=${BD_CREDENTIALS_USERNAME}
+      - BD_CREDENTIALS_PASSWORD=${BD_CREDENTIALS_PASSWORD}
+      - BD_CREDENTIALS_TENANT=${BD_CREDENTIALS_TENANT}
     ports:
-      - "${CUSTOM_RECEIVER_PORT}:${CUSTOM_RECEIVER_PORT}"
+      - "${QUALITY_RECEIVER_PORT}:${QUALITY_RECEIVER_PORT}"
     depends_on:
       - platform-local-metastore
       - sql-init
@@ -47,7 +51,7 @@ services:
         echo 'Waiting for SQL Server to be ready...'
         sleep 5
       done &&
-      java -jar /app/platform-custom-receiver.jar"
+      java -jar /app/platform-quality-receiver.jar"
     
 
   platform-collector:
@@ -61,35 +65,35 @@ services:
       #- "${OTEL_GRPC_PORT}:${OTEL_GRPC_PORT}"
       - "${OTEL_HTTP_PORT}:${OTEL_HTTP_PORT}"
     depends_on:
-      - platform-custom-receiver
+      - platform-quality-receiver
       - platform-local-metastore
       - sql-init
 
-  cdp-quality-sidecar:
-    build:
-      context: ./cdp-quality-sidecar
-    container_name: cdp-quality-sidecar
-    environment:
-      #- OTEL_EXPORTER_OTLP_ENDPOINT=${OTEL_EXPORTER_ENDPOINT}
-      #- OTEL_EXPORTER_OTLP_ENDPOINT=https://api-app.eni.com/sd-xops/otel-collector
-      - OTEL_EXPORTER_OTLP_ENDPOINT=http://platform-collector:4318
-      - OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf
-      - OTEL_METRIC_EXPORT_INTERVAL=${OTEL_METRIC_EXPORT_INTERVAL}
-      - OTEL_SERVICE_NAME=${CDP_OTEL_SERVICE_NAME}
-      - DATA_PRODUCT_NAME=${CDP_DATA_PRODUCT_NAME}
-      - EXPECTATIONS_JSON_FILE_PATH=${EXPECTATIONS_JSON_FILE_PATH}
-    depends_on:
-      - platform-collector
-
-  # jupyter:
-  #   image: jupyter/base-notebook
-  #   container_name: quality-sidecar-jupyter-notebook
-  #   ports:
-  #     - "8888:8888"  
-  #   volumes:
-  #     - ./notebook:/home/jovyan  
+  # cdp-quality-sidecar:
+  #   build:
+  #     context: ./cdp-quality-sidecar
+  #   container_name: cdp-quality-sidecar
   #   environment:
-  #     - JUPYTER_TOKEN=password
+  #     #- OTEL_EXPORTER_OTLP_ENDPOINT=${OTEL_EXPORTER_ENDPOINT}
+  #     #- OTEL_EXPORTER_OTLP_ENDPOINT=https://api-app.eni.com/sd-xops/otel-collector
+  #     - OTEL_EXPORTER_OTLP_ENDPOINT=http://platform-collector:4318
+  #     - OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf
+  #     - OTEL_METRIC_EXPORT_INTERVAL=${OTEL_METRIC_EXPORT_INTERVAL}
+  #     - OTEL_SERVICE_NAME=${CDP_OTEL_SERVICE_NAME}
+  #     - DATA_PRODUCT_NAME=${CDP_DATA_PRODUCT_NAME}
+  #     - EXPECTATIONS_JSON_FILE_PATH=${EXPECTATIONS_JSON_FILE_PATH}
+  #   depends_on:
+  #     - platform-collector
+
+  jupyter:
+    image: jupyter/base-notebook
+    container_name: quality-sidecar-jupyter-notebook
+    ports:
+      - "8888:8888"  
+    volumes:
+      - ./notebook:/home/jovyan  
+    environment:
+      - JUPYTER_TOKEN=password
 
   forwarder:
     build:

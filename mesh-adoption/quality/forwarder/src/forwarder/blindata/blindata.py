@@ -24,9 +24,9 @@ def fill_csv_file(current_metrics):
 
                 csv_row = [
                     current_metric.expectation_name + "_" + current_metric.data_source_name + "-" + current_metric.data_asset_name + "-" + current_metric.column_name, 
-                    current_metric.unexpected_count,
-                    current_metric.element_count,
-                    datetime.strptime(current_metric.timestamp[:current_metric.timestamp.index('.') + 7], "%Y-%m-%d %H:%M:%S.%f").strftime("%Y-%m-%dT%H:%M:%S.") + str(datetime.strptime(current_metric.timestamp[:current_metric.timestamp.index('.') + 7], "%Y-%m-%d %H:%M:%S.%f").microsecond // 1000).zfill(3) + 'Z'
+                    current_metric.errors_nbr,
+                    current_metric.checked_elements_nbr,
+                    datetime.strptime(current_metric.otlp_sending_datetime[:current_metric.otlp_sending_datetime.index('.') + 7], "%Y-%m-%d %H:%M:%S.%f").strftime("%Y-%m-%dT%H:%M:%S.") + str(datetime.strptime(current_metric.otlp_sending_datetime[:current_metric.otlp_sending_datetime.index('.') + 7], "%Y-%m-%d %H:%M:%S.%f").microsecond // 1000).zfill(3) + 'Z'
                 ]           
                 writer.writerow(csv_row)
         logging.info(f"CSV file created successfully!")

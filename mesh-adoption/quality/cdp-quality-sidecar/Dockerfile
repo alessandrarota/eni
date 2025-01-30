@@ -17,7 +17,7 @@ ENV DATA_PRODUCT_NAME=dataProductNameSample
 ENV OTEL_SERVICE_NAME=${DATA_PRODUCT_NAME}-quality_sidecar
 
 # Esegui i test prima di eseguire il container
-#RUN pytest -v /app/tests --maxfail=1 --disable-warnings -s
+RUN pytest -v /app/tests --maxfail=1 --disable-warnings -s
 
 ENV OTEL_LOG_LEVEL=DEBUG \
     OTEL_PYTHON_LOGGING_AUTO_INSTRUMENTATION_ENABLED=true

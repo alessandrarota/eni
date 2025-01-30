@@ -2,12 +2,12 @@
     {
         "physical_informations": {
             "data_source_name": "data_source_v1",
-            "data_asset_name": "data_asset_v2",
+            "data_asset_name": "data_asset_v1",
             "dataframe": "/app/tests/resources/v1/v1.csv"
         },
         "expectations": [
             {
-                "expectation_name": "expectCityValuesToBeInSet",
+                "expectation_name": "checkAcceptedValues",
                 "expectation_type": "expect_column_values_to_be_in_set",
                 "kwargs": {
                     "column": "City",
@@ -15,7 +15,7 @@
                 }
             },
             {
-                "expectation_name": "expectUnitPriceValuesToBeBetween",
+                "expectation_name": "checkAcceptedValues",
                 "expectation_type": "expect_column_values_to_be_between",
                 "kwargs": {
                     "column": "UnitPrice",
@@ -23,14 +23,14 @@
                 }
             },
             {
-                "expectation_name": "expectSalespersonValuesToNotBeNull",
+                "expectation_name": "checkNotNull",
                 "expectation_type": "expect_column_values_to_not_be_null",
                 "kwargs": {
                     "column": "Salesperson"
                 }
             },
             {
-                "expectation_name": "expectSaleIDValuesToBeUnique",
+                "expectation_name": "checkUnique",
                 "expectation_type": "expect_column_values_to_be_unique",
                 "kwargs": {
                     "column": "SaleID"
