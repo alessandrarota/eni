@@ -34,7 +34,7 @@ docker build -t jupyter-notebook .
 Per avviare il container, esegui il comando seguente:
 
 ```bash
-docker run -d --name jupyter-notebook -p 8888:8888 -v $(pwd)/notebooks:/home/jovyan/notebooks jupyter-notebook
+docker run -d --name jupyter-notebook -p 8888:8888 -v $(PWD)/notebooks:/home/jovyan/notebooks jupyter-notebook
 ```
 
 ### 3. Accedere all'interfaccia Jupyter Notebook
