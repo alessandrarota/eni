@@ -1,28 +1,32 @@
 import pytest
 from datetime import datetime
 import logging
-from app import read_json_file, setup_gx_resources, setup_validation_definitions
+from app import load_json_file, configure_gx_resources, configure_validation_definitions
 import os
 import pandas as pd
 from gx_setup.gx_dataframe import *
 
-def execute_main_without_loop(path, data_product_name):
-    gx_json_data = read_json_file(path)
-    gx_resources = setup_gx_resources(gx_json_data, data_product_name)
-    validation_defs = setup_validation_definitions(gx_resources)
-    
-    results = [
-        validation_run(
-            df=pd.read_csv(gx_json_data[i]["physical_informations"]["dataframe"], delimiter=','),
-            validation_definition=validation_def
+def execute_main_without_loop(path, data_product_name, business_domain_name):
+    gx_json_data = load_json_file(path)
+    gx_resources = configure_gx_resources(gx_json_data, data_product_name, business_domain_name)
+    validation_defs = configure_validation_definitions(gx_resources)
+
+    results = []
+    for validation_def in validation_defs:
+        metadata = validation_def["metadata"]
+        physical_informations = metadata["physical_informations"]
+
+        result = validation_run(
+            df=pd.read_csv(physical_informations["dataframe"], delimiter=','),
+            validation_definition=validation_def["validation_definition"]
         )
-        for i, validation_def in enumerate(validation_defs)
-    ]
+
+        results.append(result)
     
     return results
 
 def test_gx_v1():
-    validation_results = execute_main_without_loop(path='/app/tests/resources/v1/gx_v1.json', data_product_name='v1')
+    validation_results = execute_main_without_loop(path='/app/tests/resources/v1/gx_v1.json', data_product_name='v1', business_domain_name='v1')
 
     results = validation_results[0]
 
@@ -59,7 +63,7 @@ def test_gx_v1():
     assert result["expectation_config"]["type"] == "expect_column_values_to_be_unique"
 
 def test_gx_v2():
-    validation_results = execute_main_without_loop(path='/app/tests/resources/v2/gx_v2.json', data_product_name='v2')
+    validation_results = execute_main_without_loop(path='/app/tests/resources/v2/gx_v2.json', data_product_name='v2', business_domain_name='v2')
     results = validation_results[0]
 
     assert results["success"] == True

@@ -15,7 +15,9 @@ import os
 import threading
 from forwarder.configurations.health_check_handler import *
 
-logging.basicConfig(level=logging.INFO)
+for handler in logging.root.handlers[:]:
+    logging.root.removeHandler(handler)
+logging.basicConfig(level=logging.WARNING)
 
 
 def handle_metrics(config, current_metrics):

@@ -14,6 +14,7 @@ ENV PYTHONPATH=/app/build
 ENV EXPECTATIONS_JSON_FILE_PATH=resources/gx_v0.1.json
 ENV OTEL_METRIC_EXPORT_INTERVAL=10000
 ENV DATA_PRODUCT_NAME=dataProductNameSample
+ENV BUSINESS_DOMAIN_NAME=
 ENV OTEL_SERVICE_NAME=${DATA_PRODUCT_NAME}-quality_sidecar
 
 # Esegui i test prima di eseguire il container
