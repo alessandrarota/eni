@@ -69,10 +69,10 @@ services:
       - platform-local-metastore
       - sql-init
 
-  # cdp-quality-sidecar:
+  # quality-sidecar:
   #   build:
-  #     context: ./cdp-quality-sidecar
-  #   container_name: cdp-quality-sidecar
+  #     context: ./quality-sidecar
+  #   container_name: quality-sidecar
   #   environment:
   #     #- OTEL_EXPORTER_OTLP_ENDPOINT=${OTEL_EXPORTER_ENDPOINT}
   #     #- OTEL_EXPORTER_OTLP_ENDPOINT=https://api-app.eni.com/sd-xops/otel-collector

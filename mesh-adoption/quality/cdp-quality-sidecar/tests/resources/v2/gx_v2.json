@@ -12,7 +12,8 @@
                     "kwargs": {
                         "column": "Gender",
                         "value_set": ["Male", "Female"]
-                    }
+                    },
+                    "data_quality_dimension": ""
                 },
                 {
                     "expectation_name": "checkAcceptedValues",
@@ -20,7 +21,8 @@
                     "kwargs": {
                         "column": "PurchaseAmount",
                         "type_": "float64"
-                    }
+                    },
+                    "data_quality_dimension": ""
                 },
                 {
                     "expectation_name": "checkAcceptedValues",
@@ -28,7 +30,8 @@
                     "kwargs": {
                         "column": "PurchaseDate",
                         "regex": "^(\\d{4})-(\\d{2})-(\\d{2})$"
-                    }
+                    },
+                    "data_quality_dimension": ""
                 }
             ]
         }

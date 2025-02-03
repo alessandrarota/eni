@@ -128,7 +128,8 @@ def create_observations_callback(validation_results):
                         "column_name": kwargs["column"],
                         "checked_elements_nbr": result_data["element_count"],
                         "errors_nbr": result_data["unexpected_count"],
-                        "gx_suite_name": metadata["suite_name"]
+                        "gx_suite_name": metadata["suite_name"],
+                        "data_quality_dimension_name":  meta["data_quality_dimension"]
                     }
                 )
 
@@ -156,11 +157,11 @@ def main(json_file_path, data_product_name, business_domain_name):
         logging.info("Executing validations and creating metrics...")
         execute_validations_and_create_metrics(validation_defs)
 
-        # try:
-        #     while True:
-        #         time.sleep(5)  
-        # except:
-        #     logging.info("Shutting down the application...")
+        try:
+            while True:
+                time.sleep(5)  
+        except:
+            logging.info("Shutting down the application...")
 
     except Exception as e:
         logging.error(f"An error occurred during application execution: {e}")

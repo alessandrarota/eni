@@ -22,7 +22,7 @@ def add_suite(context, data_product_name, suite_name, suite_expectations):
             kwargs=exp["kwargs"], 
             meta={
                 "expectation_name": exp["expectation_name"],
-                "data_product_name": data_product_name
+                "data_quality_dimension": exp["data_quality_dimension"]
             }
         )
         suite.add_expectation_configuration(ec)

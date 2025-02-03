@@ -128,7 +128,8 @@ def create_observations_callback(validation_results):
                         "column_name": kwargs["column"],
                         "checked_elements_nbr": result_data["element_count"],
                         "errors_nbr": result_data["unexpected_count"],
-                        "gx_suite_name": metadata["suite_name"]
+                        "gx_suite_name": metadata["suite_name"],
+                        "data_quality_dimension_name":  meta["data_quality_dimension"]
                     }
                 )
 

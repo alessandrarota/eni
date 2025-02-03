@@ -76,6 +76,10 @@ public class OTELMetricsService extends MetricsServiceGrpc.MetricsServiceImplBas
     private String APP_NAME_KEY;
     @Value("${otlp.metric.appName.placeholder:N/A}")
     private String APP_NAME_PLACEHOLDER;
+    @Value("${otlp.metric.dataQualityDimensionName.key:data_quality_dimension_name}")
+    private String DATA_QUALITY_DIMENSION_NAME_KEY;
+    @Value("${otlp.metric.dataQualityDimensionName.placeholder:N/A}")
+    private String DATA_QUALITY_DIMENSION_NAME_PLACEHOLDER;
 
     @Value("${otlp.metric.status_value:NEW}")
     private String STATUS_VALUE;
@@ -111,6 +115,7 @@ public class OTELMetricsService extends MetricsServiceGrpc.MetricsServiceImplBas
                         String gxSuiteName = GX_SUITE_NAME_PLACEHOLDER;
                         String elementCount = ELEMENT_COUNT_PLACEHOLDER;
                         String unexpectedCount = UNEXPECTED_COUNT_PLACEHOLDER;
+                        String dataQualityDimensionName = DATA_QUALITY_DIMENSION_NAME_PLACEHOLDER;
 
                         String attr_dataSourceName = null;
                         String attr_dataAssetName = null;
@@ -139,6 +144,8 @@ public class OTELMetricsService extends MetricsServiceGrpc.MetricsServiceImplBas
                                 elementCount = getValueDataFromAnyValue(attribute.getValue(), logger).strip();
                             } else if (attribute.getKey().equalsIgnoreCase(UNEXPECTED_COUNT_KEY)) {
                                 unexpectedCount = getValueDataFromAnyValue(attribute.getValue(), logger).strip();
+                            } else if (attribute.getKey().equalsIgnoreCase(DATA_QUALITY_DIMENSION_NAME_KEY)) {
+                                dataQualityDimensionName = getValueDataFromAnyValue(attribute.getValue(), logger).strip();
                             } else if (attribute.getKey().equalsIgnoreCase(DATA_SOURCE_NAME_KEY)) {
                                 attr_dataSourceName = getValueDataFromAnyValue(attribute.getValue(), logger).strip();
                             } else if (attribute.getKey().equalsIgnoreCase(DATA_ASSET_NAME_KEY)) {
@@ -173,6 +180,7 @@ public class OTELMetricsService extends MetricsServiceGrpc.MetricsServiceImplBas
                                     attr_columnName,
                                     reconductedBusinessDomainName == null ? null : reconductedBusinessDomainName + "-" + cleanDataProductName,
                                     gxSuiteName,
+                                    dataQualityDimensionName,
                                     dataPoint.getAsDouble() == 0.0 ? dataPoint.getAsInt() : dataPoint.getAsDouble(),
                                     currentMetric.getUnit(),
                                     Optional.ofNullable(elementCount).map(Ints::tryParse).orElse(0),

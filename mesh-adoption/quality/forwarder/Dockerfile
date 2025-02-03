@@ -16,7 +16,7 @@ ENV PYTHONPATH=/app/src
 
 # Esegui i test prima di eseguire il container
 #RUN pytest -v /app/tests/test_blindata.py --maxfail=1 --disable-warnings -s
-RUN pytest -v /app/tests --maxfail=1 --disable-warnings -s
+RUN pytest -v /app/tests/test_forwarder.py --maxfail=1 --disable-warnings -s
 
 
 # Expose port to be reached

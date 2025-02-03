@@ -12,7 +12,8 @@
                 "kwargs": {
                     "column": "City",
                     "value_set": ["New York", "San Francisco", "Chicago", "London"]
-                }
+                },
+                "data_quality_dimension": ""
             },
             {
                 "expectation_name": "checkAcceptedValues",
@@ -20,21 +21,24 @@
                 "kwargs": {
                     "column": "UnitPrice",
                     "min_value": 0
-                }
+                },
+                "data_quality_dimension": ""
             },
             {
                 "expectation_name": "checkNotNull",
                 "expectation_type": "expect_column_values_to_not_be_null",
                 "kwargs": {
                     "column": "Salesperson"
-                }
+                },
+                "data_quality_dimension": ""
             },
             {
                 "expectation_name": "checkUnique",
                 "expectation_type": "expect_column_values_to_be_unique",
                 "kwargs": {
                     "column": "SaleID"
-                }
+                },
+                "data_quality_dimension": ""
             }
         ]
     }

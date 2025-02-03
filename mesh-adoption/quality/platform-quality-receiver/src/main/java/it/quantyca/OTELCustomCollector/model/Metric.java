@@ -26,6 +26,7 @@ public class Metric {
     @Id private String columnName;
     private String blindataSuiteName;
     private String gxSuiteName;
+    private String dataQualityDimensionName;
     private Double metricValue;
     private String unitOfMeasure;
     private Integer checkedElementsNbr;
