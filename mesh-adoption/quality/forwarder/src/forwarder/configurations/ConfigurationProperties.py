@@ -8,6 +8,7 @@ class BaseConfig(object):
     CONSOLE_LOG_LEVEL = "DEBUG"
     FILE_LOG_LEVEL = "DEBUG"
     FLOW_NAME = 'blindata-forwarder-pytest'
+    ENVIRONMENT = 'sd'
 
     DATABASE_URL = f"sqlite:///:memory:"
 
@@ -26,7 +27,7 @@ class DevelopmentConfig(BaseConfig):
     LOG_FILE_PATH = './src/forwarder/log/forwarder.log'
     CONSOLE_LOG_LEVEL = "DEBUG"
     FILE_LOG_LEVEL = "DEBUG"
-    FLOW_NAME = 'blindata-forwarder-sd'
+    ENVIRONMENT = 'sd'
 
     DATABASE_URL = os.getenv('DATABASE_URL')
 
@@ -41,6 +42,8 @@ class DevelopmentConfig(BaseConfig):
 
 class TestingConfig(BaseConfig):
     DEBUG = True
+    ENVIRONMENT = 'st'
 
 class ProductionConfig(BaseConfig):
     DEBUG = True
+    ENVIRONMENT = 'pr'

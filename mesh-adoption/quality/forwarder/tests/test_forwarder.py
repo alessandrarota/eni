@@ -45,7 +45,7 @@ def test_lock_current_metrics():
     metric = current_metrics[0]
 
     assert metric.status_code == "LOCKED"
-    assert metric.locking_service_code.startswith("blindata_forwarder-")
+    assert metric.locking_service_code.startswith("sd-")
 
 def test_empty_business_domain_name():
     testHandler = TestHandler()
@@ -106,7 +106,7 @@ def test_empty_business_domain_name():
     assert metric.app_name == "consuntiviDiProduzione-quality_sidecar"
     assert metric.otlp_sending_datetime == "2025-01-28 16:00:44.565"
     assert metric.status_code == "ERR_EMPTY_BUSINESS_DOMAIN"
-    assert metric.source_service_code.startswith("blindata_forwarder-")
+    assert metric.source_service_code.startswith("sd-")
 
     testHandler.destroy_database()
     testHandler.destroy_checks_and_suite()
@@ -170,7 +170,7 @@ def test_null_blindata_suite_name():
     assert metric.app_name == "consuntiviDiProduzione-quality_sidecar"
     assert metric.otlp_sending_datetime == "2025-01-28 16:00:44.565"
     assert metric.status_code == "ERR_WRONG_BUSINESS_DOMAIN"
-    assert metric.source_service_code.startswith("blindata_forwarder-")
+    assert metric.source_service_code.startswith("sd-")
 
     testHandler.destroy_database()
     testHandler.destroy_checks_and_suite()
@@ -234,7 +234,7 @@ def test_blindata_suite_not_found():
     assert metric.app_name == "consuntiviDiProduzione-quality_sidecar"
     assert metric.otlp_sending_datetime == "2025-01-28 16:00:44.565"
     assert metric.status_code == "ERR_BLINDATA_SUITE_NOT_FOUND"
-    assert metric.source_service_code.startswith("blindata_forwarder-")
+    assert metric.source_service_code.startswith("sd-")
 
     testHandler.destroy_database()
     testHandler.destroy_checks_and_suite()
@@ -300,7 +300,7 @@ def test_error_check_creation():
     assert metric.app_name == "consuntiviDiProduzione-quality_sidecar"
     assert metric.otlp_sending_datetime == "2025-01-28 16:00:44.565"
     assert metric.status_code == "ERR_FAILED_BLINDATA_CHECK_CREATION"
-    assert metric.source_service_code.startswith("blindata_forwarder-")
+    assert metric.source_service_code.startswith("sd-")
 
     testHandler.destroy_database()
     testHandler.destroy_checks_and_suite()
@@ -366,7 +366,7 @@ def test_error_blindata():
     assert metric.app_name == "consuntiviDiProduzione-quality_sidecar"
     assert metric.otlp_sending_datetime == "2025-01-28 16:00:44.565"
     assert metric.status_code == "ERR_BLINDATA_502"
-    assert metric.source_service_code.startswith("blindata_forwarder-")
+    assert metric.source_service_code.startswith("sd-")
 
     testHandler.destroy_database()
     testHandler.destroy_checks_and_suite()
@@ -436,7 +436,7 @@ def test_success_with_existing_quality_check():
     assert metric.app_name == "consuntiviDiProduzione-quality_sidecar"
     assert metric.otlp_sending_datetime == "2025-01-28 16:00:44.565"
     assert metric.status_code == "SUCCESS"
-    assert metric.source_service_code.startswith("blindata_forwarder-")
+    assert metric.source_service_code.startswith("sd-")
 
     testHandler.destroy_database()
     testHandler.destroy_checks_and_suite()
@@ -505,7 +505,7 @@ def test_success_without_existing_quality_check():
     assert metric.app_name == "consuntiviDiProduzione-quality_sidecar"
     assert metric.otlp_sending_datetime == "2025-01-28 16:00:44.565"
     assert metric.status_code == "SUCCESS"
-    assert metric.source_service_code.startswith("blindata_forwarder-")
+    assert metric.source_service_code.startswith("sd-")
 
     testHandler.destroy_database()
     testHandler.destroy_checks_and_suite()

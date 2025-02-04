@@ -47,7 +47,7 @@ class MetricCurrent(Base):
     @staticmethod
     def lock_new_current_metrics(configurations, hostname):
         timestamp = datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S') + str(int(datetime.now(timezone.utc).microsecond / 1000)).zfill(3)
-        locking_service_code = f"blindata_forwarder-{hostname}-{timestamp}"
+        locking_service_code = f"{configurations.ENVIRONMENT}-{hostname}-{timestamp}"
 
         with configurations.SESSION_MAKER() as session:
             try:
