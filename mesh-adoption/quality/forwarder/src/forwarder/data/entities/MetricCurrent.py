@@ -53,7 +53,8 @@ class MetricCurrent(Base):
             try:
                 updated = session.query(MetricCurrent).filter(MetricCurrent.status_code == 'NEW').update({
                     'status_code': 'LOCKED',
-                    'locking_service_code': locking_service_code
+                    'locking_service_code': locking_service_code,
+                    'update_datetime': datetime.now(timezone.utc)
                 })
                 if updated == 0:
                     logging.warning(f"No records found with 'NEW' status to lock.")

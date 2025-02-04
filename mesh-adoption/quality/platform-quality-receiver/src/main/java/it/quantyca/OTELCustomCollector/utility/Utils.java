@@ -51,24 +51,28 @@ public class Utils {
             // Normalize to remove accents
             String normalized = Normalizer.normalize(originalValue, Normalizer.Form.NFD).replaceAll("\\p{M}", "");
             // Remove non-alphabetic characters (except spaces for later processing)
-            String cleaned = normalized.replaceAll("[^a-zA-Z ]", "").toLowerCase(Locale.ROOT);
-            // Convert to camelCase
-            StringBuilder camelCaseString = new StringBuilder();
-            boolean capitalizeNext = false;
-            for (char c : cleaned.toCharArray()) {
-                if (c == ' ') {
-                    capitalizeNext = true;
-                } else {
-                    if (capitalizeNext) {
-                        camelCaseString.append(Character.toUpperCase(c));
-                        capitalizeNext = false;
+            String cleaned = normalized.replaceAll("[^a-zA-Z\s]", "").strip();
+            // Check if the string contains blank
+            if (cleaned.contains(" ")) {
+                // Convert to camelCase
+                StringBuilder camelCaseString = new StringBuilder();
+                boolean capitalizeNext = false;
+                for (char c : cleaned.toLowerCase().toCharArray()) {
+                    if (c == ' ') {
+                        capitalizeNext = true;
                     } else {
-                        camelCaseString.append(c);
+                        if (capitalizeNext) {
+                            camelCaseString.append(Character.toUpperCase(c));
+                            capitalizeNext = false;
+                        } else {
+                            camelCaseString.append(c);
+                        }
                     }
                 }
+                return camelCaseString.toString();
+            } else {
+                return cleaned;
             }
-
-            return camelCaseString.toString();
         }
     }
 

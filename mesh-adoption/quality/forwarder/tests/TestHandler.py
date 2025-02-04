@@ -2,7 +2,7 @@ import pytest
 from datetime import datetime
 from sqlalchemy.exc import SQLAlchemyError
 from forwarder import create_processor, init_configurations
-from main import lock_new_current_metrics, validate_business_domain_name, validate_blindata_suite_name, validate_quality_result_upload
+from main import lock_new_metrics, validate_business_domain_name, validate_blindata_suite_name, process_quality_result_upload
 from forwarder.data.entities.MetricCurrent import MetricCurrent
 from forwarder.data.entities.MetricHistory import MetricHistory
 from forwarder.data.enum.MetricStatusCode import MetricStatusCode
@@ -77,7 +77,7 @@ class TestHandler():
                 self.create_quality_check(f"{current_metric.expectation_name}_{current_metric.data_source_name}-{current_metric.data_asset_name}-{current_metric.column_name}", current_metric.data_quality_dimension_name,blindata_suite)
                 return True
 
-    def job_without_blindata(self, current_metrics, ERR_FAILED_BLINDATA_CHECK_CREATION=False, STATUS_CODE = 200):
+    def job_without_blindata(self, current_metrics, ERR_FAILED_BLINDATA_CHECK_CREATION=False, STATUS_CODE = 201):
         if current_metrics is not None and len(current_metrics) != 0:
             for current_metric in current_metrics:
                 if not validate_business_domain_name(self.configurations, current_metric):
@@ -93,10 +93,10 @@ class TestHandler():
                     if not quality_check:
                         return 
 
-                validate_quality_result_upload(self.configurations, current_metric, STATUS_CODE)
+                process_quality_result_upload(self.configurations, current_metric, STATUS_CODE)
 
     def lock_new_current_metric(self):
-        return lock_new_current_metrics(self.configurations)
+        return lock_new_metrics(self.configurations)
 
     def create_quality_suite(self, code):
         suite = {

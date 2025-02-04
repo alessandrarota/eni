@@ -33,7 +33,7 @@ def validate_blindata_suite_name(config, current_metric):
         return False
     return True
 
-def create_quality_check_for_metric(config, current_metric):
+def handle_quality_check_creation(config, current_metric):
     blindata_suite = get_quality_suite(config, current_metric)
 
     if not blindata_suite:
@@ -50,8 +50,8 @@ def create_quality_check_for_metric(config, current_metric):
         else:
             return quality_check
 
-def validate_quality_result_upload(config, current_metric, status_code):
-    if status_code == 200:
+def process_quality_result_upload(config, current_metric, status_code):
+    if status_code == 201:
         MetricHistory.save(config, current_metric, MetricStatusCode.SUCCESS.value)
         MetricCurrent.delete(config, current_metric)
     else:
@@ -68,30 +68,30 @@ def handle_locked_metrics(config, current_metric):
     quality_check = get_quality_check(config, current_metric)
 
     if not quality_check:
-        quality_check = create_quality_check_for_metric(config, current_metric)
+        quality_check = handle_quality_check_creation(config, current_metric)
         if not quality_check:
             return 
         
     status_code = post_single_quality_result_on_blindata(config, quality_check, current_metric)
-    validate_quality_result_upload(config, current_metric, status_code)
+    process_quality_result_upload(config, current_metric, status_code)
 
-def lock_new_current_metrics(config):
+def lock_new_metrics(config):
     try:
         return MetricCurrent.lock_new_current_metrics(config, os.getenv('HOSTNAME'))
     except SQLAlchemyError as e:
         logging.error(f"Error retrieving new metrics: {e}")
 
 def process_new_metrics(config):
-    current_metrics = lock_new_current_metrics(config)
+    metrics = lock_new_metrics(config)
 
-    if current_metrics and len(current_metrics) > 0:
-        logging.info(f"Found {len(current_metrics)} metrics to process, starting processing.")
-        for current_metric in current_metrics:
-            handle_locked_metrics(config, current_metric)
+    if metrics and len(metrics) > 0:
+        logging.info(f"Found {len(metrics)} metrics to process, starting processing.")
+        for metric in metrics:
+            handle_locked_metrics(config, metric)
     else:
         logging.debug("No metrics available for processing.")
 
-def start_server():
+def start_http_server():
     logging.info("Starting server on port 5000")
     server = HTTPServer(('0.0.0.0', 5000), RequestHandler)
     threading.Thread(target=server.serve_forever, daemon=True).start()
@@ -109,7 +109,7 @@ def main():
     schedule_interval = int(os.getenv('SCHEDULE_INTERVAL'))
     schedule.every(schedule_interval).seconds.do(process_new_metrics, configuration)
 
-    start_server()
+    start_http_server()
 
 
 if __name__ == '__main__':

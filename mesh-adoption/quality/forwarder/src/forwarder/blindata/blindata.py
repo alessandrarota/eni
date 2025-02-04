@@ -2,7 +2,6 @@ import requests
 import logging
 import csv
 import traceback
-import json
 import re
 from datetime import datetime
 import threading
@@ -136,7 +135,7 @@ def post_single_quality_result_on_blindata(config, quality_check, current_metric
             "qualityCheck": quality_check,
             "metric": current_metric.errors_nbr,
             "totalElements": current_metric.checked_elements_nbr,
-            "createdAt": datetime.strptime(current_metric.otlp_sending_datetime[:current_metric.otlp_sending_datetime.index('.') + 7], "%Y-%m-%d %H:%M:%S.%f")
+            "startedAt": datetime.strptime(current_metric.otlp_sending_datetime[:current_metric.otlp_sending_datetime.index('.') + 7], "%Y-%m-%d %H:%M:%S.%f")
                         .strftime("%Y-%m-%dT%H:%M:%S.") +
                     str(datetime.strptime(current_metric.otlp_sending_datetime[:current_metric.otlp_sending_datetime.index('.') + 7], "%Y-%m-%d %H:%M:%S.%f").microsecond // 1000).zfill(3) + 'Z'
         }
@@ -147,8 +146,8 @@ def post_single_quality_result_on_blindata(config, quality_check, current_metric
             headers={"Authorization": bearer_token, "Content-Type": "application/json"}
         )
 
-        if response.status_code == 200:
-            logging.info(f"Result for quality check {quality_check.code} updated successfully!")
+        if response.status_code == 201:
+            logging.info(f"Result for quality check {quality_check['code']} updated successfully!")
         else:
             logging.error(f"Error during results upload: {response.status_code} - {response.text}")
         
@@ -172,7 +171,7 @@ def get_quality_check(config, current_metric):
 
         if check_response.status_code == 200 and check_response.json().get("totalElements") == 1:
             logging.info(f"Quality check found for {quality_check_code}.")
-            return True
+            return check_response.json()['content'][0]
         else:
             logging.info(f"No quality check found for {quality_check_code}.")
             return False
@@ -215,13 +214,13 @@ def create_quality_check(config, current_metric, blindata_suite):
 
         check_response = requests.post(
             config.BLINDATA_QUALITY_CHECK_ENDPOINT,
-            json=json.dumps(quality_check),
+            json=quality_check,
             headers={"Authorization": bearer_token, "Content-Type": "application/json"}
         )
 
-        if check_response.status_code == 200:
+        if check_response.status_code == 201:
             logging.info(f"Quality check created successfully: {quality_check_code}")
-            return quality_check
+            return check_response.json()
         else:
             logging.error(f"Failed to create quality check: {check_response.status_code} - {check_response.text}")
             return False
