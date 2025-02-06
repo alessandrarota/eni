@@ -1,0 +1,44 @@
+[
+    {
+        "system_name": "data_source_v2",
+        "system_type": "CSV",
+        "expectations": [
+            {
+                "check_name": "check1",
+                "expectation_type": "ExpectColumnValuesToBeInSet",
+                "asset_name": "data_asset_v2",
+                "asset_kwargs": {
+                    "path": "/app/tests/resources/v2/v2.csv"
+                },
+                "kwargs": {
+                    "column": "Gender",
+                    "value_set": ["Male", "Female"]
+                }
+            },
+            {
+                "check_name": "check2",
+                "expectation_type": "ExpectColumnValuesToBeOfType",
+                "asset_name": "data_asset_v2",
+                "asset_kwargs": {
+                    "path": "/app/tests/resources/v2/v2.csv"
+                },
+                "kwargs": {
+                    "column": "PurchaseAmount",
+                    "type_": "float64"
+                }
+            },
+            {
+                "check_name": "check3",
+                "expectation_type": "ExpectColumnValuesToMatchRegex",
+                "asset_name": "data_asset_v2",
+                "asset_kwargs": {
+                    "path": "/app/tests/resources/v2/v2.csv"
+                },
+                "kwargs": {
+                    "column": "PurchaseDate",
+                    "regex": "^(\\d{4})-(\\d{2})-(\\d{2})$"
+                }
+            }
+        ]
+    }
+]

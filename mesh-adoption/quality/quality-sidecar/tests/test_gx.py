@@ -1,89 +1,79 @@
 import pytest
 from datetime import datetime
 import logging
-from app import load_json_file, configure_gx_resources, configure_validation_definitions
+from app import load_json_file, configure_expectations_and_run_validations
 import os
 import pandas as pd
 from gx_setup.gx_dataframe import *
 
-def execute_main_without_loop(path, data_product_name, business_domain_name):
+def execute_main_without_loop(path, data_product_name):
     gx_json_data = load_json_file(path)
-    gx_resources = configure_gx_resources(gx_json_data, data_product_name, business_domain_name)
-    validation_defs = configure_validation_definitions(gx_resources)
 
-    results = []
-    for validation_def in validation_defs:
-        metadata = validation_def["metadata"]
-        physical_informations = metadata["physical_informations"]
-
-        result = validation_run(
-            df=pd.read_csv(physical_informations["dataframe"], delimiter=','),
-            validation_definition=validation_def["validation_definition"]
-        )
-
-        results.append(result)
-    
-    return results
+    return configure_expectations_and_run_validations(gx_json_data, data_product_name)
 
 def test_gx_v1():
-    validation_results = execute_main_without_loop(path='/app/tests/resources/v1/gx_v1.json', data_product_name='v1', business_domain_name='v1')
+    validation_results = execute_main_without_loop('/app/tests/resources/v1/csv_v1.json', "v1")
 
-    results = validation_results[0]
+    print(validation_results)
 
-    assert results["success"] == False
-    assert len(results["results"]) == 4
+    assert len(validation_results) == 4
 
-    result = results["results"][0]
+    result = validation_results[0]
     assert result["success"] is False
     assert result["result"]["unexpected_count"] == 1
     assert result["result"]["unexpected_percent"] == 14.285714285714285
     assert "Paris" in result["result"]["partial_unexpected_list"]
     assert result["result"]["element_count"] == 7
     assert result["expectation_config"]["type"] == "expect_column_values_to_be_in_set"
+    assert result["expectation_config"]["meta"]["check_name"] == "check1"
 
-    result = results["results"][1]
+    result = validation_results[1]
     assert result["success"] is True
     assert result["result"]["unexpected_count"] == 0
     assert result["result"]["unexpected_percent"] == 0.0
     assert result["result"]["element_count"] == 7
     assert result["expectation_config"]["type"] == "expect_column_values_to_be_between"
+    assert result["expectation_config"]["meta"]["check_name"] == "check2"
 
-    result = results["results"][2]
+    result = validation_results[2]
     assert result["success"] is True
     assert result["result"]["unexpected_count"] == 0
     assert result["result"]["unexpected_percent"] == 0.0
     assert result["result"]["element_count"] == 7
     assert result["expectation_config"]["type"] == "expect_column_values_to_not_be_null"
+    assert result["expectation_config"]["meta"]["check_name"] == "check3"
 
-    result = results["results"][3]
+    result = validation_results[3]
     assert result["success"] is True
     assert result["result"]["unexpected_count"] == 0
     assert result["result"]["unexpected_percent"] == 0.0
     assert result["result"]["element_count"] == 7
     assert result["expectation_config"]["type"] == "expect_column_values_to_be_unique"
+    assert result["expectation_config"]["meta"]["check_name"] == "check4"
 
 def test_gx_v2():
-    validation_results = execute_main_without_loop(path='/app/tests/resources/v2/gx_v2.json', data_product_name='v2', business_domain_name='v2')
-    results = validation_results[0]
+    validation_results = execute_main_without_loop('/app/tests/resources/v2/csv_v2.json', "v2")
 
-    assert results["success"] == True
-    assert len(results["results"]) == 3
+    assert len(validation_results) == 3
 
-    result = results["results"][0]
+    result = validation_results[0]
     assert result["success"] is True
     assert result["result"]["unexpected_count"] == 0
     assert result["result"]["unexpected_percent"] == 0.0
     assert result["result"]["element_count"] == 6
     assert result["expectation_config"]["type"] == "expect_column_values_to_be_in_set"
+    assert result["expectation_config"]["meta"]["check_name"] == "check1"
 
-    result = results["results"][1]
+    result = validation_results[1]
     assert result["success"] is True
     assert result["result"]["observed_value"] == "float64"
     assert result["expectation_config"]["type"] == "expect_column_values_to_be_of_type"
+    assert result["expectation_config"]["meta"]["check_name"] == "check2"
 
-    result = results["results"][2]
+    result = validation_results[2]
     assert result["success"] is True
     assert result["result"]["unexpected_count"] == 0
     assert result["result"]["unexpected_percent"] == 0.0
     assert result["result"]["element_count"] == 6
     assert result["expectation_config"]["type"] == "expect_column_values_to_match_regex"
+    assert result["expectation_config"]["meta"]["check_name"] == "check3"

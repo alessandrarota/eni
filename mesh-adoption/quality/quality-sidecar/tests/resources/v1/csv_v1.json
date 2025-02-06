@@ -1,0 +1,54 @@
+[
+    {
+        "system_name": "data_source_v1",
+        "system_type": "CSV",
+        "expectations": [
+            {
+                "check_name": "check1",
+                "expectation_type": "ExpectColumnValuesToBeInSet",
+                "asset_name": "data_asset_v1",
+                "asset_kwargs": {
+                    "path": "/app/tests/resources/v1/v1.csv"
+                },
+                "kwargs": {
+                    "column": "City",
+                    "value_set": ["New York", "San Francisco", "Chicago", "London"]
+                }
+            },
+            {
+                "check_name": "check2",
+                "expectation_type": "ExpectColumnValuesToBeBetween",
+                "asset_name": "data_asset_v1",
+                "asset_kwargs": {
+                    "path": "/app/tests/resources/v1/v1.csv"
+                },
+                "kwargs": {
+                    "column": "UnitPrice",
+                    "min_value": 0
+                }
+            },
+            {
+                "check_name": "check3",
+                "expectation_type": "ExpectColumnValuesToNotBeNull",
+                "asset_name": "data_asset_v1",
+                "asset_kwargs": {
+                    "path": "/app/tests/resources/v1/v1.csv"
+                },
+                "kwargs": {
+                    "column": "Salesperson"
+                }
+            },
+            {
+                "check_name": "check4",
+                "expectation_type": "ExpectColumnValuesToBeUnique",
+                "asset_name": "data_asset_v1",
+                "asset_kwargs": {
+                    "path": "/app/tests/resources/v1/v1.csv"
+                },
+                "kwargs": {
+                    "column": "SaleID"
+                }
+            }
+        ]
+    }
+]

@@ -1,12 +1,12 @@
 package it.quantyca.OTELCustomCollector.utility;
 
-import io.opentelemetry.proto.common.v1.AnyValue;
-import org.slf4j.Logger;
-
-import java.util.Locale;
+import java.text.Normalizer;
 import java.util.Map;
 import java.util.Optional;
-import java.text.Normalizer;
+
+import org.slf4j.Logger;
+
+import io.opentelemetry.proto.common.v1.AnyValue;
 
 public class Utils {
     public static String getValueDataFromAnyValue(AnyValue value, Logger logger) {
@@ -24,7 +24,7 @@ public class Utils {
         }
     }
 
-    public static String getValueDataFromOptionalAnyValue(Optional<AnyValue> value, Logger logger) {
+    public static String getValueDataFromOptionalAnyValue(Optional<AnyValue> value, String placeholder, Logger logger) {
         if (value.isPresent()) {
             if (value.get().hasStringValue()) {
                 return value.get().getStringValue();
@@ -40,7 +40,7 @@ public class Utils {
             }
         } else {
             logger.warn("Metric Attribute Value is not present.");
-            return "";
+            return placeholder;
         }
     }
 

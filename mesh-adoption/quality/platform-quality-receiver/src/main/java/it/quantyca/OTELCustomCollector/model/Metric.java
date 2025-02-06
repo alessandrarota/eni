@@ -1,6 +1,7 @@
 package it.quantyca.OTELCustomCollector.model;
 
-import jakarta.annotation.Nullable;
+import java.time.LocalDateTime;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.IdClass;
@@ -9,8 +10,6 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
-
 @Entity(name = "Metric")
 @Table(name = "metric_current")
 @IdClass(MetricID.class)
@@ -18,31 +17,25 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Getter
 public class Metric {
-    private String businessDomainName;
-    @Id private String dataProductName;
-    @Id private String expectationName;
-    @Id private String dataSourceName;
-    @Id private String dataAssetName;
-    @Id private String columnName;
-    private String blindataSuiteName;
-    private String gxSuiteName;
-    private String dataQualityDimensionName;
+    private String dataProductName;
+    @Id private String checkName;
     private Double metricValue;
     private String unitOfMeasure;
     private Integer checkedElementsNbr;
     private Integer errorsNbr;
-    @Id private String appName;
-    @Id private LocalDateTime otlpSendingDatetime;
+    private String metricSourceName;
     private String statusCode;
     private String lockingServiceCode;
+    @Id private String otlpSendingDatetimeCode;
+    private LocalDateTime otlpSendingDatetime;
     private LocalDateTime insertDatetime;
     private LocalDateTime updateDatetime;
 
     @Override
     public String toString() {
         return String.format(
-                "Metric[DP='%s', Expectation='%s', Column='%s', Suite='%s', App='%s', Value='%f %s', TS='%s']",
-                dataProductName, expectationName, columnName, blindataSuiteName, appName, metricValue, unitOfMeasure, otlpSendingDatetime.toString()
+                "Metric[DP='%s', Check='%s', Value='%f %s', TS='%s']",
+                dataProductName, checkName, metricValue, unitOfMeasure, otlpSendingDatetimeCode
         );
     }
 }

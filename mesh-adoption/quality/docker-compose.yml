@@ -69,37 +69,37 @@ services:
       - platform-local-metastore
       - sql-init
 
-  # quality-sidecar:
-  #   build:
-  #     context: ./quality-sidecar
-  #   container_name: quality-sidecar
-  #   environment:
-  #     #- OTEL_EXPORTER_OTLP_ENDPOINT=${OTEL_EXPORTER_ENDPOINT}
-  #     #- OTEL_EXPORTER_OTLP_ENDPOINT=https://api-app.eni.com/sd-xops/otel-collector
-  #     - OTEL_EXPORTER_OTLP_ENDPOINT=http://platform-collector:4318
-  #     - OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf
-  #     - OTEL_METRIC_EXPORT_INTERVAL=${OTEL_METRIC_EXPORT_INTERVAL}
-  #     - OTEL_SERVICE_NAME=${CDP_OTEL_SERVICE_NAME}
-  #     - DATA_PRODUCT_NAME=${CDP_DATA_PRODUCT_NAME}
-  #     - BUSINESS_DOMAIN_NAME=${BUSINESS_DOMAIN_NAME}
-  #     - EXPECTATIONS_JSON_FILE_PATH=${EXPECTATIONS_JSON_FILE_PATH}
-  #   depends_on:
-  #     - platform-collector
-
-  jupyter:
-    image: jupyter/base-notebook
-    container_name: quality-sidecar-jupyter-notebook
-    ports:
-      - "8888:8888"  
-    volumes:
-      - ./notebook:/home/jovyan  
+  quality-sidecar:
+    build:
+      context: ./quality-sidecar
+    container_name: quality-sidecar
     environment:
-      - JUPYTER_TOKEN=password
+      #- OTEL_EXPORTER_OTLP_ENDPOINT=${OTEL_EXPORTER_ENDPOINT}
+      #- OTEL_EXPORTER_OTLP_ENDPOINT=https://api-app.eni.com/sd-xops/otel-collector
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://platform-collector:4318
+      - OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf
+      - OTEL_METRIC_EXPORT_INTERVAL=${OTEL_METRIC_EXPORT_INTERVAL}
+      - OTEL_SERVICE_NAME=${CDP_OTEL_SERVICE_NAME}
+      - DATA_PRODUCT_NAME=${CDP_DATA_PRODUCT_NAME}
+      - BUSINESS_DOMAIN_NAME=${BUSINESS_DOMAIN_NAME}
+      - EXPECTATIONS_JSON_FILE_PATH=${EXPECTATIONS_JSON_FILE_PATH}
+    depends_on:
+      - platform-collector
 
-  forwarder:
+  # jupyter:
+  #   image: jupyter/base-notebook
+  #   container_name: quality-sidecar-jupyter-notebook
+  #   ports:
+  #     - "8888:8888"  
+  #   volumes:
+  #     - ./notebook:/home/jovyan  
+  #   environment:
+  #     - JUPYTER_TOKEN=password
+
+  forwarder-1:
     build:
       context: ./forwarder
-    container_name: forwarder
+    container_name: forwarder-1
     environment:
       - ENV=development
       - DATABASE_URL=${DATABASE_URL}
@@ -109,6 +109,31 @@ services:
       - SCHEDULE_INTERVAL=${SCHEDULE_INTERVAL}
     ports:
       - "5000:5000"
+    depends_on:
+      - platform-local-metastore
+      - sql-init
+    entrypoint: >
+      /bin/bash -c "sleep 10 && 
+      until nc -zv platform-local-metastore 1433; do 
+        echo 'Waiting for SQL Server to be ready...' && 
+        sleep 5; 
+      done && 
+      echo 'SQL Server is ready, starting the service...' && 
+      python3 /app/src/main.py"
+
+  forwarder-2:
+    build:
+      context: ./forwarder
+    container_name: forwarder-2
+    environment:
+      - ENV=development
+      - DATABASE_URL=${DATABASE_URL}
+      - BLINDATA_FORWARDER_USERNAME=${BLINDATA_FORWARDER_USERNAME}
+      - BLINDATA_FORWARDER_PASSWORD=${BLINDATA_FORWARDER_PASSWORD}
+      - BLINDATA_TENANT_ID=${BLINDATA_TENANT_ID}
+      - SCHEDULE_INTERVAL=${SCHEDULE_INTERVAL}
+    ports:
+      - "5001:5001"
     depends_on:
       - platform-local-metastore
       - sql-init
