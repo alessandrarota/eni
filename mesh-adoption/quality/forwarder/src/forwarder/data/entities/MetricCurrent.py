@@ -11,23 +11,17 @@ Base = declarative_base()
 class MetricCurrent(Base):
     __tablename__ = 'metric_current'
     
-    business_domain_name = Column(String)
-    data_product_name = Column(String, primary_key=True)
-    expectation_name = Column(String, primary_key=True)
-    data_source_name = Column(String, primary_key=True)
-    data_asset_name = Column(String, primary_key=True)
-    column_name = Column(String, primary_key=True)
-    blindata_suite_name = Column(String)
-    gx_suite_name = Column(String)
-    data_quality_dimension_name = Column(String)
+    data_product_name = Column(String)
+    check_name = Column(String, primary_key=True)
     metric_value = Column(Float)
     unit_of_measure = Column(String)
     checked_elements_nbr = Column(Integer)
     errors_nbr = Column(Integer)
-    app_name = Column(String, primary_key=True)
-    otlp_sending_datetime = Column(String, primary_key=True)
+    metric_source_name = Column(String)
     status_code = Column(String)
     locking_service_code = Column(String)
+    otlp_sending_datetime_code = Column(String, primary_key=True)
+    otlp_sending_datetime = Column(String)
     insert_datetime = Column(String)
     update_datetime = Column(String)
 
@@ -75,13 +69,8 @@ class MetricCurrent(Base):
         with configurations.SESSION_MAKER() as session:
             try:  
                 metric_to_delete = session.query(MetricCurrent).filter_by(
-                    data_product_name=metric.data_product_name,
-                    app_name=metric.app_name,
-                    expectation_name=metric.expectation_name,
-                    data_source_name=metric.data_source_name,
-                    data_asset_name=metric.data_asset_name,
-                    column_name=metric.column_name,
-                    otlp_sending_datetime=metric.otlp_sending_datetime
+                    check_name=metric.check_name,
+                    otlp_sending_datetime_code=metric.otlp_sending_datetime_code
                 ).first()
                 
                 if metric_to_delete:
@@ -104,23 +93,17 @@ class MetricCurrent(Base):
 
     def __str__(self):
         return (
-            f"MetricCurrent(business_domain_name={self.business_domain_name}, "
-            f"data_product_name={self.data_product_name}, "
-            f"expectation_name={self.expectation_name}, "
-            f"data_source_name={self.data_source_name}, "
-            f"data_asset_name={self.data_asset_name}, "
-            f"column_name={self.column_name}, "
-            f"blindata_suite_name={self.blindata_suite_name}, "
-            f"gx_suite_name={self.gx_suite_name}, "
-            f"data_quality_dimension_name={self.data_quality_dimension_name}, "
+            f"MetricCurrent(data_product_name={self.data_product_name}, "
+            f"check_name={self.check_name}, "
             f"metric_value={self.metric_value}, "
             f"unit_of_measure={self.unit_of_measure}, "
             f"checked_elements_nbr={self.checked_elements_nbr}, "
             f"errors_nbr={self.errors_nbr}, "
-            f"app_name={self.app_name}, "
-            f"otlp_sending_datetime={self.otlp_sending_datetime}, "
+            f"metric_source_name={self.metric_source_name}, "
             f"status_code={self.status_code}, "
             f"locking_service_code={self.locking_service_code}, "
+            f"otlp_sending_datetime_code={self.otlp_sending_datetime_code}, "
+            f"otlp_sending_datetime={self.otlp_sending_datetime}, "
             f"insert_datetime={self.insert_datetime}, "
             f"update_datetime={self.update_datetime})"
         )

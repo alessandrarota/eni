@@ -48,7 +48,7 @@ def configure_expectations_and_run_validations(json_file, data_product_name):
             if not data_asset:
                 data_asset = add_data_asset(data_source, asset_name)
 
-            batch_definition = data_asset.add_batch_definition_whole_dataframe(check_name)
+            batch_definition = add_whole_batch_definition(data_asset, check_name)
             
             connector = get_connector(
                 system_type=system_type,
@@ -57,21 +57,14 @@ def configure_expectations_and_run_validations(json_file, data_product_name):
                 asset_kwargs=expectation["asset_kwargs"]
             )
 
-            try:
-                ExpectationClass = getattr(gx.expectations.core, expectation_type)
+            ExpectationClass = get_expectation_class(expectation_type)
 
-                if isinstance(ExpectationClass, type):
-                    expectation_instance = ExpectationClass(**expectation["kwargs"], meta={"check_name": check_name, "data_product_name": data_product_name})
-                    logging.info(f"Expectation instance created: {expectation_instance}")
+            if ExpectationClass is not None:
+                expectation_instance = ExpectationClass(**expectation["kwargs"], meta={"check_name": check_name, "data_product_name": data_product_name})
+                logging.info(f"Expectation instance created: {expectation_instance}")
 
-                    batch = batch_definition.get_batch(batch_parameters={"dataframe": connector.get_dataframe()})
-                    validation_result = batch.validate(expectation_instance)
-
-                else:
-                    logging.error(f"{expectation_type} is not a valid expectation class!")
-
-            except Exception as e:
-                logging.error(f"Error processing expectation {expectation_type}: {str(e)}")
+                batch = add_batch_to_batch_definition(batch_definition, connector.get_dataframe())
+                validation_result = validate_expectation_on_batch(batch, expectation_instance)
 
             validation_results.append(validation_result) 
 
@@ -80,7 +73,7 @@ def configure_expectations_and_run_validations(json_file, data_product_name):
 
 def create_otlp_metric(validations_results, data_product_name):
     meter.create_observable_gauge(
-        name=data_product_name,
+        name="".join(data_product_name.split()),
         unit="%",
         callbacks=[create_observations_callback(validations_results)]
     )
@@ -90,6 +83,7 @@ def create_otlp_metric(validations_results, data_product_name):
 # Function to create the observation callback
 def create_observations_callback(validation_results):
     def callback(options):
+        logging.info("Creating Observations...")
         observations = []
 
         for validation_result in validation_results:
@@ -106,10 +100,9 @@ def create_observations_callback(validation_results):
                     "data_product_name": meta["data_product_name"]
                 }
             )
-
+            logging.info("Observations created!")
             observations.append(observation)
 
-        logging.info("Observations created!")
         return observations
 
     return callback 

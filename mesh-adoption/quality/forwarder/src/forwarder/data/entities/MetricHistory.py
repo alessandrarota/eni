@@ -10,25 +10,20 @@ Base = declarative_base()
 
 class MetricHistory(Base):
     __tablename__ = 'metric_history'
-    
-    business_domain_name = Column(String)
-    data_product_name = Column(String, primary_key=True)
-    expectation_name = Column(String, primary_key=True)
-    data_source_name = Column(String, primary_key=True)
-    data_asset_name = Column(String, primary_key=True)
-    column_name = Column(String, primary_key=True)
-    blindata_suite_name = Column(String)
-    gx_suite_name = Column(String)
-    data_quality_dimension_name = Column(String)
+
+    data_product_name = Column(String)
+    check_name = Column(String, primary_key=True)
     metric_value = Column(Float)
     unit_of_measure = Column(String)
     checked_elements_nbr = Column(Integer)
     errors_nbr = Column(Integer)
-    app_name = Column(String, primary_key=True)
-    otlp_sending_datetime = Column(String, primary_key=True)
+    metric_source_name = Column(String)
     status_code = Column(String)
+    locking_service_code = Column(String)
+    otlp_sending_datetime_code = Column(String, primary_key=True)
+    otlp_sending_datetime = Column(String)
     insert_datetime = Column(String)
-    source_service_code = Column(String)
+    update_datetime = Column(String)
 
     @staticmethod
     def get_all_history_metrics(configurations):
@@ -50,24 +45,19 @@ class MetricHistory(Base):
     def save(configurations, current_metric, status_code):
         now_utc = datetime.now(timezone.utc)
         metric_history = MetricHistory(
-            business_domain_name = current_metric.business_domain_name,
-            data_product_name = current_metric.data_product_name,
-            expectation_name = current_metric.expectation_name,
-            data_source_name = current_metric.data_source_name,
-            data_asset_name = current_metric.data_asset_name,
-            column_name = current_metric.column_name,
-            blindata_suite_name = current_metric.blindata_suite_name,
-            gx_suite_name = current_metric.gx_suite_name,
-            data_quality_dimension_name = current_metric.data_quality_dimension_name,
-            metric_value = current_metric.metric_value,
-            unit_of_measure = current_metric.unit_of_measure,
-            checked_elements_nbr = current_metric.checked_elements_nbr,
-            errors_nbr = current_metric.errors_nbr,
-            app_name = current_metric.app_name,
-            otlp_sending_datetime = current_metric.otlp_sending_datetime,
-            status_code = status_code,
-            insert_datetime = now_utc,
-            source_service_code = current_metric.locking_service_code
+            data_product_name=current_metric.data_product_name,
+            check_name=current_metric.check_name,
+            metric_value=current_metric.metric_value,
+            unit_of_measure=current_metric.unit_of_measure,
+            checked_elements_nbr=current_metric.checked_elements_nbr,
+            errors_nbr=current_metric.errors_nbr,
+            metric_source_name=current_metric.metric_source_name,
+            status_code=status_code,
+            locking_service_code=current_metric.locking_service_code,
+            otlp_sending_datetime_code=current_metric.otlp_sending_datetime_code,
+            otlp_sending_datetime=current_metric.otlp_sending_datetime,
+            insert_datetime=now_utc,
+            update_datetime=now_utc
         )
 
         with configurations.SESSION_MAKER() as session:
@@ -87,23 +77,18 @@ class MetricHistory(Base):
 
     def __str__(self):
         return (
-            f"MetricHistory(business_domain_name={self.business_domain_name}, "
-            f"data_product_name={self.data_product_name}, "
-            f"expectation_name={self.expectation_name}, "
-            f"data_source_name={self.data_source_name}, "
-            f"data_asset_name={self.data_asset_name}, "
-            f"column_name={self.column_name}, "
-            f"blindata_suite_name={self.blindata_suite_name}, "
-            f"gx_suite_name={self.gx_suite_name}, "
-            f"data_quality_dimension_name={self.data_quality_dimension_name}, "
+            f"MetricHistory(data_product_name={self.data_product_name}, "
+            f"check_name={self.check_name}, "
             f"metric_value={self.metric_value}, "
             f"unit_of_measure={self.unit_of_measure}, "
             f"checked_elements_nbr={self.checked_elements_nbr}, "
             f"errors_nbr={self.errors_nbr}, "
-            f"app_name={self.app_name}, "
-            f"otlp_sending_datetime={self.otlp_sending_datetime}, "
+            f"metric_source_name={self.metric_source_name}, "
             f"status_code={self.status_code}, "
+            f"locking_service_code={self.locking_service_code}, "
+            f"otlp_sending_datetime_code={self.otlp_sending_datetime_code}, "
+            f"otlp_sending_datetime={self.otlp_sending_datetime}, "
             f"insert_datetime={self.insert_datetime}, "
-            f"source_service_code={self.source_service_code})"
+            f"update_datetime={self.update_datetime})"
         )
 

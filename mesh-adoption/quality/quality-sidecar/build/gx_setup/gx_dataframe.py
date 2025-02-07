@@ -13,7 +13,6 @@ def get_existing_data_source(context, data_source_name):
     except AttributeError:
         return None  
     except Exception as e:
-        #print(f"Error retrieving data source: {e}")
         return None
 
 def add_data_asset(data_source, data_asset_name):
@@ -25,45 +24,25 @@ def get_existing_data_asset(data_source, data_asset_name):
     except AttributeError:
         return None  
     except Exception as e:
-        #print(f"Error retrieving data asset: {e}")
         return None
 
 def add_whole_batch_definition(data_asset, batch_definition_name):
     return data_asset.add_batch_definition_whole_dataframe(batch_definition_name)
 
-def get_existing_batch_definition(data_asset, batch_definition_name):
+def get_expectation_class(expectation_type):
     try:
-        return data_asset.get_batch_definition(batch_definition_name) 
-    except AttributeError:
-        return None  
+        ExpectationClass = getattr(gx.expectations.core, expectation_type)
+
+        if isinstance(ExpectationClass, type):
+            return ExpectationClass
+        else:
+            logging.error(f"{expectation_type} is not a valid expectation class!")
     except Exception as e:
-        print(f"Error retrieving batch definition: {e}")
-        return None
+        logging.error(f"Error processing expectation {expectation_type}: {str(e)}")
 
+def add_batch_to_batch_definition(batch_definition, dataframe):
+    return batch_definition.get_batch(batch_parameters={"dataframe": dataframe})
 
-def add_suite(context, suite_name, suite_expectations):
-    suite = gx.ExpectationSuite(name=suite_name)
-    suite = context.suites.add(suite)
-    for exp in suite_expectations:
-        ec = ExpectationConfiguration(
-            type=exp["expectation_type"], 
-            kwargs=exp["kwargs"], 
-            meta={
-                "check_name": exp["check_name"],
-                "asset_name": exp["asset_name"],
-                "asset_kwargs": exp["asset_kwargs"]
-            }
-        )
-        suite.add_expectation_configuration(ec)
-    suite.save()
-
-    return suite
-
-def add_validation_definition(context, batch_definition, suite):
-    validation = gx.ValidationDefinition(data=batch_definition, suite=suite, name=suite.name)
-    return context.validation_definitions.add(validation)
-
-def validation_run(df, validation_definition):
-    return validation_definition.run(batch_parameters={"dataframe": df})
-    
+def validate_expectation_on_batch(batch, expectation):
+    return batch.validate(expectation)
 

@@ -69,32 +69,32 @@ services:
       - platform-local-metastore
       - sql-init
 
-  quality-sidecar:
-    build:
-      context: ./quality-sidecar
-    container_name: quality-sidecar
-    environment:
-      #- OTEL_EXPORTER_OTLP_ENDPOINT=${OTEL_EXPORTER_ENDPOINT}
-      #- OTEL_EXPORTER_OTLP_ENDPOINT=https://api-app.eni.com/sd-xops/otel-collector
-      - OTEL_EXPORTER_OTLP_ENDPOINT=http://platform-collector:4318
-      - OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf
-      - OTEL_METRIC_EXPORT_INTERVAL=${OTEL_METRIC_EXPORT_INTERVAL}
-      - OTEL_SERVICE_NAME=${CDP_OTEL_SERVICE_NAME}
-      - DATA_PRODUCT_NAME=${CDP_DATA_PRODUCT_NAME}
-      - BUSINESS_DOMAIN_NAME=${BUSINESS_DOMAIN_NAME}
-      - EXPECTATIONS_JSON_FILE_PATH=${EXPECTATIONS_JSON_FILE_PATH}
-    depends_on:
-      - platform-collector
-
-  # jupyter:
-  #   image: jupyter/base-notebook
-  #   container_name: quality-sidecar-jupyter-notebook
-  #   ports:
-  #     - "8888:8888"  
-  #   volumes:
-  #     - ./notebook:/home/jovyan  
+  # quality-sidecar:
+  #   build:
+  #     context: ./quality-sidecar
+  #   container_name: quality-sidecar
   #   environment:
-  #     - JUPYTER_TOKEN=password
+  #     #- OTEL_EXPORTER_OTLP_ENDPOINT=${OTEL_EXPORTER_ENDPOINT}
+  #     #- OTEL_EXPORTER_OTLP_ENDPOINT=https://api-app.eni.com/sd-xops/otel-collector
+  #     - OTEL_EXPORTER_OTLP_ENDPOINT=http://platform-collector:4318
+  #     - OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf
+  #     - OTEL_METRIC_EXPORT_INTERVAL=${OTEL_METRIC_EXPORT_INTERVAL}
+  #     - OTEL_SERVICE_NAME=${CDP_OTEL_SERVICE_NAME}
+  #     - DATA_PRODUCT_NAME=${CDP_DATA_PRODUCT_NAME}
+  #     - BUSINESS_DOMAIN_NAME=${BUSINESS_DOMAIN_NAME}
+  #     - EXPECTATIONS_JSON_FILE_PATH=${EXPECTATIONS_JSON_FILE_PATH}
+  #   depends_on:
+  #     - platform-collector
+
+  jupyter:
+    image: jupyter/base-notebook
+    container_name: quality-sidecar-jupyter-notebook
+    ports:
+      - "8888:8888"  
+    volumes:
+      - ./notebook:/home/jovyan  
+    environment:
+      - JUPYTER_TOKEN=password
 
   forwarder-1:
     build:

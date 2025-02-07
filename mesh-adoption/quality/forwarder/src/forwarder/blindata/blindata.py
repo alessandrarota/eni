@@ -135,9 +135,7 @@ def post_single_quality_result_on_blindata(config, quality_check, current_metric
             "qualityCheck": quality_check,
             "metric": current_metric.errors_nbr,
             "totalElements": current_metric.checked_elements_nbr,
-            "startedAt": datetime.strptime(current_metric.otlp_sending_datetime[:current_metric.otlp_sending_datetime.index('.') + 7], "%Y-%m-%d %H:%M:%S.%f")
-                        .strftime("%Y-%m-%dT%H:%M:%S.") +
-                    str(datetime.strptime(current_metric.otlp_sending_datetime[:current_metric.otlp_sending_datetime.index('.') + 7], "%Y-%m-%d %H:%M:%S.%f").microsecond // 1000).zfill(3) + 'Z'
+            "startedAt": (current_metric.otlp_sending_datetime.strftime("%Y-%m-%dT%H:%M:%S.") + str(current_metric.otlp_sending_datetime.microsecond // 1000).zfill(3) + 'Z')
         }
 
         response = requests.post(
@@ -161,7 +159,7 @@ def post_single_quality_result_on_blindata(config, quality_check, current_metric
 def get_quality_check(config, current_metric):
     try:
         bearer_token = get_blindata_token()
-        quality_check_code = f"{current_metric.expectation_name}_{current_metric.data_source_name}-{current_metric.data_asset_name}-{current_metric.column_name}"
+        quality_check_code = f"{current_metric.check_name}"
 
         check_response = requests.get(
             config.BLINDATA_QUALITY_CHECK_ENDPOINT,
@@ -178,55 +176,6 @@ def get_quality_check(config, current_metric):
 
     except Exception as e:
         logging.error(f"Error during API request for quality check: {e}")
-        logging.error(traceback.format_exc())
-        raise
-
-def format_quality_check_name(code):
-    try:
-        prefix, rest = code.split("_", 1)
-        formatted_prefix = re.sub(r'([a-z])([A-Z])', r'\1 \2', prefix).title()
-        return f"{formatted_prefix}: {rest}"
-    except Exception as e:
-        logging.error(f"Error while formatting quality check name: {e}")
-        logging.error(traceback.format_exc())
-        raise
-
-def create_quality_check(config, current_metric, blindata_suite):
-    try:
-        bearer_token = get_blindata_token()
-        quality_check_code = f"{current_metric.expectation_name}_{current_metric.data_source_name}-{current_metric.data_asset_name}-{current_metric.column_name}"
-
-        quality_check = {
-            "code": quality_check_code,
-            "name": format_quality_check_name(quality_check_code),
-            "warningThreshold": 95.0,
-            "successThreshold": 100.0,
-            "qualitySuite": blindata_suite,
-            "scoreStrategy": "PERCENTAGE",
-            "enabled": True,
-            "additionalProperties": [
-                {
-                    "name": "Data Quality Dimension",
-                    "value": current_metric.data_quality_dimension_name
-                }
-            ]
-        }
-
-        check_response = requests.post(
-            config.BLINDATA_QUALITY_CHECK_ENDPOINT,
-            json=quality_check,
-            headers={"Authorization": bearer_token, "Content-Type": "application/json"}
-        )
-
-        if check_response.status_code == 201:
-            logging.info(f"Quality check created successfully: {quality_check_code}")
-            return check_response.json()
-        else:
-            logging.error(f"Failed to create quality check: {check_response.status_code} - {check_response.text}")
-            return False
-
-    except Exception as e:
-        logging.error(f"Error during API request to create quality check: {e}")
         logging.error(traceback.format_exc())
         raise
 

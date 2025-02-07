@@ -10,6 +10,7 @@ from opentelemetry import metrics
 from opentelemetry.metrics import Observation
 import great_expectations as gx
 from gx_setup.gx_dataframe import *
+from connectors.SystemConnector import *
 
 # Logging configuration
 logging.basicConfig(level=logging.INFO)
@@ -19,7 +20,6 @@ logging.getLogger("great_expectations").setLevel(logging.WARNING)
 context = gx.get_context()
 meter = metrics.get_meter(__name__)
 
-# Function to load JSON file
 def load_json_file(file_path):
     try:
         with open(file_path, "r") as f:
@@ -28,134 +28,98 @@ def load_json_file(file_path):
         logging.error(f"Error reading or decoding the JSON file: {file_path} - {e}")
         sys.exit(1)
 
-# Function to configure Great Expectations resources
-def configure_gx_resources(gx_data, data_product_name, business_domain_name):
-    gx_resources = []
+def configure_expectations_and_run_validations(json_file, data_product_name):
+    validation_results = []
 
-    for suite_data in gx_data:
-        physical_info = suite_data["physical_informations"]
-        suite_name = f"{physical_info['data_source_name']}-{physical_info['data_asset_name']}"
-        
-        data_source = add_data_source(context, physical_info["data_source_name"])
-        data_asset = add_data_asset(data_source, physical_info["data_asset_name"])
-        batch_definition = add_whole_batch_definition(data_asset, suite_name)
-        suite = add_suite(context, data_product_name, suite_name, suite_data["expectations"])
+    for system in json_file:
+        system_name = system["system_name"]
+        system_type = system["system_type"]
 
-        gx_resources.append({
-            "batch_definition": batch_definition,
-            "suite_name": suite_name,
-            "physical_informations": physical_info,
-            "expectations": suite_data["expectations"],
-            "suite": suite,
-            "business_domain_name": business_domain_name,
-            "data_product_name": data_product_name
-        })
+        data_source = get_existing_data_source(context, system_name)
+        if not data_source:
+            data_source = add_data_source(context, system_name)
 
-    return gx_resources
+        for expectation in system["expectations"]:
+            asset_name = expectation["asset_name"]
+            check_name = expectation["check_name"]
+            expectation_type = expectation["expectation_type"]
 
-# Function to configure validation definitions
-def configure_validation_definitions(resources):
-    validation_definitions = []
+            data_asset = get_existing_data_asset(data_source, asset_name)
+            if not data_asset:
+                data_asset = add_data_asset(data_source, asset_name)
 
-    for resource in resources:
-        batch_definition = resource["batch_definition"]
-        suite = resource["suite"]
-        validation_definition = add_validation_definition(context, batch_definition, suite)
+            batch_definition = add_whole_batch_definition(data_asset, check_name)
+            
+            connector = get_connector(
+                system_type=system_type,
+                system_name=system_name,
+                asset_name=asset_name,
+                asset_kwargs=expectation["asset_kwargs"]
+            )
 
-        validation_definitions.append({
-            "validation_definition": validation_definition,
-            "metadata": resource
-        })
+            ExpectationClass = get_expectation_class(expectation_type)
 
-    return validation_definitions
+            if ExpectationClass is not None:
+                expectation_instance = ExpectationClass(**expectation["kwargs"], meta={"check_name": check_name, "data_product_name": data_product_name})
+                logging.info(f"Expectation instance created: {expectation_instance}")
 
-# Function to execute validations and create metrics
-def execute_validations_and_create_metrics(validation_definitions):
-    all_validation_results = []
+                batch = add_batch_to_batch_definition(batch_definition, connector.get_dataframe())
+                validation_result = validate_expectation_on_batch(batch, expectation_instance)
 
-    for validation_def in validation_definitions:
-        metadata = validation_def["metadata"]
-        physical_info = metadata["physical_informations"]
+            validation_results.append(validation_result) 
 
-        validation_result = validation_run(
-            df=pd.read_csv(physical_info["dataframe"], delimiter=','),
-            validation_definition=validation_def["validation_definition"]
-        )
-        
-        all_validation_results.append({
-            "validation_result": validation_result,
-            "metadata": validation_def["metadata"]
-        })
+    return validation_results
 
-    # Create metric name using SHA1 hash
-    metric_name = f"{metadata['business_domain_name']}-{metadata['data_product_name']}"
-    hashed_metric_name = re.sub(r'[^a-zA-Z0-9]', '', base64.urlsafe_b64encode(hashlib.sha1(metric_name.encode('utf-8')).digest()).decode('utf-8').rstrip('='))
-    
-    # Create observable gauge metric
+
+def create_otlp_metric(validations_results, data_product_name):
     meter.create_observable_gauge(
-        name=hashed_metric_name,
+        name="".join(data_product_name.split()),
         unit="%",
-        callbacks=[create_observations_callback(all_validation_results)]
+        callbacks=[create_observations_callback(validations_results)]
     )
 
-    logging.info("Validation metrics created!")
+    logging.info("OTLP metric created!")
 
 # Function to create the observation callback
 def create_observations_callback(validation_results):
     def callback(options):
+        logging.info("Creating Observations...")
         observations = []
 
-        for result_data in validation_results:
-            validation_result = result_data["validation_result"]
-            metadata = result_data["metadata"]
-            physical_informations = metadata["physical_informations"]
+        for validation_result in validation_results:
+            result = validation_result["result"]
+            meta = validation_result["expectation_config"]["meta"]
 
-            for result in validation_result["results"]:
-                result_data = result["result"]
-                expectation_config = result["expectation_config"]
-                meta = expectation_config["meta"]
-                kwargs = expectation_config["kwargs"]
+            observation = Observation(
+                value=100 - result["unexpected_percent"],
+                attributes={
+                    "signal_type": "DATA_QUALITY",
+                    "checked_elements_nbr": result["element_count"],
+                    "errors_nbr": result["unexpected_count"],
+                    "check_name":  meta["check_name"],
+                    "data_product_name": meta["data_product_name"]
+                }
+            )
+            logging.info("Observations created!")
+            observations.append(observation)
 
-                observation = Observation(
-                    value=100 - result_data["unexpected_percent"],
-                    attributes={
-                        "signal_type": "DATA_QUALITY",
-                        "business_domain_name": metadata["business_domain_name"],
-                        "data_product_name": metadata["data_product_name"],
-                        "expectation_name": meta["expectation_name"],
-                        "data_source_name": physical_informations["data_source_name"],
-                        "data_asset_name": physical_informations["data_asset_name"],
-                        "column_name": kwargs["column"],
-                        "checked_elements_nbr": result_data["element_count"],
-                        "errors_nbr": result_data["unexpected_count"],
-                        "gx_suite_name": metadata["suite_name"],
-                        "data_quality_dimension_name":  meta["data_quality_dimension"]
-                    }
-                )
-
-                observations.append(observation)
-
-        logging.info("Observations created!")
         return observations
 
     return callback 
 
 # Main function to start the process
-def main(json_file_path, data_product_name, business_domain_name):
+def main(json_file_path, data_product_name):
     try:
         logging.info("Starting the application...")
 
         logging.info("Reading the GreatExpectations JSON configuration file...")
-        gx_data = load_json_file(json_file_path)
+        json_file = load_json_file(json_file_path)
 
-        logging.info("Configuring GreatExpectations resources...")
-        gx_resources = configure_gx_resources(gx_data, data_product_name, business_domain_name)
+        logging.info("Configuring Expectations and running Validations...")
+        validation_results = configure_expectations_and_run_validations(json_file, data_product_name)
 
-        logging.info("Configuring validation definitions...")
-        validation_defs = configure_validation_definitions(gx_resources)
-
-        logging.info("Executing validations and creating metrics...")
-        execute_validations_and_create_metrics(validation_defs)
+        logging.info("Creating OTLP Metric...")
+        create_otlp_metric(validation_results, data_product_name)
 
         # try:
         #     while True:
@@ -177,4 +141,4 @@ if __name__ == "__main__":
         logging.error("The environment variable DATA_PRODUCT_NAME is not set or is empty!")
         sys.exit(1)
 
-    main(sys.argv[1], os.getenv("DATA_PRODUCT_NAME"), os.getenv("BUSINESS_DOMAIN_NAME", ""))
+    main(sys.argv[1], os.getenv("DATA_PRODUCT_NAME"))

@@ -19,37 +19,6 @@ for handler in logging.root.handlers[:]:
     logging.root.removeHandler(handler)
 logging.basicConfig(level=logging.WARNING)
 
-def validate_business_domain_name(config, current_metric):
-    if not current_metric.business_domain_name:
-        MetricHistory.save(config, current_metric, MetricStatusCode.ERR_EMPTY_BUSINESS_DOMAIN.value)
-        MetricCurrent.delete(config, current_metric)
-        return False
-    return True
-
-def validate_blindata_suite_name(config, current_metric):
-    if current_metric.blindata_suite_name is None:
-        MetricHistory.save(config, current_metric, MetricStatusCode.ERR_WRONG_BUSINESS_DOMAIN.value)
-        MetricCurrent.delete(config, current_metric)
-        return False
-    return True
-
-def handle_quality_check_creation(config, current_metric):
-    blindata_suite = get_quality_suite(config, current_metric)
-
-    if not blindata_suite:
-        MetricHistory.save(config, current_metric, MetricStatusCode.ERR_BLINDATA_SUITE_NOT_FOUND.value)
-        MetricCurrent.delete(config, current_metric)
-        return False
-    else:
-        quality_check = create_quality_check(config, current_metric, blindata_suite)
-
-        if not quality_check:
-            MetricHistory.save(config, current_metric, MetricStatusCode.ERR_FAILED_BLINDATA_CHECK_CREATION.value)
-            MetricCurrent.delete(config, current_metric)
-            return False
-        else:
-            return quality_check
-
 def process_quality_result_upload(config, current_metric, status_code):
     if status_code == 201:
         MetricHistory.save(config, current_metric, MetricStatusCode.SUCCESS.value)
@@ -59,18 +28,12 @@ def process_quality_result_upload(config, current_metric, status_code):
         MetricCurrent.delete(config, current_metric)
 
 def handle_locked_metrics(config, current_metric):
-    if not validate_business_domain_name(config, current_metric):
-        return
-
-    if not validate_blindata_suite_name(config, current_metric):
-        return
-    
     quality_check = get_quality_check(config, current_metric)
 
     if not quality_check:
-        quality_check = handle_quality_check_creation(config, current_metric)
-        if not quality_check:
-            return 
+        MetricHistory.save(config, current_metric, MetricStatusCode.ERR_CHECK_NOT_FOUND.value)
+        MetricCurrent.delete(config, current_metric)
+        return
         
     status_code = post_single_quality_result_on_blindata(config, quality_check, current_metric)
     process_quality_result_upload(config, current_metric, status_code)
