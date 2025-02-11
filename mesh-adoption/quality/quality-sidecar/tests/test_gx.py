@@ -1,10 +1,9 @@
 import pytest
 from datetime import datetime
 import logging
-from app import load_json_file, configure_expectations_and_run_validations
+from data_quality_gx import load_json_file, configure_expectations_and_run_validations
 import os
 import pandas as pd
-from gx_setup.gx_dataframe import *
 
 def execute_main_without_loop(path, data_product_name):
     gx_json_data = load_json_file(path)

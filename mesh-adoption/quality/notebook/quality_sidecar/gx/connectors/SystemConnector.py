@@ -90,6 +90,8 @@ class SystemConnectorFactory:
             return CSVConnector(system_type, system_name, asset_name, **kwargs)
         elif system_type == 'HIVE':
             return HiveConnector(system_type, system_name, asset_name, **kwargs)
+        elif system_type == 'UNITY':
+            return UnityConnector(system_type, system_name, asset_name, **kwargs)
         else:
             raise ValueError(f"Unsupported system type: {system_type}")
         
