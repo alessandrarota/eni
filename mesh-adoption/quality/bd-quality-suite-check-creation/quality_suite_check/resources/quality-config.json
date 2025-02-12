@@ -1,0 +1,48 @@
+[
+    {
+        "business_domain_name": "Chief Transition & Financial Officer - Amministrazione e Bilancio",
+        "data_product_name": "SAP IESS",
+        "data_quality_checks": [
+            {
+                "data_quality_check_name": "PKinPrezziGiornalieriQuartoOrariisUnique",
+                "data_quality_dimension": "Uniqueness",
+                "score_strategy": "PERCENTAGE",
+                "score_warning_threshold": 100.0,
+                "score_success_threshold": 100.0,
+                "physical_associations": [
+                    {
+                        "system": "azure:west-europe:adls-gen2:dlswweictpddsiess001",
+                        "physical_entity_schema": "trusted",
+                        "physical_entity_name": "PrezziGiornalieriQuartoOrari"
+                    },
+                    {
+                        "system": "azure:west-europe:adb:adb-6143998898700984.4.azuredatabricks.net",
+                        "physical_entity_schema": "ddsdltdb",
+                        "physical_entity_name": "PrezziGiornalieriQuartoOrari"
+                    }
+                ]
+            },
+            {
+                "data_quality_check_name": "DataDiRiferimentoinPrezziGiornalieriQuartoOrariisComplete",
+                "data_quality_dimension": "Completeness",
+                "score_strategy": "PERCENTAGE",
+                "score_warning_threshold": 90.0,
+                "score_success_threshold": 100.0,
+                "physical_associations": [
+                    {
+                        "system": "azure:west-europe:adls-gen2:dlswweictpddsiess001",
+                        "physical_entity_schema": "trusted",
+                        "physical_entity_name": "PrezziGiornalieriQuartoOrari",
+                        "physical_field_name": "DataDiRiferimento"
+                    },
+                    {
+                        "system": "azure:west-europe:adb:adb-6143998898700984.4.azuredatabricks.net",
+                        "physical_entity_schema": "ddsdltdb",
+                        "physical_entity_name": "PrezziGiornalieriQuartoOrari",
+                        "physical_field_name": "DataDiRiferimento"
+                    }
+                ]
+            }
+        ]
+    }
+]

@@ -1,0 +1,79 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "array",
+  "items": [
+    {
+      "type": "object",
+      "properties": {
+        "business_domain_name": {
+          "type": "string"
+        },
+        "data_product_name": {
+          "type": "string"
+        },
+        "data_quality_checks": {
+          "type": "array",
+          "items": [
+            {
+              "type": "object",
+              "properties": {
+                "data_quality_check_name": {
+                  "type": "string"
+                },
+                "data_quality_dimension": {
+                  "type": "string"
+                },
+                "score_strategy": {
+                  "type": "string"
+                },
+                "score_warning_threshold": {
+                  "type": "number"
+                },
+                "score_success_threshold": {
+                  "type": "number"
+                },
+                "physical_associations": {
+                  "type": "array",
+                  "items": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "system": {
+                          "type": "string"
+                        },
+                        "physical_entity_schema": {
+                          "type": "string"
+                        },
+                        "physical_entity_name": {
+                          "type": "string"
+                        },
+                        "physical_field_name": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "system",
+                        "physical_entity_schema",
+                        "physical_entity_name"
+                      ]
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "data_quality_check_name",
+                "data_quality_dimension",
+                "physical_associations"
+              ]
+            }
+          ]
+        }
+      },
+      "required": [
+        "business_domain_name",
+        "data_product_name",
+        "data_quality_checks"
+      ]
+    }
+  ]
+}
