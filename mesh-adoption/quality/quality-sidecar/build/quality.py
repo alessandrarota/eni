@@ -19,7 +19,7 @@ def main(json_file_path, data_product_name):
     try:
         logging.info("Running GX functions...")
         # Running GX module
-        validation_results = validate_data_quality(expectations_json_file_path, data_product_name)
+        validation_results = validate_data_quality(json_file_path, data_product_name)
         logging.info(f"GX Validation Results: {validation_results}")
 
         # Running OTLP functions with subprocess
@@ -28,12 +28,6 @@ def main(json_file_path, data_product_name):
         result = subprocess.run(command, shell=True, check=True)
 
         logging.info(result)
-
-        try:
-            while True:
-                time.sleep(5) 
-        except KeyboardInterrupt:
-            logging.info("Shutting down the application...")
 
     except Exception as e:
         logging.error(f"An error occurred during application execution: {e}")

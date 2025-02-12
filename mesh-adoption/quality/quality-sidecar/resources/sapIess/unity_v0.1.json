@@ -1,38 +1,29 @@
 [
     {
         "system_name": "dit_dicox_dpflab_dds2_dev",
-        "system_type": "CSV",
+        "system_type": "UNITY",
         "expectations": [
             {
-                "check_name": "sapNac-dit_dicox_dpflab_dds2_dev-ddsdltdb.segnogiornalieroquartoorario-PK-ExpectColumnValuesToNotBeNull",
+                "check_name": "sapIess-dit_dicox_dpflab_dds2_dev-ddsdltdb.segnogiornalieroquartoorario-PK-ExpectColumnValuesToNotBeNull",
                 "expectation_type": "ExpectColumnValuesToNotBeNull",
                 "asset_name": "ddsdltdb.segnogiornalieroquartoorario",
-                "asset_kwargs": {
-                    "path": "resources/sapNac/sapNac-segnogiornalieroquartoorario.csv"
-                },
                 "kwargs": {
                     "column": "PK"
                 }
             },
             {
-                "check_name": "sapNac-dit_dicox_dpflab_dds2_dev-ddsdltdb.segnogiornalieroquartoorario-Macrozona-ExpectColumnValuesToBeInSet",
+                "check_name": "sapIess-dit_dicox_dpflab_dds2_dev-ddsdltdb.segnogiornalieroquartoorario-Macrozona-ExpectColumnValuesToBeInSet",
                 "expectation_type": "ExpectColumnValuesToBeInSet",
                 "asset_name": "ddsdltdb.segnogiornalieroquartoorario",
-                "asset_kwargs": {
-                    "path": "resources/sapNac/sapNac-segnogiornalieroquartoorario.csv"
-                },
                 "kwargs": {
                     "column": "Macrozona",
                     "value_set": ["NORD", "SUD"]
                 }
             },
             {
-                "check_name": "sapNac-dit_dicox_dpflab_dds2_dev.ddsdltdb.segnogiornalieroquartoorario-ScambiMWh-ExpectColumnValuesToBeBetween",
+                "check_name": "sapIess-dit_dicox_dpflab_dds2_dev.ddsdltdb.segnogiornalieroquartoorario-ScambiMWh-ExpectColumnValuesToBeBetween",
                 "expectation_type": "ExpectColumnValuesToBeBetween",
                 "asset_name": "ddsdltdb.segnogiornalieroquartoorario",
-                "asset_kwargs": {
-                    "path": "resources/sapNac/sapNac-segnogiornalieroquartoorario.csv"
-                },
                 "kwargs": {
                     "column": "Scambi[MWh]",
                     "min_value": -930,
@@ -40,12 +31,9 @@
                 }
             },
             {
-                "check_name": "sapNac-dit_dicox_dpflab_dds2_dev.ddsdltdb.segnogiornalieroquartoorario-DataDiRiferimento-ExpectColumnValuesToMatchRegex",
+                "check_name": "sapIess-dit_dicox_dpflab_dds2_dev.ddsdltdb.segnogiornalieroquartoorario-DataDiRiferimento-ExpectColumnValuesToMatchRegex",
                 "expectation_type": "ExpectColumnValuesToMatchRegex",
                 "asset_name": "ddsdltdb.segnogiornalieroquartoorario",
-                "asset_kwargs": {
-                    "path": "resources/sapNac/sapNac-segnogiornalieroquartoorario.csv"
-                },
                 "kwargs": {
                     "column": "DataDiRiferimento",
                     "regex": "^\\d{2}/\\d{2}/\\d{4}$"
@@ -55,9 +43,6 @@
                 "check_name": "PrezzoSbilanciamento-PrezzoBase-ExpectColumnPairValuesAToBeGreaterThanB",
                 "expectation_type": "ExpectColumnPairValuesAToBeGreaterThanB",
                 "asset_name": "ddsdltdb.prezzigiornalieriquartoorari",
-                "asset_kwargs": {
-                    "path": "resources/sapNac/sapNac-prezzigiornalieriquartoorari.csv"
-                },
                 "kwargs": {
                     "column_A": "PrezzoSbilanciamento",
                     "column_B": "PrezzoBase",
@@ -68,9 +53,6 @@
                 "check_name": "ComponenteIncentivante-ExpectColumnValuesToBeBetween",
                 "expectation_type": "ExpectColumnValuesToBeBetween",
                 "asset_name": "ddsdltdb.prezzigiornalieriquartoorari",
-                "asset_kwargs": {
-                    "path": "resources/sapNac/sapNac-prezzigiornalieriquartoorari.csv"
-                },
                 "kwargs": {
                     "column": "ComponenteIncentivante",
                     "min_value": 0
@@ -79,4 +61,3 @@
         ]
     }
 ]
-

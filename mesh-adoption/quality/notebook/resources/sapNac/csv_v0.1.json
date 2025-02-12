@@ -4,7 +4,7 @@
         "system_type": "CSV",
         "expectations": [
             {
-                "check_name": "sapNac-dit_dicox_dpflab_dds2_dev-ddsdltdb.segnogiornalieroquartoorario-PK-ToNotBeNull",
+                "check_name": "sapNac-dit_dicox_dpflab_dds2_dev-ddsdltdb.segnogiornalieroquartoorario-PK-ExpectColumnValuesToNotBeNull",
                 "expectation_type": "ExpectColumnValuesToNotBeNull",
                 "asset_name": "ddsdltdb.segnogiornalieroquartoorario",
                 "asset_kwargs": {
@@ -49,6 +49,31 @@
                 "kwargs": {
                     "column": "DataDiRiferimento",
                     "regex": "^\\d{2}/\\d{2}/\\d{4}$"
+                }
+            },
+            {
+                "check_name": "PrezzoSbilanciamento-PrezzoBase-ExpectColumnPairValuesAToBeGreaterThanB",
+                "expectation_type": "ExpectColumnPairValuesAToBeGreaterThanB",
+                "asset_name": "ddsdltdb.prezzigiornalieriquartoorari",
+                "asset_kwargs": {
+                    "path": "resources/sapNac/sapNac-prezzigiornalieriquartoorari.csv"
+                },
+                "kwargs": {
+                    "column_A": "PrezzoSbilanciamento",
+                    "column_B": "PrezzoBase",
+                    "or_equal": true
+                }
+            },
+            {
+                "check_name": "ComponenteIncentivante-ExpectColumnValuesToBeBetween",
+                "expectation_type": "ExpectColumnValuesToBeBetween",
+                "asset_name": "ddsdltdb.prezzigiornalieriquartoorari",
+                "asset_kwargs": {
+                    "path": "resources/sapNac/sapNac-prezzigiornalieriquartoorari.csv"
+                },
+                "kwargs": {
+                    "column": "ComponenteIncentivante",
+                    "min_value": 0
                 }
             }
         ]
