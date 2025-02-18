@@ -24,15 +24,12 @@ La cartella `/build` contiene i moduli Python che gestiscono la di validazione e
 - `/gx`: gestisce la validazione dei dati usando Great Expectations
 - `/otlp`: invia i risultati delle validazioni al collector di piattaforma tramite OpenTelemetry
 
-**NB:** questo profgetto contiene i file sorgenti dei moduli per il quality sidecar. In ambiente Eni, il sidecar è centralizzato in un notebook di Databricks. Entrambe le cartelle potranno poi essere distribuite come librerie indipendenti e importate direttamente nel notebook.
+**NB:** questo progetto contiene i file sorgenti dei moduli per il quality sidecar. In ambiente Eni, il sidecar è centralizzato in un notebook di Databricks. Entrambe le cartelle potranno poi essere distribuite come librerie indipendenti e importate direttamente nel notebook.
 
 ## Navigazione del codice e struttura
 
 ### File di Configurazione
 I file all'interno della cartella **/resources** contengono le configurazioni necessarie per la corretta esecuzione di **Great Expectations** all'interno del sidecar, in particolare le aspettative di validazione sui dati. Ogni file di configurazione definisce tutti i controlli per l'intero data product.
-
-**Nota**: per convenzione, i file di configurazione vengono nominati includendo la versione, ad esempio:
-gx_v<i>MAJOR.MINOR</i>.json
 
 #### Struttura del file JSON
 Il file di configurazione permette di definire tutti i controlli di data quality per l'intero data product. Contiene una lista di elementi che sono rappresentativi per un sistema fisico: ogni elemento contiene poi i riferimenti al sistema e un insieme di aspettative. Nel dettaglio, ogni elemento della lista presenta le seguenti informazioni:
@@ -46,7 +43,7 @@ Il file di configurazione permette di definire tutti i controlli di data quality
 - `expectations`: contiene la lista di controlli da effettuare su tabelle e campi del sistema. Nel dettaglio, ogni elemento contiene le seguenti informazioni:
     - `check_name`: il riferimento al quality check presente su Blindata
     - `asset_name`: il nome dell'asset dati
-    - `asset_kwargs`: i parametri (non necessari) per l'asset, come nel caso di connettore CSV il path del file
+    - `asset_kwargs`: i parametri per l'asset, come nel caso di connettore CSV il path del file (non obbligatori per connettore UNITY)
     - `expectation_type`: il tipo di aspettativa da applicare (ad esempio, verifica che un valore non sia nullo, che un valore sia compreso tra due estremi, o che un valore corrisponda a una regex).
 
         - Consultare la gallery di Expectations ufficiale: https://greatexpectations.io/expectations/
