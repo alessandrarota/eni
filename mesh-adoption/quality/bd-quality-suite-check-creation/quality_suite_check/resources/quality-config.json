@@ -5,6 +5,7 @@
         "data_quality_checks": [
             {
                 "data_quality_check_name": "PKinPrezziGiornalieriQuartoOrariisUnique",
+                "data_quality_check_description": "",
                 "data_quality_dimension": "Uniqueness",
                 "score_strategy": "PERCENTAGE",
                 "score_warning_threshold": 100.0,
@@ -24,6 +25,7 @@
             },
             {
                 "data_quality_check_name": "DataDiRiferimentoinPrezziGiornalieriQuartoOrariisComplete",
+                "data_quality_check_description": "",
                 "data_quality_dimension": "Completeness",
                 "score_strategy": "PERCENTAGE",
                 "score_warning_threshold": 90.0,

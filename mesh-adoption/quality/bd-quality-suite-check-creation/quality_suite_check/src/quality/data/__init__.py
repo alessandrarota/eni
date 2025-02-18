@@ -75,22 +75,23 @@ def convert_excel_to_json(configuration: BaseConfig,
             "data_product_name": suite_row['Data Product'].strip(),
             "data_quality_checks": [
                 {
-                    "data_quality_check_name": check_row['Name'].strip(),
-                    "data_quality_dimension": check_row['Dimension'].strip(),
-                    "score_strategy": check_row['Score Strategy'].strip(),
+                    "data_quality_check_name": str(check_row['Name']).strip(),
+                    "data_quality_check_description": str(check_row['Description']).strip(),
+                    "data_quality_dimension": str(check_row['Dimension']).strip(),
+                    "score_strategy": str(check_row['Score Strategy']).strip(),
                     "score_warning_threshold": check_row['Warning Threshold'],
                     "score_success_threshold": check_row['Success Threshold'],
                     "physical_associations": [
                         {
-                            "system": assoc_row['Physical System'].strip(),
-                            "physical_entity_schema": assoc_row['Physical Entity Schema'].strip(),
-                            "physical_entity_name": assoc_row['Physical Entity Name'].strip(),
+                            "system": str(assoc_row['Physical System']).strip(),
+                            "physical_entity_schema": str(assoc_row['Physical Entity Schema']).strip(),
+                            "physical_entity_name": str(assoc_row['Physical Entity Name']).strip(),
                             
                         } if assoc_row['Physical Field'] is None else {
-                            "system": assoc_row['Physical System'].strip(),
-                            "physical_entity_schema": assoc_row['Physical Entity Schema'].strip(),
-                            "physical_entity_name": assoc_row['Physical Entity Name'].strip(),
-                            "physical_field_name": assoc_row['Physical Field']
+                            "system": str(assoc_row['Physical System']).strip(),
+                            "physical_entity_schema": str(assoc_row['Physical Entity Schema']).strip(),
+                            "physical_entity_name": str(assoc_row['Physical Entity Name']).strip(),
+                            "physical_field_name": str(assoc_row['Physical Field']).strip()
                         } for _, assoc_row in in_assoc[(in_assoc['Data Product'] == check_row['Data Product']) & (in_assoc['Data Quality Check'] == check_row['Name'])].iterrows()
                     ]
                 } for _, check_row in in_check[in_check['Data Product'] == suite_row['Data Product']].iterrows()

@@ -55,8 +55,11 @@ def main():
             if data_quality_suite_uuid is not None:
                 logging.info(f'Object {curr_idx:02d} - Processing Data Quality Suite [{data_quality_suite_uuid}].')
                 for curr_check_idx, curr_check_configuration_data in enumerate(curr_configuration_data['data_quality_checks']):
-                    logging.info(f'Object {curr_idx:02d} - Processing Data Quality Check {curr_check_idx:03d}')
-                    data_quality_check.process_data_quality_check(configuration, curr_check_configuration_data, data_quality_suite_uuid, curr_data_product)
+                    success, response_code, response_text = data_quality_check.process_data_quality_check(configuration, curr_check_configuration_data, data_quality_suite_uuid, curr_data_product)
+                    if success:
+                        logging.info(f'Object {curr_idx:02d} - Data Quality Check {curr_check_idx:03d} successfully processed ({response_code}).')
+                    else:
+                        logging.error(f'Object {curr_idx:02d} - Data Quality Check {curr_check_idx:03d} not sent succesfully ({response_code}): "{response_text}".')
             else:
                 logging.error(f'Object {curr_idx:02d} - Data Quality Suite not found.')
 

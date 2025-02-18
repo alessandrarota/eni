@@ -20,6 +20,9 @@
                 "data_quality_check_name": {
                   "type": "string"
                 },
+                "data_quality_check_description": {
+                  "type": "string"
+                },
                 "data_quality_dimension": {
                   "type": "string"
                 },
