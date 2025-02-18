@@ -36,20 +36,16 @@ Il file di configurazione permette di definire tutti i controlli di data quality
 
 - `system_name`: il nome del sistema fisico
 - `system_type`: la tipologia del sistema. Il quality sidecar al suo interno include e gestisce una serie di **connettori**: essi hanno il compito di estrapolare il Dataframe Pandas, da dare in pasto a GX, in modalita' differenti a seconda di quale sia il tipo di sorgente. Attualmente vengono gestiti i seguenti tipi di connettori:
-
-  - **UNITY**: estrapola i dati da Unity Catalog
-  - **CSV**: estrapola i dati da un file CSV (il cui percorso viene specificato nel file di configurazione)
-
+    - **UNITY**: estrapola i dati da Unity Catalog
+    - **CSV**: estrapola i dati da un file CSV (il cui percorso viene specificato nel file di configurazione)
 - `expectations`: contiene la lista di controlli da effettuare su tabelle e campi del sistema. Nel dettaglio, ogni elemento contiene le seguenti informazioni:
     - `check_name`: il riferimento al quality check presente su Blindata
     - `asset_name`: il nome dell'asset dati
     - `asset_kwargs`: i parametri per l'asset, come nel caso di connettore CSV il path del file (non obbligatori per connettore UNITY)
     - `expectation_type`: il tipo di aspettativa da applicare (ad esempio, verifica che un valore non sia nullo, che un valore sia compreso tra due estremi, o che un valore corrisponda a una regex).
-
         - Consultare la gallery di Expectations ufficiale: https://greatexpectations.io/expectations/
     - `kwargs`: i parametri necessari per eseguire l'aspettativa (ad esempio, il nome della colonna da verificare o i valori di limite per un intervallo).
-
-      - Consultare la gallery di Expectations ufficiale: https://greatexpectations.io/expectations/
+        - Consultare la gallery di Expectations ufficiale: https://greatexpectations.io/expectations/
 
 
 Di seguito un esempio di file di configurazione per `"system_type": "UNITY"`:  
