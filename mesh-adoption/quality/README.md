@@ -4,6 +4,7 @@ Questo repository contiene tutte le componenti necessarie per implementare il pr
 
 ## Struttura del progetto
 Il progetto è organizzato come segue:
+
 - cartella `/quality-sidecar` 
 - cartella `/platform-collector`  
 - cartella `/platform-quality-receiver` 
@@ -83,6 +84,7 @@ GO
 Il Blindata Forwarder e' uno scheduler che ciclicamente legge le metriche contenute nella tabella `metric_current`, invia ciascuna metrica verso blindata e storicizza il risultato nella tabella `metric_history`.
 
 Vengono gestiti diversi tipi di `status_code`:
+
 - **NEW**: nuova metrica inserita (tabella `metric_current`)
 - **LOCKED**: un'istanza di Blindata Forwarder blocca le metriche non gia bloccate da altre istanze (tabella `metric_current`)
 - **SUCCESS**: metriche correttamente inviate a Blindata (tabella `metric_history`)
