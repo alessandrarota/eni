@@ -7,8 +7,7 @@ Il quality sidecar integra due moduli principali, **GX (Great Expectations)** e 
 Il progetto è strutturato come segue:
 
 ```
-├── quality.ipynb
-├── /quality_sidecar
+├── /build
     └── /gx
         └── ...
     └── /otlp   
@@ -17,14 +16,15 @@ Il progetto è strutturato come segue:
     └── /<data_product>
         └── <expectations_file>.json  # File JSON con le aspettative di qualità per un prodotto specifico
         └── ... # Ulteriori file per il calcolo dei risultati (file csv)
+├── /tests
 
 ```
 
-La cartella `/quality_sidecar` contiene i moduli Python che gestiscono la logica di monitoraggio e validazione della qualità dei dati:
+La cartella `/build` contiene i moduli Python che gestiscono la di validazione ed invio dei dati di quality:
 - `/gx`: gestisce la validazione dei dati usando Great Expectations
-- `/otlp`: invia i risultati delle validazioni al sistema di monitoraggio tramite OpenTelemetry
+- `/otlp`: invia i risultati delle validazioni al collector di piattaforma tramite OpenTelemetry
 
-Entrambe le cartelle contengono il file sorgente, a tendere potranno essere deployati come librerie indipendenti e importate direttamente nel notebook.
+**NB:** questo profgetto contiene i file sorgenti dei moduli per il quality sidecar. In ambiente Eni, il sidecar è centralizzato in un notebook di Databricks. Entrambe le cartelle potranno poi essere distribuite come librerie indipendenti e importate direttamente nel notebook.
 
 ## Navigazione del codice e struttura
 
