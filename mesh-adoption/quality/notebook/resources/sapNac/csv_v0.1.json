@@ -52,7 +52,7 @@
                 }
             },
             {
-                "check_name": "PrezzoSbilanciamento-PrezzoBase-ExpectColumnPairValuesAToBeGreaterThanB",
+                "check_name": "sapNac-PrezzoSbilanciamento-PrezzoBase-ExpectColumnPairValuesAToBeGreaterThanB",
                 "expectation_type": "ExpectColumnPairValuesAToBeGreaterThanB",
                 "asset_name": "ddsdltdb.prezzigiornalieriquartoorari",
                 "asset_kwargs": {
@@ -65,7 +65,7 @@
                 }
             },
             {
-                "check_name": "ComponenteIncentivante-ExpectColumnValuesToBeBetween",
+                "check_name": "sapNac-ComponenteIncentivante-ExpectColumnValuesToBeBetween",
                 "expectation_type": "ExpectColumnValuesToBeBetween",
                 "asset_name": "ddsdltdb.prezzigiornalieriquartoorari",
                 "asset_kwargs": {

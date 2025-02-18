@@ -26,18 +26,14 @@ def configure_expectations_and_run_validations(json_file, data_product_name):
         system_name = system["system_name"]
         system_type = system["system_type"]
 
-        data_source = get_existing_data_source(context, system_name)
-        if not data_source:
-            data_source = add_data_source(context, system_name)
+        data_source = add_data_source(context, system_name)
 
         for expectation in system["expectations"]:
             asset_name = expectation["asset_name"]
             check_name = expectation["check_name"]
             expectation_type = expectation["expectation_type"]
 
-            data_asset = get_existing_data_asset(data_source, asset_name)
-            if not data_asset:
-                data_asset = add_data_asset(data_source, asset_name)
+            data_asset = add_data_asset(data_source, asset_name)
 
             batch_definition = add_whole_batch_definition(data_asset, check_name)
             

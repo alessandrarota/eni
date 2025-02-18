@@ -1,31 +1,31 @@
 # Quality Sidecar
 
 
-Questo sidecar integra **Great Expectations** con **OpenTelemetry** per eseguire validazioni su DataFrame e monitorare le metriche, utilizzando una configurazione personalizzata, e generare dei risultati in formato OTLP.
+Il quality sidecar integra due moduli principali, **GX (Great Expectations)** e **OTLP (OpenTelemetry Protocol)**, per gestire e monitorare la qualità dei dati di un prodotto. L'obiettivo è applicare controlli di qualità sui dati tramite Great Expectations, e inviare le metriche di qualità tramite protocollo e specifica OpenTelemetry, usando SDK Python per OTLP.
 
 ## Struttura del progetto
 
 Il progetto è strutturato come segue:
 
 ```
-├── builds/
-    └── app.py
-    └── gx_setup/
-        └── gx_dataframe.py
-└── resources/
-    └── gx_v0.1.json
-    └── ...
-├── Dockerfile
-├── requirements.txt
+├── quality.ipynb
+├── /quality_sidecar
+    └── /gx
+        └── ...
+    └── /otlp   
+        └── ...
+└── /resources  # Cartella per i file di configurazione e dati
+    └── /<data_product>
+        └── <expectations_file>.json  # File JSON con le aspettative di qualità per un prodotto specifico
+        └── ... # Ulteriori file per il calcolo dei risultati (file csv)
+
 ```
 
-### Descrizione di file e cartelle
+La cartella `/quality_sidecar` contiene i moduli Python che gestiscono la logica di monitoraggio e validazione della qualità dei dati:
+- `/gx`: gestisce la validazione dei dati usando Great Expectations
+- `/otlp`: invia i risultati delle validazioni al sistema di monitoraggio tramite OpenTelemetry
 
-- **Dockerfile**: Definisce l'immagine del container e le fasi di installazione delle dipendenze, esecuzione dei test, e configurazione dell'ambiente per l'esecuzione dell'applicazione.
-- **requirements.txt**: Contiene tutte le dipendenze Python necessarie per il progetto (ad esempio `great_expectations`, `opentelemetry` e `pandas`).
-- **/builds/app.py**: Contiene la logica principale del sidecar: legge il file JSON di configurazione, imposta e valida le aspettative di Great Expectations, e utilizza OpenTelemetry per formattare ed inviare le metriche.
-- **/gx_setup/gx_dataframe.py**: Contiene funzioni per configurare Great Expectations per il suo utilizzo sui DataFrame nello specifico, inclusa l'aggiunta di sorgenti dati, asset, suite di aspettative e definizioni di validazioni.
-- **/resources**: La cartella contiene i file JSON di configurazione per definire i dati da validare e le aspettative di Great Expectations.
+Entrambe le cartelle contengono il file sorgente, a tendere potranno essere deployati come librerie indipendenti e importate direttamente nel notebook.
 
 ## Navigazione del codice e struttura
 
