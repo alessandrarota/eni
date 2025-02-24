@@ -71,7 +71,7 @@ class UnityConnector(SystemConnector):
                 raise ValueError("Both schema and table should be specified in 'data_asset_name'.")
 
             # Running the query on Unity Catalog
-            query = f"SELECT * FROM {self.system_name}.{schema}.{table}"
+            query = f"SELECT * FROM `{self.system_name}`.`{schema}`.`{table}`"
             df_spark = spark.sql(query)
 
             df = df_spark.toPandas()

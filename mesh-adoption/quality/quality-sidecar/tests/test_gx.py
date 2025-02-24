@@ -1,7 +1,7 @@
 import pytest
 from datetime import datetime
 import logging
-from data_quality_gx import load_json_file, configure_expectations_and_run_validations
+from qualitysidecar_gx import load_json_file, configure_expectations_and_run_validations
 import os
 import pandas as pd
 

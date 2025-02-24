@@ -10,3 +10,5 @@ opentelemetry-util-http==0.49b2
 wrapt==1.16.0
 pytest
 pyspark
+python-dotenv
+sh

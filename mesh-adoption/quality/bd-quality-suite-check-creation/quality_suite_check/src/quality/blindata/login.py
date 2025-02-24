@@ -4,7 +4,7 @@ import logging
 from quality.configurations.ConfigurationProperties import BaseConfig
 
 
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 
 
 def get_bearer_token(configuration: BaseConfig):

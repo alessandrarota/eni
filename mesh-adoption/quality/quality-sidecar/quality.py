@@ -4,7 +4,8 @@ import logging
 import time
 import shlex
 import json
-from gx.data_quality_gx import validate_data_quality
+from qualitysidecar.qualitysidecar.qualitysidecar_gx import validate_data_quality
+from qualitysidecar.qualitysidecar.qualitysidecar_otlp import send_metric
 import subprocess
 
 # Logging configuration
@@ -19,15 +20,12 @@ def main(json_file_path, data_product_name):
     try:
         logging.info("Running GX functions...")
         # Running GX module
-        validation_results = validate_data_quality(json_file_path, data_product_name)
+        validation_results = validate_data_quality(json_file_path)
         logging.info(f"GX Validation Results: {validation_results}")
 
         # Running OTLP functions with subprocess
         logging.info("Running OTLP functions...")
-        command = f"opentelemetry-instrument --metrics_exporter otlp,console --logs_exporter otlp,console python -m data_quality_otlp {shlex.quote(json.dumps(validation_results))} \"{data_product_name}\""
-        result = subprocess.run(command, shell=True, check=True)
-
-        logging.info(result)
+        result = send_metric(validation_results)
 
     except Exception as e:
         logging.error(f"An error occurred during application execution: {e}")
@@ -38,13 +36,5 @@ def main(json_file_path, data_product_name):
 if __name__ == "__main__":
     expectations_json_file_path = os.getenv("EXPECTATIONS_JSON_FILE_PATH")
     data_product_name = os.getenv("DATA_PRODUCT_NAME")
-
-    if not expectations_json_file_path:
-        logging.error("The environment variable EXPECTATIONS_JSON_FILE_PATH is not set or is empty!")
-        sys.exit(1)
-
-    if not data_product_name:
-        logging.error("The environment variable DATA_PRODUCT_NAME is not set or is empty!")
-        sys.exit(1)
 
     main(expectations_json_file_path, data_product_name)

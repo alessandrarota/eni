@@ -74,26 +74,27 @@ services:
   #     context: ./quality-sidecar
   #   container_name: quality-sidecar
   #   environment:
-  #     #- OTEL_EXPORTER_OTLP_ENDPOINT=${OTEL_EXPORTER_ENDPOINT}
-  #     #- OTEL_EXPORTER_OTLP_ENDPOINT=https://api-app.eni.com/sd-xops/otel-collector
-  #     - OTEL_EXPORTER_OTLP_ENDPOINT=http://platform-collector:4318
-  #     - OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf
+  #     - ENV=development
   #     - OTEL_METRIC_EXPORT_INTERVAL=${OTEL_METRIC_EXPORT_INTERVAL}
-  #     - OTEL_SERVICE_NAME=${OTEL_SERVICE_NAME}
   #     - DATA_PRODUCT_NAME=${DATA_PRODUCT_NAME}
   #     - EXPECTATIONS_JSON_FILE_PATH=${EXPECTATIONS_JSON_FILE_PATH}
   #   depends_on:
   #     - platform-collector
 
   jupyter:
-    image: jupyter/base-notebook
-    container_name: quality-sidecar-jupyter-notebook
-    ports:
-      - "8888:8888"  
+    build:
+      context: .
+      dockerfile: notebook/Dockerfile
     volumes:
-      - ./notebook:/home/jovyan  
+      #- ./quality-sidecar/qualitysidecar:/home/jovyan/quality/qualitysidecar
+      - ./notebook/quality:/home/jovyan/quality
+      #- /home/jovyan/.cache:/home/jovyan/.cache  # Usa questa riga per la cache
+    ports:
+      - "8888:8888"
     environment:
       - JUPYTER_TOKEN=password
+    user: root
+
 
   forwarder-1:
     build:
@@ -120,30 +121,30 @@ services:
       echo 'SQL Server is ready, starting the service...' && 
       python3 /app/src/main.py"
 
-  forwarder-2:
-    build:
-      context: ./forwarder
-    container_name: forwarder-2
-    environment:
-      - ENV=development
-      - DATABASE_URL=${DATABASE_URL}
-      - BLINDATA_FORWARDER_USERNAME=${BLINDATA_FORWARDER_USERNAME}
-      - BLINDATA_FORWARDER_PASSWORD=${BLINDATA_FORWARDER_PASSWORD}
-      - BLINDATA_TENANT_ID=${BLINDATA_TENANT_ID}
-      - SCHEDULE_INTERVAL=${SCHEDULE_INTERVAL}
-    ports:
-      - "5001:5001"
-    depends_on:
-      - platform-local-metastore
-      - sql-init
-    entrypoint: >
-      /bin/bash -c "sleep 10 && 
-      until nc -zv platform-local-metastore 1433; do 
-        echo 'Waiting for SQL Server to be ready...' && 
-        sleep 5; 
-      done && 
-      echo 'SQL Server is ready, starting the service...' && 
-      python3 /app/src/main.py"
+  # forwarder-2:
+  #   build:
+  #     context: ./forwarder
+  #   container_name: forwarder-2
+  #   environment:
+  #     - ENV=development
+  #     - DATABASE_URL=${DATABASE_URL}
+  #     - BLINDATA_FORWARDER_USERNAME=${BLINDATA_FORWARDER_USERNAME}
+  #     - BLINDATA_FORWARDER_PASSWORD=${BLINDATA_FORWARDER_PASSWORD}
+  #     - BLINDATA_TENANT_ID=${BLINDATA_TENANT_ID}
+  #     - SCHEDULE_INTERVAL=${SCHEDULE_INTERVAL}
+  #   ports:
+  #     - "5001:5001"
+  #   depends_on:
+  #     - platform-local-metastore
+  #     - sql-init
+  #   entrypoint: >
+  #     /bin/bash -c "sleep 10 && 
+  #     until nc -zv platform-local-metastore 1433; do 
+  #       echo 'Waiting for SQL Server to be ready...' && 
+  #       sleep 5; 
+  #     done && 
+  #     echo 'SQL Server is ready, starting the service...' && 
+  #     python3 /app/src/main.py"
 
 volumes:
   sql-data:

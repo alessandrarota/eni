@@ -9,7 +9,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-ENV PYTHONPATH=/app/build/gx:/app/build/otlp
+#ENV PYTHONPATH=/app/quality_sidecar/gx:/app/quality_sidecar/otlp
+ENV PYTHONPATH=/app/qualitysidecar/qualitysidecar
 
 ENV EXPECTATIONS_JSON_FILE_PATH=resources/gx_v0.1.json
 ENV OTEL_METRIC_EXPORT_INTERVAL=10000
@@ -24,7 +25,4 @@ ENV OTEL_LOG_LEVEL=DEBUG \
     OTEL_PYTHON_LOGGING_AUTO_INSTRUMENTATION_ENABLED=true
 
 ENV OTEL_PYTHON_DISABLED_INSTRUMENTATIONS=http,requests
-
-#CMD ["opentelemetry-instrument", "--metrics_exporter", "otlp,console", "--logs_exporter", "otlp,console", "python", "build/app.py", "${EXPECTATIONS_JSON_FILE_PATH}"]
-#CMD ["sh", "-c", "opentelemetry-instrument --metrics_exporter otlp,console --logs_exporter otlp,console python build/app.py $EXPECTATIONS_JSON_FILE_PATH"]
-CMD ["python", "build/quality.py"]
+CMD ["python", "quality.py"]

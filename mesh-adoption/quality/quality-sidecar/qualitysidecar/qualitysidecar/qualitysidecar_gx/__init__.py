@@ -1,12 +1,13 @@
 import sys
 import json
+import os
 import great_expectations as gx
 from .setup.dataframe import *
 from .connectors.SystemConnector import *
 
 # Logging configuration
 logging.getLogger("great_expectations").setLevel(logging.WARNING)
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 
 def load_json_file(file_path):
     try:
@@ -59,13 +60,23 @@ def configure_expectations_and_run_validations(json_file, data_product_name):
 
     return validation_results
 
-def validate_data_quality(json_file_path, data_product_name):
+def validate_data_quality(json_file_path):
     try:
+        env = os.getenv("ENV")
+        if not env:
+            logging.error(f"Environment variable {env} not found. Using system environment variables.")
+            raise ValueError("ENV is required.")
+
+        data_product_name = os.getenv("DATA_PRODUCT_NAME")
+        if not data_product_name:
+            logging.error(f"Environment variable {data_product_name} not found. Using system environment variables.")
+            raise ValueError("DATA_PRODUCT_NAME is required.")
+        
         logging.info("Reading the JSON configuration file...")
         json_file = load_json_file(json_file_path)
 
         logging.info("Configuring Expectations and running Validations...")
-        validation_results = configure_expectations_and_run_validations(json_file, data_product_name)
+        validation_results = configure_expectations_and_run_validations(json_file, os.getenv("DATA_PRODUCT_NAME"))
 
         return validation_results
 

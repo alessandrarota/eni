@@ -5,7 +5,7 @@ import logging
 from datetime import datetime, timezone
 from sqlalchemy.orm import class_mapper
 
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 Base = declarative_base()
 
 class MetricHistory(Base):

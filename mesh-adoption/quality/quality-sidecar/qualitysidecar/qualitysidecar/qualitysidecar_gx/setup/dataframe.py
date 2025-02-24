@@ -2,7 +2,7 @@ from great_expectations.expectations.expectation_configuration import Expectatio
 import logging
 import great_expectations as gx
 
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 
 def add_data_source(context, data_source_name):
     data_source = get_existing_data_source(context, data_source_name)

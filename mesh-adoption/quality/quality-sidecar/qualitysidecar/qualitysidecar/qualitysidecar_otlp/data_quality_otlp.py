@@ -3,9 +3,10 @@ import logging
 from opentelemetry import metrics
 from opentelemetry.metrics import Observation
 import json
+import os
 
 # Logging configuration
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 
 # Setup meter for metric creation
 meter = metrics.get_meter(__name__)
@@ -44,10 +45,10 @@ def create_observations_callback(validation_results):
 
     return callback 
 
-def main(validation_results, data_product_name):
+def main(validation_results):
     try:
         logging.info("Creating OTLP Metric...")
-        create_otlp_metric(validation_results, data_product_name)
+        create_otlp_metric(validation_results, os.getenv("DATA_PRODUCT_NAME"))
         logging.info("Observations created!")
 
     except Exception as e:
@@ -56,5 +57,4 @@ def main(validation_results, data_product_name):
 
 if __name__ == "__main__":
     validation_results = sys.argv[1]  
-    data_product_name = sys.argv[2] 
-    main(json.loads(validation_results), data_product_name)
+    main(json.loads(validation_results))

@@ -7,7 +7,7 @@ from datetime import datetime
 import threading
 import time
 
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 
 # Variabili globali per memorizzare il token e la sua scadenza
 token_lock = threading.Lock()
