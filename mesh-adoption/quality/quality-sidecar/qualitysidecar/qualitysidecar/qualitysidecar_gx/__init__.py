@@ -2,8 +2,10 @@ import sys
 import json
 import os
 import great_expectations as gx
-from .setup.dataframe import *
+#from .setup.dataframe import *
 from .connectors.SystemConnector import *
+from .setup.data import SparkDataSource, PandasDataSource
+from .setup.expectation import get_expectation_class
 
 # Logging configuration
 logging.getLogger("great_expectations").setLevel(logging.WARNING)
@@ -20,6 +22,8 @@ def load_json_file(file_path):
 def configure_expectations_and_run_validations(json_file, data_product_name):
     # setup gx context
     context = gx.get_context()
+    #data_source_manager = SparkDataSource(context)
+    data_source_manager = PandasDataSource(context)
     
     validation_results = []
 
@@ -27,16 +31,16 @@ def configure_expectations_and_run_validations(json_file, data_product_name):
         system_name = system["system_name"]
         system_type = system["system_type"]
 
-        data_source = add_data_source(context, system_name)
+        data_source = data_source_manager.add_data_source(system_name)
 
         for expectation in system["expectations"]:
             asset_name = expectation["asset_name"]
             check_name = expectation["check_name"]
             expectation_type = expectation["expectation_type"]
 
-            data_asset = add_data_asset(data_source, asset_name)
+            data_asset = data_source_manager.add_data_asset(data_source, asset_name)
 
-            batch_definition = add_whole_batch_definition(data_asset, check_name)
+            batch_definition = data_source_manager.add_whole_batch_definition(data_asset, check_name)
             
             connector = get_connector(
                 system_type=system_type,
@@ -51,8 +55,8 @@ def configure_expectations_and_run_validations(json_file, data_product_name):
                 expectation_instance = ExpectationClass(**expectation["kwargs"], meta={"check_name": check_name, "data_product_name": data_product_name})
                 logging.info(f"Expectation instance created: {expectation_instance}")
 
-                batch = add_batch_to_batch_definition(batch_definition, connector.get_dataframe())
-                validation_result = validate_expectation_on_batch(batch, expectation_instance)
+                batch = data_source_manager.add_batch_to_batch_definition(batch_definition, connector.get_dataframe())
+                validation_result = data_source_manager.validate_expectation_on_batch(batch, expectation_instance)
 
             validation_results.append(validation_result.to_json_dict()) 
 

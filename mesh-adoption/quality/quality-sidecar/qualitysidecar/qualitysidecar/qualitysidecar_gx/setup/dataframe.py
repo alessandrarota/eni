@@ -1,4 +1,3 @@
-from great_expectations.expectations.expectation_configuration import ExpectationConfiguration
 import logging
 import great_expectations as gx
 
@@ -14,11 +13,21 @@ def get_existing_data_source(context, data_source_name):
     except Exception:
         return None
 
-def add_data_asset(data_source, data_asset_name):
-    data_asset = get_existing_data_asset(data_source, data_asset_name)
+def add_data_asset_pandas(data_source, data_asset_name):
+    data_asset = get_existing_data_asset_pandas(data_source, data_asset_name)
     return data_asset if data_asset else data_source.add_dataframe_asset(name=data_asset_name)
 
-def get_existing_data_asset(data_source, data_asset_name):
+def get_existing_data_asset_pandas(data_source, data_asset_name):
+    try:
+        return data_source.get_asset(data_asset_name)  
+    except Exception:
+        return None
+    
+def add_data_asset_spark(data_source, data_asset_name):
+    data_asset = get_existing_data_asset_spark(data_source, data_asset_name)
+    return data_asset if data_asset else data_source.add_dataframe_asset(name=data_asset_name)
+
+def get_existing_data_asset_spark(data_source, data_asset_name):
     try:
         return data_source.get_asset(data_asset_name)  
     except Exception:

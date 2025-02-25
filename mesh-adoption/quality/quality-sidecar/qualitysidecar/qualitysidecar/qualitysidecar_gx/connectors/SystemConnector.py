@@ -8,7 +8,7 @@ class SystemConnector(ABC):
     def __init__(self, system_type, system_name, asset_name, **kwargs):
         self.system_type = system_type
         self.system_name = system_name
-        self.data_asset_name = asset_name
+        self.asset_name = asset_name
         self.kwargs = kwargs if kwargs else {} 
         self.dataframe= None
     
@@ -24,6 +24,14 @@ class SystemConnector(ABC):
     def set_dataframe(self, df):
         self.dataframe = df
 
+    @staticmethod
+    def get_or_create_spark_session(app_name="SparkSession"):
+        try:
+            return spark
+        except NameError:
+            logging.info("Creating new SparkSession...")
+            return SparkSession.builder.appName(app_name).getOrCreate()
+
 
 class CSVConnector(SystemConnector):
     def extract(self):
@@ -31,6 +39,11 @@ class CSVConnector(SystemConnector):
             path = self.kwargs.get('path')
             if not path:
                 raise ValueError("The 'path' parameter is required.")
+            
+            # spark = self.get_or_create_spark_session("CSVConnector")
+            # df_spark = spark.read.csv(path, header=True, inferSchema=True)
+            # self.set_dataframe(df_spark)
+
             df = pd.read_csv(path)
             self.set_dataframe(df)
         except Exception as e:
@@ -42,13 +55,8 @@ class HiveConnector(SystemConnector):
     def extract(self):
         try:
             spark = SparkSession.builder.appName("HiveConnector").getOrCreate()
-
-            schema, table = self.data_asset_name.split(".")
-
-            if not schema or not table:
-                raise ValueError("Both schema and table should be specified in 'data_asset_name'.")
             
-            query = f"SELECT * FROM {schema}.{table}"
+            query = f"SELECT * FROM {self.system_name}.{self.asset_name}"
             df_spark = spark.sql(query)
 
             df = df_spark.toPandas()
@@ -65,7 +73,7 @@ class UnityConnector(SystemConnector):
             spark = SparkSession.builder.appName("UnityConnector").getOrCreate()
 
             # Parsing schema and table name
-            schema, table = self.data_asset_name.split(".")
+            schema, table = self.asset_name.split(".")
 
             if not schema or not table:
                 raise ValueError("Both schema and table should be specified in 'data_asset_name'.")
