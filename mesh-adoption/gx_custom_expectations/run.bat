@@ -1,12 +1,13 @@
 @echo off
 echo Stopping and removing previous container...
-docker rm -f gx_manage_result
+docker rm -f gx_custom_expectations
 
 echo Building new Docker image...
-docker build -t gx_manage_result .
+docker build -t gx_custom_expectations .
 
 echo Running the new Docker container and keeping it alive...
-docker run -d --name gx_manage_result gx_manage_result /bin/bash -c "python gx_manage_result.py && tail -f /dev/null"
+REM docker run -d --name gx_manage_result gx_manage_result /bin/bash -c "python gx_manage_result.py && tail -f /dev/null"
+docker run -d --name gx_custom_expectations gx_custom_expectations
 
 echo Displaying container logs...
-docker logs -f gx_manage_result
+docker logs -f gx_custom_expectations

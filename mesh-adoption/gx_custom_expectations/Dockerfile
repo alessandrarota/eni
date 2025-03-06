@@ -13,4 +13,5 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-CMD ["python", "gx_manage_result.py"]
+#CMD ["python", "gx_manage_result.py"]
+CMD ["python", "custom_expectations.py"]
