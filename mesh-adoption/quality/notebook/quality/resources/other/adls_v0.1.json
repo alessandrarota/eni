@@ -1,0 +1,44 @@
+[
+    {
+        "system_name": "dlswweictdddstemp001",
+        "system_type": "ADLS",
+        "expectations": [
+            {
+                "check_name": "wrong_check_name1",
+                "expectation_type": "ExpectColumnValuesToNotBeNull",
+                "asset_name": "trusted",
+                "asset_kwargs": {
+                    "path": "ddsdltdb/segnogiornalieroquartoorario", 
+                    "type": "delta"  
+                },
+                "kwargs": {
+                    "column": "PK"
+                }
+            },
+            {
+                "check_name": "wrong_check_name2",
+                "expectation_type": "ExpectColumnValuesToNotBeNull",
+                "asset_name": "raw",
+                "asset_kwargs": {
+                    "path": "QuarantineCsv/CustomerCSV/20240826/customer.csv", 
+                    "type": "csv"  
+                },
+                "kwargs": {
+                    "column": "PK"
+                }
+            },
+            {
+                "check_name": "wrong_check_name",
+                "expectation_type": "ExpectColumnValuesToNotBeNull",
+                "asset_name": "raw",
+                "asset_kwargs": {
+                    "path": "extraction/finalresult/dailyuserdata/20250218/_delta_log/00000000000000000001.json", 
+                    "type": "json"  
+                },
+                "kwargs": {
+                    "column": "PK"
+                }
+            }
+        ]
+    }
+]

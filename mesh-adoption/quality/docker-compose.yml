@@ -11,6 +11,19 @@ services:
       - "${SQLSERVER_PORT}:${SQLSERVER_PORT}"
     volumes:
       - sql-data:/var/opt/mssql
+
+
+  # platform-local-metastore:
+  #   image: postgres:latest
+  #   container_name: platform-local-metastore
+  #   environment:
+  #     - POSTGRES_USER=sa
+  #     - POSTGRES_PASSWORD=${SA_PASSWORD}
+  #     - POSTGRES_DB=${DB_NAME}
+  #   ports:
+  #     - "${POSTGRES_PORT}:${POSTGRES_PORT}"
+  #   # volumes:
+  #   #   - pg-data:/var/lib/postgresql/data
     
 
   sql-init:
@@ -28,6 +41,29 @@ services:
       done &&
       /opt/mssql-tools/bin/sqlcmd -S platform-local-metastore -U sa -P ${SA_PASSWORD} -i /platform-local-metastore/init.sql"
     
+  # sql-init:
+  #   image: postgres:latest
+  #   container_name: sql-init
+  #   depends_on:
+  #     - platform-local-metastore
+  #   environment:
+  #     - POSTGRES_USER=sa
+  #     - POSTGRES_PASSWORD=${SA_PASSWORD}
+  #     - POSTGRES_DB=${DB_NAME}
+  #   volumes:
+  #     - ./platform-local-metastore:/platform-local-metastore
+  #   entrypoint: >
+  #     /bin/bash -c "
+  #     echo 'Waiting for PostgreSQL to start...' &&
+  #     sleep 10 &&
+  #     until pg_isready -h platform-local-metastore -U sa; do
+  #       echo 'Waiting for PostgreSQL to be ready...'
+  #       sleep 5
+  #     done &&
+  #     echo 'PostgreSQL is ready, running init.sql' &&
+  #     PGPASSWORD=${SA_PASSWORD} psql -h platform-local-metastore -U sa -d ${POSTGRES_DB} -f /platform-local-metastore/init.sql &&
+  #     echo 'Database initialized successfully!'"
+
 
   platform-quality-receiver:
     build:

@@ -2,89 +2,92 @@ import sys
 import json
 import os
 import great_expectations as gx
-#from .setup.dataframe import *
 from .connectors.SystemConnector import *
 from .setup.data import SparkDataSource, PandasDataSource
 from .setup.expectation import get_expectation_class
+from .utils.utils import clean_kwargs_columns
 
 # Logging configuration
 logging.getLogger("great_expectations").setLevel(logging.WARNING)
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 
-def load_json_file(file_path):
+def extract_configurations(file_path):
     try:
         with open(file_path, "r") as f:
-            return json.load(f)
+            data = json.load(f)
+            
+            if not isinstance(data, list) or not data:
+                logging.error("Invalid JSON format: Expected a list with at least one element.")
+                sys.exit(1)
+            
+            system_name = data[0].get("system_name", "Unknown")
+            system_type = data[0].get("system_type", "Unknown")
+            
+            expectations = data[0].get("expectations", [])
+            for exp in expectations:
+                exp["system_name"] = system_name
+                exp["system_type"] = system_type
+            
+            return expectations
     except (FileNotFoundError, json.JSONDecodeError) as e:
         logging.error(f"Error reading or decoding the JSON file: {file_path} - {e}")
         sys.exit(1)
 
-def configure_expectations_and_run_validations(json_file, data_product_name):
-    # setup gx context
-    context = gx.get_context()
-    #data_source_manager = SparkDataSource(context)
-    data_source_manager = PandasDataSource(context)
-    
-    validation_results = []
+def retrieve_dataframe_from_configuration(configuration):
+    system_name = configuration.get("system_name", "unknown")
+    system_type = configuration.get("system_type", "unknown")
 
-    for system in json_file:
-        system_name = system["system_name"]
-        system_type = system["system_type"]
+    asset_name = configuration.get("asset_name", "unknown")
+    check_name = configuration.get("check_name", "unknown")
+    asset_kwargs = configuration.get("asset_kwargs", {})
 
-        data_source = data_source_manager.add_data_source(system_name)
-
-        for expectation in system["expectations"]:
-            asset_name = expectation["asset_name"]
-            check_name = expectation["check_name"]
-            expectation_type = expectation["expectation_type"]
-
-            data_asset = data_source_manager.add_data_asset(data_source, asset_name)
-
-            batch_definition = data_source_manager.add_whole_batch_definition(data_asset, check_name)
-            
-            connector = get_connector(
-                system_type=system_type,
-                system_name=system_name,
-                asset_name=asset_name,
-                asset_kwargs=expectation.get("asset_kwargs", {})
-            )
-
-            ExpectationClass = get_expectation_class(expectation_type)
-
-            if ExpectationClass is not None:
-                expectation_instance = ExpectationClass(**expectation["kwargs"], meta={"check_name": check_name, "data_product_name": data_product_name})
-                logging.info(f"Expectation instance created: {expectation_instance}")
-
-                batch = data_source_manager.add_batch_to_batch_definition(batch_definition, connector.get_dataframe())
-                validation_result = data_source_manager.validate_expectation_on_batch(batch, expectation_instance)
-
-            validation_results.append(validation_result.to_json_dict()) 
-
-        logging.info("Validation Results created!")
-
-    return validation_results
-
-def validate_data_quality(json_file_path):
     try:
-        env = os.getenv("ENV")
-        if not env:
-            logging.error(f"Environment variable {env} not found. Using system environment variables.")
-            raise ValueError("ENV is required.")
+        connector = get_connector(
+            system_type=system_type,
+            system_name=system_name,
+            asset_name=asset_name,
+            asset_kwargs=asset_kwargs
+        )
 
-        data_product_name = os.getenv("DATA_PRODUCT_NAME")
-        if not data_product_name:
-            logging.error(f"Environment variable {data_product_name} not found. Using system environment variables.")
-            raise ValueError("DATA_PRODUCT_NAME is required.")
-        
-        logging.info("Reading the JSON configuration file...")
-        json_file = load_json_file(json_file_path)
-
-        logging.info("Configuring Expectations and running Validations...")
-        validation_results = configure_expectations_and_run_validations(json_file, os.getenv("DATA_PRODUCT_NAME"))
-
-        return validation_results
-
+        return connector.extract()            
     except Exception as e:
-        logging.error(f"An error occurred during application execution: {e}")
-        sys.exit(1)
+        logging.error(f"Error processing expectation {check_name} for system {system_name}: {e}")
 
+def run_validations(configuration, dataframe):
+    data_product_name = os.getenv("DATA_PRODUCT_NAME")
+    if not data_product_name:
+        logging.error(f"Environment variable {data_product_name} not found.")
+        raise ValueError("DATA_PRODUCT_NAME is required.")
+    
+    context = gx.get_context()
+    data_source_manager = SparkDataSource(context)
+
+    system_name = configuration.get("system_name", "unknown")
+    expectation_type = configuration.get("expectation_type", "unknown")
+    kwargs = configuration.get("kwargs", {})
+    asset_name = configuration.get("asset_name", "unknown")
+    check_name = configuration.get("check_name", "unknown")
+
+    try:
+        data_source = data_source_manager.add_data_source(system_name)
+    except Exception as e:
+        logging.error(f"Error adding data source for system {system_name}: {e}")
+
+    try:
+        data_asset = data_source_manager.add_data_asset(data_source, asset_name)
+        batch_definition = data_source_manager.add_whole_batch_definition(data_asset, check_name)
+        ExpectationClass = get_expectation_class(expectation_type)
+        
+        if ExpectationClass is not None:
+            expectation_instance = ExpectationClass(
+                **clean_kwargs_columns(kwargs),
+                meta={"check_name": check_name, "data_product_name": data_product_name}
+            )
+            logging.info(f"Expectation instance created: {expectation_instance}")
+            
+            batch = data_source_manager.add_batch_to_batch_definition(batch_definition, dataframe)
+            validation_result = data_source_manager.validate_expectation_on_batch(batch, expectation_instance)
+            return validation_result.to_json_dict()
+        
+    except Exception as e:
+        logging.error(f"Error processing expectation {check_name} for system {system_name}: {e}")

@@ -1,6 +1,12 @@
 FROM jupyter/base-notebook:latest
 
 USER root
+
+RUN apt-get update && \
+    apt-get install -y default-jre default-jdk
+
+ENV JAVA_HOME=/usr/lib/jvm/default-java
+
 WORKDIR /home/jovyan/quality
 
 # Copia il pacchetto qualitysidecar nel contenitore

@@ -4,7 +4,7 @@ import logging
 import time
 import shlex
 import json
-from qualitysidecar.qualitysidecar.qualitysidecar_gx import validate_data_quality
+from qualitysidecar.qualitysidecar.qualitysidecar_gx import extract_configurations, retrieve_dataframe_from_configuration, run_validations 
 from qualitysidecar.qualitysidecar.qualitysidecar_otlp import send_metric
 import subprocess
 
@@ -20,12 +20,13 @@ def main(json_file_path, data_product_name):
     try:
         logging.info("Running GX functions...")
         # Running GX module
-        validation_results = validate_data_quality(json_file_path)
-        logging.info(f"GX Validation Results: {validation_results}")
+        configurations = extract_configurations(json_file_path)
+        results = []
 
-        # Running OTLP functions with subprocess
-        logging.info("Running OTLP functions...")
-        result = send_metric(validation_results)
+        for configuration in configurations:
+            dataframe = retrieve_dataframe_from_configuration(configuration)
+            results.append(run_validations(configuration, dataframe))
+        logging.info(f"GX Validation Results: {results}")
 
     except Exception as e:
         logging.error(f"An error occurred during application execution: {e}")

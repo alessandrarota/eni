@@ -6,7 +6,7 @@ import shlex
 import sys
 import sh
 from dotenv import load_dotenv
-from .configurations.environment import DevelopmentConfig, TestingConfig, ProductionConfig
+from .configurations.environment import DevelopmentConfig, TestingConfig, ProductionConfig, BaseConfig
 
 logging.basicConfig(
     level=logging.INFO, 
@@ -16,7 +16,7 @@ logging.getLogger('sh').setLevel(logging.CRITICAL)
 
 
 def load_env(env_folder="configurations"):
-    env = os.getenv("ENV", "sd")
+    env = os.getenv("ENV")
     data_product_name = os.getenv("DATA_PRODUCT_NAME")
 
     
@@ -27,11 +27,11 @@ def load_env(env_folder="configurations"):
     elif env == 'pr':
         config_class = ProductionConfig
     else:
-        raise ValueError("Unknown environment")
+        config_class = BaseConfig
 
-    # Imposta le variabili d'ambiente
     os.environ["OTEL_EXPORTER_OTLP_PROTOCOL"] = config_class.OTEL_EXPORTER_OTLP_PROTOCOL
     os.environ["OTEL_EXPORTER_OTLP_ENDPOINT"] = config_class.OTEL_EXPORTER_OTLP_ENDPOINT
+    logging.info(f"OTEL_EXPORTER_OTLP_ENDPOINT set to {os.environ['OTEL_EXPORTER_OTLP_ENDPOINT']}")
 
     os.environ["OTEL_SERVICE_NAME"] = f"{data_product_name}-quality_sidecar"
     logging.info(f"OTEL_SERVICE_NAME set to {os.environ['OTEL_SERVICE_NAME']}")

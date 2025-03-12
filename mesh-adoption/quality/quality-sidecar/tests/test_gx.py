@@ -1,19 +1,22 @@
 import pytest
 from datetime import datetime
 import logging
-from qualitysidecar_gx import load_json_file, configure_expectations_and_run_validations
+from qualitysidecar_gx import extract_configurations, retrieve_dataframe_from_configuration, run_validations
 import os
 import pandas as pd
 
-def execute_main_without_loop(path, data_product_name):
-    gx_json_data = load_json_file(path)
+def execute_main_without_loop(path):
+    configurations = extract_configurations(path)
+    results = []
 
-    return configure_expectations_and_run_validations(gx_json_data, data_product_name)
+    for configuration in configurations:
+        dataframe = retrieve_dataframe_from_configuration(configuration)
+        results.append(run_validations(configuration, dataframe))
+
+    return results
 
 def test_gx_v1():
-    validation_results = execute_main_without_loop('/app/tests/resources/v1/csv_v1.json', "v1")
-
-    print(validation_results)
+    validation_results = execute_main_without_loop('/app/tests/resources/v1/csv_v1.json')
 
     assert len(validation_results) == 4
 
@@ -51,7 +54,7 @@ def test_gx_v1():
     assert result["expectation_config"]["meta"]["check_name"] == "check4"
 
 def test_gx_v2():
-    validation_results = execute_main_without_loop('/app/tests/resources/v2/csv_v2.json', "v2")
+    validation_results = execute_main_without_loop('/app/tests/resources/v2/csv_v2.json')
 
     assert len(validation_results) == 3
 
@@ -65,7 +68,7 @@ def test_gx_v2():
 
     result = validation_results[1]
     assert result["success"] is True
-    assert result["result"]["observed_value"] == "float64"
+    assert result["result"]["observed_value"] == "DoubleType"
     assert result["expectation_config"]["type"] == "expect_column_values_to_be_of_type"
     assert result["expectation_config"]["meta"]["check_name"] == "check2"
 

@@ -48,7 +48,7 @@ class PandasDataSource(DataSource):
 class SparkDataSource(DataSource):
     def add_data_source(self, data_source_name):
         data_source = self.get_existing_data_source(data_source_name)
-        return data_source if data_source else self.context.data_sources.add_spark(data_source_name)
+        return data_source if data_source else self.context.data_sources.add_spark(data_source_name, persist=False)
 
     def get_existing_data_source(self, data_source_name):
         try:

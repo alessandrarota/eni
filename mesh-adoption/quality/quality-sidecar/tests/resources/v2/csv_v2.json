@@ -24,7 +24,7 @@
                 },
                 "kwargs": {
                     "column": "PurchaseAmount",
-                    "type_": "float64"
+                    "type_": "DoubleType"
                 }
             },
             {

@@ -1,0 +1,87 @@
+[
+    {
+        "system_name": "dlswweictdddstemp001",
+        "system_type": "ADLS",
+        "expectations": [
+            {
+                "check_name": "sapIess-dit_dicox_dpflab_dds2_dev-ddsdltdb.segnogiornalieroquartoorario-PK-ExpectColumnValuesToNotBeNull",
+                "expectation_type": "ExpectColumnValuesToNotBeNull",
+                "asset_name": "trusted",
+                "asset_kwargs": {
+                    "path": "ddsdltdb/segnogiornalieroquartoorario", 
+                    "type": "delta"  
+                },
+                "kwargs": {
+                    "column": "PK"
+                }
+            },
+            {
+                "check_name": "sapIess-dit_dicox_dpflab_dds2_dev-ddsdltdb.segnogiornalieroquartoorario-Macrozona-ExpectColumnValuesToBeInSet",
+                "expectation_type": "ExpectColumnValuesToBeInSet",
+                "asset_name": "trusted",
+                "asset_kwargs": {
+                    "path": "ddsdltdb/segnogiornalieroquartoorario", 
+                    "type": "delta"  
+                },
+                "kwargs": {
+                    "column": "Macrozona",
+                    "value_set": ["NORD", "SUD"]
+                }
+            },
+            {
+                "check_name": "sapIess-dit_dicox_dpflab_dds2_dev.ddsdltdb.segnogiornalieroquartoorario-ScambiMWh-ExpectColumnValuesToBeBetween",
+                "expectation_type": "ExpectColumnValuesToBeBetween",
+               "asset_name": "trusted",
+                "asset_kwargs": {
+                    "path": "ddsdltdb/segnogiornalieroquartoorario", 
+                    "type": "delta"  
+                },
+                "kwargs": {
+                    "column": "Scambi[MWh]",
+                    "min_value": -930,
+                    "max_value": 800
+                }
+            },
+            {
+                "check_name": "sapIess-dit_dicox_dpflab_dds2_dev.ddsdltdb.segnogiornalieroquartoorario-DataDiRiferimento-ExpectColumnValuesToMatchRegex",
+                "expectation_type": "ExpectColumnValuesToMatchRegex",
+                "asset_name": "trusted",
+                "asset_kwargs": {
+                    "path": "ddsdltdb/segnogiornalieroquartoorario", 
+                    "type": "delta"  
+                },
+                "kwargs": {
+                    "column": "DataDiRiferimento",
+                    "regex": "^\\d{2}/\\d{2}/\\d{4}$"
+                }
+            },
+            {
+                "check_name": "sapIess-PrezzoSbilanciamento-PrezzoBase-ExpectColumnPairValuesAToBeGreaterThanB",
+                "expectation_type": "ExpectColumnPairValuesAToBeGreaterThanB",
+                "asset_name": "trusted",
+                "asset_kwargs": {
+                    "path": "ddsdltdb/segnogiornalieroquartoorario", 
+                    "type": "delta"  
+                },
+                "kwargs": {
+                    "column_A": "PrezzoSbilanciamento",
+                    "column_B": "PrezzoBase",
+                    "or_equal": true
+                }
+            },
+            {
+                "check_name": "sapIess-ComponenteIncentivante-ExpectColumnValuesToBeBetween",
+                "expectation_type": "ExpectColumnValuesToBeBetween",
+                "asset_name": "trusted",
+                "asset_kwargs": {
+                    "path": "ddsdltdb/segnogiornalieroquartoorario", 
+                    "type": "delta"  
+                },
+                "kwargs": {
+                    "column": "ComponenteIncentivante",
+                    "min_value": 0
+                }
+            }
+        ]
+    }
+]
