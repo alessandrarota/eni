@@ -3,7 +3,8 @@ from setuptools import setup, find_packages
 setup(
     name='qualitysidecar',
     version='1.0',
-    packages=find_packages(),
+    package_dir={"": "src"},
+    packages=find_packages(where="src"),
     install_requires=[
         'great_expectations==1.3.5',
         'pyspark',

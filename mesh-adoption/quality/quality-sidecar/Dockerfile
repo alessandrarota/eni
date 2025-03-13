@@ -16,7 +16,7 @@ ENV JAVA_HOME=/usr/lib/jvm/default-java
 
 #ENV PYTHONPATH=/app/quality_sidecar/gx:/app/quality_sidecar/otlp
 #ENV PYTHONPATH=/app/qualitysidecar/qualitysidecar
-ENV PYTHONPATH=/app/qualitysidecar
+ENV PYTHONPATH=/app/src
 
 ENV EXPECTATIONS_JSON_FILE_PATH=resources/sapNac/csv_v0.1.json
 ENV OTEL_METRIC_EXPORT_INTERVAL=10000

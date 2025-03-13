@@ -4,8 +4,8 @@ import logging
 import time
 import shlex
 import json
-from qualitysidecar.qualitysidecar2.qualitysidecar_gx import extract_configurations, retrieve_dataframe_from_configuration, run_validations 
-from qualitysidecar.qualitysidecar2.qualitysidecar_otlp import send_metric
+from src.qualitysidecar_gx import extract_configurations, retrieve_dataframe_from_configuration, run_validations 
+from src.qualitysidecar_otlp import send_metric
 import subprocess
 
 # Logging configuration
