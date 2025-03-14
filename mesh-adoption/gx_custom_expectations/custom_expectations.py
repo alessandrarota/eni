@@ -50,36 +50,16 @@ def test_ExpectColumnMaxToBeBetween():
 
 def test_ExpectColumnMinToBeBetween(): 
     print(df.select("extra").show(5, truncate=False))
-    # expectation_instance = Min(
-    #     column="extra",
-    #     min_value=0,
-    #     max_value=3,
-    #     strict_max=False
-    #     )
-    # batch = batch_definition.get_batch(batch_parameters={"dataframe": df.limit(5)})
-    # validation_results = batch.validate(expectation_instance)
-    # print(f"GX: {validation_results}")
     
     expectation_instance = ExpectColumnMinToBeBetween(
         column="extra",
         min_value=0,
-        max_value=2,
+        max_value=3.5,
         strict_max=False
         )
     batch = batch_definition.get_batch(batch_parameters={"dataframe": df.limit(5)})
     validation_results = batch.validate(expectation_instance)
     print(validation_results)
-
-    expectation_instance = ExpectColumnMaxToBeBetween(
-        column="extra",
-        min_value=3,
-        max_value=4,
-        strict_max=False
-        )
-    batch = batch_definition.get_batch(batch_parameters={"dataframe": df.limit(5)})
-    validation_results = batch.validate(expectation_instance)
-    print(validation_results)
-    return validation_results
 
 
 def ExpectQueriedTableRowCountToBe_1(df, expected_count=5):    

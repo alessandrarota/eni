@@ -231,7 +231,7 @@ class ExpectColumnMinToBeBetween(ColumnAggregateExpectation):
         "strict_max",
     )
 
-    map_metric = 'column_values.between'#'column.distinct_values'#'column_values.nonnull'
+    map_metric = 'column_values.between'#'column_values.nonnull'#''#'column.distinct_values'#
 
     class Config:
         title = "Expect column minimum to be between"

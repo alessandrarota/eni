@@ -243,20 +243,20 @@ class ColumnAggregateExpectation(BatchExpectation, ABC):
             ),
         )
 
-        if include_unexpected_rows:
-            metric_kwargs = get_metric_kwargs(
+        
+        metric_kwargs = get_metric_kwargs(
+            metric_name=f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_ROWS.value}",
+            configuration=self.configuration,
+            runtime_configuration=runtime_configuration,
+        )
+        validation_dependencies.set_metric_configuration(
+            metric_name=f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_ROWS.value}",
+            metric_configuration=MetricConfiguration(
                 metric_name=f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_ROWS.value}",
-                configuration=self.configuration,
-                runtime_configuration=runtime_configuration,
-            )
-            validation_dependencies.set_metric_configuration(
-                metric_name=f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_ROWS.value}",
-                metric_configuration=MetricConfiguration(
-                    metric_name=f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_ROWS.value}",
-                    metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
-                    metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
-                ),
-            )
+                metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
+                metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
+            ),
+        )
 
         if result_format_str == ResultFormat.BASIC:
             return validation_dependencies
