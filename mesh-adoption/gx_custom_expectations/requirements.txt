@@ -3,3 +3,4 @@ pyspark
 pyarrow
 fastparquet
 openpyxl
+debugpy

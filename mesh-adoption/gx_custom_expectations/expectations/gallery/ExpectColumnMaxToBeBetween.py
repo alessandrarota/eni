@@ -29,7 +29,8 @@ try:
 except ImportError:
     pass
 
-from great_expectations.expectations.expectation import ColumnAggregateExpectation
+# remove
+#from great_expectations.expectations.expectation import ColumnAggregateExpectation
 from great_expectations.render.renderer.renderer import renderer
 
 if TYPE_CHECKING:
@@ -69,18 +70,8 @@ SUPPORTED_DATA_SOURCES = [
 ]
 DATA_QUALITY_ISSUES = ["Numerical data"]
 
-# imports for overriding
-from great_expectations.expectations.registry import (
-    get_metric_kwargs
-)
-from great_expectations.core.metric_function_types import (
-    SummarizationMetricNameSuffixes,
-)
-from great_expectations.validator.validator import ValidationDependencies
-from great_expectations.validator.metric_configuration import MetricConfiguration
-from great_expectations.expectations.expectation_configuration import (
-    ExpectationConfiguration,
-)
+# new imports
+from .ColumnAggregateExpectation import ColumnAggregateExpectation
 
 class ExpectColumnMaxToBeBetween(ColumnAggregateExpectation):
     __doc__ = f"""{EXPECTATION_SHORT_DESCRIPTION}
@@ -226,6 +217,8 @@ class ExpectColumnMaxToBeBetween(ColumnAggregateExpectation):
         "max_value",
         "strict_max",
     )
+
+    map_metric = 'column_values.between'
 
     args_keys = ("column", "min_value", "max_value", "strict_min", "strict_max")
 
@@ -394,127 +387,3 @@ class ExpectColumnMaxToBeBetween(ColumnAggregateExpectation):
             },
             f"{result.result['observed_value']:.2f}",
         ]
-
-    @override
-    def get_validation_dependencies(
-        self,
-        execution_engine: Optional[ExecutionEngine] = None,
-        runtime_configuration: Optional[dict] = None,
-    ) -> ValidationDependencies:
-        validation_dependencies: ValidationDependencies = super().get_validation_dependencies(
-            execution_engine=execution_engine,
-            runtime_configuration=runtime_configuration,
-        )
-        
-        configuration = self.configuration
-        metric_name: str
-        for metric_name in self.metric_dependencies:
-            metric_kwargs = get_metric_kwargs(
-                metric_name=metric_name,
-                configuration=self.configuration,
-                runtime_configuration=runtime_configuration,
-            )
-            validation_dependencies.set_metric_configuration(
-                metric_name=metric_name,
-                metric_configuration=MetricConfiguration(
-                    metric_name=metric_name,
-                    metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
-                    metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
-                ),
-            )
-        
-        # element_count
-        metric_kwargs = get_metric_kwargs(
-            metric_name="table.row_count",
-            configuration=configuration,
-            runtime_configuration=runtime_configuration,
-        )
-        validation_dependencies.set_metric_configuration(
-            metric_name="table.row_count",
-            metric_configuration=MetricConfiguration(
-                metric_name="table.row_count",
-                metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
-                metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
-            ),
-        )
-        
-        # unexpected_count
-        metric_kwargs = get_metric_kwargs(
-            metric_name=f"column_values.between.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}",
-            configuration=self.configuration,
-            runtime_configuration=runtime_configuration,
-        )
-        validation_dependencies.set_metric_configuration(
-            metric_name=f"column_values.between.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}",
-            metric_configuration=MetricConfiguration(
-                metric_name=f"column_values.between.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}",
-                metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
-                metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
-            ),
-        )
-
-        # null_count
-        metric_kwargs = get_metric_kwargs(
-            metric_name=f"column_values.nonnull.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}",
-            configuration=self.configuration,
-            runtime_configuration=runtime_configuration,
-        )
-        validation_dependencies.set_metric_configuration(
-            metric_name=f"column_values.nonnull.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}",
-            metric_configuration=MetricConfiguration(
-                metric_name=f"column_values.nonnull.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}",
-                metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
-                metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
-            ),
-        )
-
-        return validation_dependencies
-
-    @override
-    def _validate(
-        self,
-        metrics: Dict,
-        runtime_configuration: Optional[dict] = None,
-        execution_engine: Optional[ExecutionEngine] = None,
-    ):
-        
-        gx_result = self._validate_metric_value_between(
-            metric_name="column.max",
-            metrics=metrics,
-            runtime_configuration=runtime_configuration,
-            execution_engine=execution_engine,
-        )
-
-        success = gx_result['success']
-        element_count = metrics.get('table.row_count')
-        unexpected_count = metrics.get('column_values.between.unexpected_count')
-        null_count: Optional[int] = metrics.get(
-            f"column_values.nonnull.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}"
-        )
-        nonnull_count = element_count - null_count
-        
-        skip_missing = False
-        missing_count: Optional[int] = None
-        if nonnull_count is None:
-            skip_missing = True
-        else:
-            missing_count = element_count - nonnull_count
-            if unexpected_count is not None and element_count > 0:
-                unexpected_percent_total = unexpected_count / element_count * 100
-
-            if not skip_missing and missing_count is not None:
-                if nonnull_count is not None and nonnull_count > 0:
-                    unexpected_percent_nonmissing = unexpected_count / nonnull_count * 100
-                else:
-                    unexpected_percent_nonmissing = None
-            else:
-                unexpected_percent_nonmissing = unexpected_percent_total
-        
-        return_obj: Dict[str, Any] = {"success": success}
-        return_obj["result"] = {
-            "element_count": element_count,
-            "unexpected_count": unexpected_count,
-            "unexpected_percent": unexpected_percent_nonmissing,
-        }
-
-        return return_obj

@@ -14,4 +14,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 
 #CMD ["python", "gx_manage_result.py"]
-CMD ["python", "custom_expectations.py"]
+#CMD ["python", "custom_expectations.py"]
+EXPOSE 5678
+
+# Avvia il processo con il debugger attivo
+CMD ["python", "-m", "debugpy", "--listen", "0.0.0.0:5678", "--wait-for-client", "custom_expectations.py"]

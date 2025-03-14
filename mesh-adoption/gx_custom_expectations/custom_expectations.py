@@ -1,10 +1,13 @@
 import great_expectations as gx
+from great_expectations.datasource.fluent.interfaces import Batch
 #from gx.expectactions import ExpectColumnValuesToBeBetween
 from expectations.query.ExpectQueriedTableRowCountToBe import ExpectQueriedTableRowCountToBe
-from expectations.gx_gallery.ExpectColumnMaxToBeBetween import ExpectColumnMaxToBeBetween
 
-#from great_expectations.expectations import ExpectColumnMaxToBeBetween
-from expectations.gx_gallery.complete.ExpectColumnValuesToBeBetween import ExpectColumnValuesToBeBetween
+from expectations.gallery.ExpectColumnMinToBeBetween import ExpectColumnMinToBeBetween
+from expectations.gallery.ExpectColumnMaxToBeBetween import ExpectColumnMaxToBeBetween
+
+from great_expectations.expectations import ExpectColumnMinToBeBetween as Min
+#from expectations.gallery.complete.ExpectColumnValuesToBeBetween import ExpectColumnValuesToBeBetween
 from pyspark.sql import SparkSession
 
 import requests
@@ -46,14 +49,36 @@ def test_ExpectColumnMaxToBeBetween():
     return validation_results
 
 def test_ExpectColumnMinToBeBetween(): 
-    expectation_instance = ExpectColumnMaxToBeBetween(
+    print(df.select("extra").show(5, truncate=False))
+    # expectation_instance = Min(
+    #     column="extra",
+    #     min_value=0,
+    #     max_value=3,
+    #     strict_max=False
+    #     )
+    # batch = batch_definition.get_batch(batch_parameters={"dataframe": df.limit(5)})
+    # validation_results = batch.validate(expectation_instance)
+    # print(f"GX: {validation_results}")
+    
+    expectation_instance = ExpectColumnMinToBeBetween(
         column="extra",
         min_value=0,
-        max_value=3,
+        max_value=2,
         strict_max=False
         )
     batch = batch_definition.get_batch(batch_parameters={"dataframe": df.limit(5)})
     validation_results = batch.validate(expectation_instance)
+    print(validation_results)
+
+    expectation_instance = ExpectColumnMaxToBeBetween(
+        column="extra",
+        min_value=3,
+        max_value=4,
+        strict_max=False
+        )
+    batch = batch_definition.get_batch(batch_parameters={"dataframe": df.limit(5)})
+    validation_results = batch.validate(expectation_instance)
+    print(validation_results)
     return validation_results
 
 
@@ -84,9 +109,6 @@ def ExpectQueriedTableRowCountToBe_2(df, expected_count=96):
 # print(ExpectQueriedTableRowCountToBe_2(df))
 #print("test_ExpectColumnValuesToBeBetween")
 #test_ExpectColumnValuesToBeBetween()
-print("\n\n")
-print(f"ExpectColumnMaxToBeBetween: {test_ExpectColumnMaxToBeBetween()}")
-
-#print(test_ExpectColumnValuesToBeBetween())
-#print(test_ExpectColumnMaxToBeBetween())
+#print(f"\n\nExpectColumnMaxToBeBetween: {test_ExpectColumnMaxToBeBetween()}")
+print(f"\n\nExpectColumnMinToBeBetween: {test_ExpectColumnMinToBeBetween()}")
 
