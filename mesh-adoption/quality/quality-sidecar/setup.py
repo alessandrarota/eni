@@ -6,7 +6,7 @@ setup(
     package_dir={"": "src"},
     packages=find_packages(where="src"),
     install_requires=[
-        'great_expectations==1.3.5',
+        'great_expectations',
         'pyspark',
         'pandas',
         'opentelemetry-api',

@@ -85,7 +85,7 @@ def post_single_quality_result_on_blindata(quality_check, metric):
         result = {
             "qualityCheck": quality_check,
             "metric": metric,
-            #"totalElements": "100",
+            "totalElements": "100",
             "startedAt": (now.strftime("%Y-%m-%dT%H:%M:%S.") + str(now.microsecond // 1000).zfill(3) + 'Z')
         }
 
@@ -116,6 +116,11 @@ def post_single_quality_result_on_blindata(quality_check, metric):
 
 #post_single_quality_result_on_blindata(quality_check=get_quality_check("minimumQualityCheck"), metric=25)
 #post_single_quality_result_on_blindata(quality_check=get_quality_check("maximumQualityCheck"), metric=75)
-post_single_quality_result_on_blindata(quality_check=get_quality_check("distanceQualityCheck"), metric=50)
-post_single_quality_result_on_blindata(quality_check=get_quality_check("distanceQualityCheck"), metric=25)
-post_single_quality_result_on_blindata(quality_check=get_quality_check("distanceQualityCheck"), metric=75)
+# post_single_quality_result_on_blindata(quality_check=get_quality_check("distanceQualityCheck"), metric=50)
+# post_single_quality_result_on_blindata(quality_check=get_quality_check("distanceQualityCheck"), metric=25)
+# post_single_quality_result_on_blindata(quality_check=get_quality_check("distanceQualityCheck"), metric=75)
+
+
+# true/false
+post_single_quality_result_on_blindata(quality_check=get_quality_check("distanceTrueFalseQualityCheck"), metric=1)
+post_single_quality_result_on_blindata(quality_check=get_quality_check("distanceTrueFalseQualityCheck"), metric=0)
