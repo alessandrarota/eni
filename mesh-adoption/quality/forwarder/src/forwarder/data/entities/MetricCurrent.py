@@ -15,8 +15,9 @@ class MetricCurrent(Base):
     check_name = Column(String, primary_key=True)
     metric_value = Column(Float)
     unit_of_measure = Column(String)
-    checked_elements_nbr = Column(Integer)
-    errors_nbr = Column(Integer)
+    expectation_checked_elements_nbr = Column(Integer)
+    expectation_output_errors_nbr = Column(Integer)
+    expectation_output_metric_val = Column(Float)
     metric_source_name = Column(String)
     status_code = Column(String)
     locking_service_code = Column(String)
@@ -97,8 +98,9 @@ class MetricCurrent(Base):
             f"check_name={self.check_name}, "
             f"metric_value={self.metric_value}, "
             f"unit_of_measure={self.unit_of_measure}, "
-            f"checked_elements_nbr={self.checked_elements_nbr}, "
-            f"errors_nbr={self.errors_nbr}, "
+            f"expectation_checked_elements_nbr={self.expectation_checked_elements_nbr}, "
+            f"expectation_output_errors_nbr={self.expectation_output_errors_nbr}, "
+            f"expectation_output_metric_val={self.expectation_output_metric_val}, "
             f"metric_source_name={self.metric_source_name}, "
             f"status_code={self.status_code}, "
             f"locking_service_code={self.locking_service_code}, "

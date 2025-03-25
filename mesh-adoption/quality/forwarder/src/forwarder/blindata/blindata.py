@@ -6,6 +6,7 @@ import re
 from datetime import datetime
 import threading
 import time
+from ..data.enum.BlindataScoreStrategy import BlindataScoreStrategy
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 
@@ -130,11 +131,19 @@ def post_quality_results_on_blindata_with_csv(config, current_metrics):
 def post_single_quality_result_on_blindata(config, quality_check, current_metric):
     try:
         bearer_token = get_blindata_token()
+        metric = None
+
+        if quality_check["scoreStrategy"] == BlindataScoreStrategy.PERCENTAGE.value:
+            metric = current_metric.expectation_output_errors_nbr
+        elif quality_check["scoreStrategy"] == BlindataScoreStrategy.DISTANCE.value:
+            metric = current_metric.expectation_output_metric_val
+
+        print(metric)
 
         result = {
             "qualityCheck": quality_check,
-            "metric": current_metric.errors_nbr,
-            "totalElements": current_metric.checked_elements_nbr,
+            "metric": metric,
+            "totalElements": current_metric.expectation_checked_elements_nbr,
             "startedAt": (current_metric.otlp_sending_datetime.strftime("%Y-%m-%dT%H:%M:%S.") + str(current_metric.otlp_sending_datetime.microsecond // 1000).zfill(3) + 'Z')
         }
 

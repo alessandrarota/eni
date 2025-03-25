@@ -1,5 +1,6 @@
 package it.quantyca.OTELCustomCollector.service;
 
+import com.google.common.primitives.Floats;
 import io.grpc.stub.StreamObserver;
 
 import io.opentelemetry.proto.collector.metrics.v1.ExportMetricsServiceRequest;
@@ -65,8 +66,10 @@ public class OTELMetricsService extends MetricsServiceGrpc.MetricsServiceImplBas
     private String UNEXPECTED_COUNT_KEY;
     @Value("${otlp.metric.unexpectedCount.placeholder:0}")
     private String UNEXPECTED_COUNT_PLACEHOLDER;
-
-
+    @Value("${otlp.metric.expectationOutputMetric.key:expectation_output_metric}")
+    private String EXPECTATION_OUTPUT_METRIC_KEY;
+    @Value("${otlp.metric.expectationOutputMetric.placeholder:0}")
+    private String EXPECTATION_OUTPUT_METRIC_PLACEHOLDER;
 
     @Override
     @Transactional
@@ -102,6 +105,7 @@ public class OTELMetricsService extends MetricsServiceGrpc.MetricsServiceImplBas
                         String attr_dataProductName = null;
                         String attr_elementCount = ELEMENT_COUNT_PLACEHOLDER;
                         String attr_unexpectedCount = UNEXPECTED_COUNT_PLACEHOLDER;
+                        String attr_expectationOutputMetric = EXPECTATION_OUTPUT_METRIC_PLACEHOLDER;
 
                         String appName = getValueDataFromOptionalAnyValue(
                                 resourceMetrics.getResource().getAttributesList().stream()
@@ -123,6 +127,8 @@ public class OTELMetricsService extends MetricsServiceGrpc.MetricsServiceImplBas
                                 attr_elementCount = getValueDataFromAnyValue(attribute.getValue(), logger).strip();
                             } else if (attribute.getKey().equalsIgnoreCase(UNEXPECTED_COUNT_KEY)) {
                                 attr_unexpectedCount = getValueDataFromAnyValue(attribute.getValue(), logger).strip();
+                            } else if (attribute.getKey().equalsIgnoreCase(EXPECTATION_OUTPUT_METRIC_KEY)) {
+                                attr_expectationOutputMetric = getValueDataFromAnyValue(attribute.getValue(), logger).strip();
                             }
                         }
 
@@ -139,6 +145,7 @@ public class OTELMetricsService extends MetricsServiceGrpc.MetricsServiceImplBas
                                     currentMetric.getUnit(),
                                     Optional.ofNullable(attr_elementCount).map(Ints::tryParse).orElse(null),
                                     Optional.ofNullable(attr_unexpectedCount).map(Ints::tryParse).orElse(null),
+                                    Optional.ofNullable(attr_expectationOutputMetric).map(Floats::tryParse).orElse(null),
                                     appName,
                                     STATUS_VALUE,
                                     null,

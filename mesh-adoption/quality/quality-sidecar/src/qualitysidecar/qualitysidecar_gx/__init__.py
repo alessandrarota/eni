@@ -6,6 +6,7 @@ from .connectors.SystemConnector import *
 from .setup.data import SparkDataSource, PandasDataSource
 from .setup.expectation import get_expectation_class
 from .utils.utils import clean_kwargs_columns
+from .utils.ResultFormatter import ResultFormatter
 
 # Logging configuration
 logging.getLogger("great_expectations").setLevel(logging.WARNING)
@@ -54,6 +55,8 @@ def retrieve_dataframe_from_configuration(configuration):
         logging.error(f"Error processing expectation {check_name} for system {system_name}: {e}")
 
 def run_validations(configuration, dataframe):
+    result_formatter = ResultFormatter()
+
     data_product_name = os.getenv("DATA_PRODUCT_NAME")
     if not data_product_name:
         logging.error(f"Environment variable {data_product_name} not found.")
@@ -87,7 +90,8 @@ def run_validations(configuration, dataframe):
             
             batch = data_source_manager.add_batch_to_batch_definition(batch_definition, dataframe)
             validation_result = data_source_manager.validate_expectation_on_batch(batch, expectation_instance)
-            return validation_result.to_json_dict()
+            results = result_formatter.format_result(validation_result)
+            return results.to_json_dict()
         
     except Exception as e:
         logging.error(f"Error processing expectation {check_name} for system {system_name}: {e}")

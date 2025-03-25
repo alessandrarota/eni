@@ -14,8 +14,9 @@ def test_lock_current_metrics():
             check_name="checkAcceptedValues",
             metric_value=100.00,
             unit_of_measure="%",
-            checked_elements_nbr=10000,
-            errors_nbr=0,
+            expectation_checked_elements_nbr=10000,
+            expectation_output_errors_nbr=0,
+            expectation_output_metric_val=None,
             metric_source_name="dataSourceSample",
             status_code="NEW",
             locking_service_code="",
@@ -55,8 +56,9 @@ def test_check_not_found():
             check_name="check",
             metric_value=100.00,
             unit_of_measure="%",
-            checked_elements_nbr=10000,
-            errors_nbr=0,
+            expectation_checked_elements_nbr=10000,
+            expectation_output_errors_nbr=0,
+            expectation_output_metric_val=None,
             metric_source_name="dataSourceSample",
             status_code="NEW",
             locking_service_code="",
@@ -85,8 +87,9 @@ def test_check_not_found():
     assert metric.check_name == "check"
     assert metric.metric_value == 100.00
     assert metric.unit_of_measure == "%"
-    assert metric.checked_elements_nbr == 10000
-    assert metric.errors_nbr == 0
+    assert metric.expectation_checked_elements_nbr == 10000
+    assert metric.expectation_output_errors_nbr == 0
+    assert metric.expectation_output_metric_val is None
     assert metric.metric_source_name == "dataSourceSample"
     assert metric.status_code == "ERR_CHECK_NOT_FOUND"
     assert metric.locking_service_code.startswith("sd-")
@@ -109,8 +112,9 @@ def test_error_blindata():
             check_name="check",
             metric_value=100.00,
             unit_of_measure="%",
-            checked_elements_nbr=10000,
-            errors_nbr=0,
+            expectation_checked_elements_nbr=10000,
+            expectation_output_errors_nbr=0,
+            expectation_output_metric_val=None,
             metric_source_name="dataSourceSample",
             status_code="NEW",
             locking_service_code="",
@@ -141,8 +145,9 @@ def test_error_blindata():
     assert metric.check_name == "check"
     assert metric.metric_value == 100.00
     assert metric.unit_of_measure == "%"
-    assert metric.checked_elements_nbr == 10000
-    assert metric.errors_nbr == 0
+    assert metric.expectation_checked_elements_nbr == 10000
+    assert metric.expectation_output_errors_nbr == 0
+    assert metric.expectation_output_metric_val is None
     assert metric.metric_source_name == "dataSourceSample"
     assert metric.status_code == "ERR_BLINDATA_502"
     assert metric.locking_service_code.startswith("sd-")
@@ -165,8 +170,9 @@ def test_success_with_existing_quality_check():
             check_name="check",
             metric_value=100.00,
             unit_of_measure="%",
-            checked_elements_nbr=10000,
-            errors_nbr=0,
+            expectation_checked_elements_nbr=10000,
+            expectation_output_errors_nbr=0,
+            expectation_output_metric_val=None,
             metric_source_name="dataSourceSample",
             status_code="NEW",
             locking_service_code="",
@@ -197,8 +203,9 @@ def test_success_with_existing_quality_check():
     assert metric.check_name == "check"
     assert metric.metric_value == 100.00
     assert metric.unit_of_measure == "%"
-    assert metric.checked_elements_nbr == 10000
-    assert metric.errors_nbr == 0
+    assert metric.expectation_checked_elements_nbr == 10000
+    assert metric.expectation_output_errors_nbr == 0
+    assert metric.expectation_output_metric_val is None
     assert metric.metric_source_name == "dataSourceSample"
     assert metric.status_code == "SUCCESS"
     assert metric.locking_service_code.startswith("sd-")

@@ -21,8 +21,9 @@ public class Metric {
     @Id private String checkName;
     private Double metricValue;
     private String unitOfMeasure;
-    private Integer checkedElementsNbr;
-    private Integer errorsNbr;
+    private Integer expectationCheckedElementsNbr;
+    private Integer expectationOutputErrorsNbr;
+    private Float expectationOutputMetricVal;
     private String metricSourceName;
     private String statusCode;
     private String lockingServiceCode;

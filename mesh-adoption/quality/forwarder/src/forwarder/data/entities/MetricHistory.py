@@ -15,8 +15,9 @@ class MetricHistory(Base):
     check_name = Column(String, primary_key=True)
     metric_value = Column(Float)
     unit_of_measure = Column(String)
-    checked_elements_nbr = Column(Integer)
-    errors_nbr = Column(Integer)
+    expectation_checked_elements_nbr = Column(Integer)
+    expectation_output_errors_nbr = Column(Integer)
+    expectation_output_metric_val = Column(Float)
     metric_source_name = Column(String)
     status_code = Column(String)
     locking_service_code = Column(String)
@@ -49,8 +50,9 @@ class MetricHistory(Base):
             check_name=current_metric.check_name,
             metric_value=current_metric.metric_value,
             unit_of_measure=current_metric.unit_of_measure,
-            checked_elements_nbr=current_metric.checked_elements_nbr,
-            errors_nbr=current_metric.errors_nbr,
+            expectation_checked_elements_nbr=current_metric.expectation_checked_elements_nbr,
+            expectation_output_errors_nbr=current_metric.expectation_output_errors_nbr,
+            expectation_output_metric_val=current_metric.expectation_output_metric_val,
             metric_source_name=current_metric.metric_source_name,
             status_code=status_code,
             locking_service_code=current_metric.locking_service_code,
@@ -81,8 +83,9 @@ class MetricHistory(Base):
             f"check_name={self.check_name}, "
             f"metric_value={self.metric_value}, "
             f"unit_of_measure={self.unit_of_measure}, "
-            f"checked_elements_nbr={self.checked_elements_nbr}, "
-            f"errors_nbr={self.errors_nbr}, "
+            f"expectation_checked_elements_nbr={self.expectation_checked_elements_nbr}, "
+            f"expectation_output_errors_nbr={self.expectation_output_errors_nbr}, "
+            f"expectation_output_metric_val={self.expectation_output_metric_val}, "
             f"metric_source_name={self.metric_source_name}, "
             f"status_code={self.status_code}, "
             f"locking_service_code={self.locking_service_code}, "
